@@ -1,0 +1,32 @@
+{%- liquid
+  if l.url == '#'
+    assign l_url = 'javascript:void(0);'
+  else
+    assign l_url = l.url
+  endif
+  assign submenu = l.title | handle
+-%}
+
+{%- if l.links.size > 0 -%}
+
+  <li class="{{class}} dropdown dropdown-submenu{% if l.active or l.child_active %} active{% endif %}" nav-sublink="0">
+    <a href="{{ l_url }}" class="dropdown-link">
+      <span>{{ l.title }}</span>
+    </a>
+
+    <span class="expand"></span>
+
+    <ul class="dropdown-menu">
+      {%- for sub_l in l.links -%}
+        {%- render 'nav-link-sub', l: sub_l, class: class -%}
+      {%- endfor -%}
+    </ul>
+  </li>
+
+{%- else -%}
+  <li class="{{class}}{% if l.active  %} active{% endif %}" nav-sublink="1">
+    <a href="{{ l_url }}">
+      <span>{{ l.title }}</span>
+    </a>
+  </li>
+{%- endif -%}

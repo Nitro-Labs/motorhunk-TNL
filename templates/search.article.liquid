@@ -1,0 +1,46 @@
+
+{%- liquid
+  if settings.page_layout == 'boxed'
+    assign is_boxed = true
+  endif
+  assign _total = settings.search_page_total | default: '20' | abs
+-%}
+{%- capture keyWord -%}{{search.terms | escape}}{%- endcapture -%}
+
+<div class="page page-search">
+  <div class="page_wrapper">
+    {%- if is_boxed -%} <div class="container"> {%- endif -%}
+      {%- if search.results_count > 0 -%}
+        <h2 class="page_title text-center">{{ 'search.general.result_title' | t: number: search.results_count, keyword: search.terms}}</h2>
+      {%- else -%}
+        <h2 class="page_title text-center">{{ 'search.general.no_result' | t:  keyword: search.terms}}</h2>
+      {%- endif -%}
+
+      <div class="page_search-form">
+        <form action="/search">
+          <input type="hidden" name="view" value="article">
+          <input type="hidden" name="type" value="article">
+          <div class="form-group">
+            <input type="text" name="q" value="{{search.terms}}">
+            <button type="submit" class="btn btn-1">{%- render 'svg' type: 'search' -%}</button>
+          </div>
+        </form>
+      </div>
+      {%- paginate search.results by _total -%}
+        <div class="search-type article-type">
+          <div class="{%- render 'grid-class' value: settings.search_page_number_per_row %} grid-gap-15 grid-gap-md-30">
+            {%- for article in search.results -%}
+              <div class="article-item">
+                {%- render 'article-item' article: article, imagePadding: '55%' -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- include 'pagination' -%}
+      {%- endpaginate -%}
+
+    {%- if is_boxed -%} </div> {%- endif -%}
+  </div>
+</div>
+
+{% comment %} compress {% endcomment %}

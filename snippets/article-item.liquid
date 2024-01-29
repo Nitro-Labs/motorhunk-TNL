@@ -1,0 +1,26 @@
+<article class="featured_blog__item">
+  <header>
+    <figure class="featured_blog__item-image">
+      <a href="{{ article.url }}">
+        {%- render 'image-style', image: article.image, imagePadding: imagePadding -%}
+      </a>
+    </figure>
+  </header>
+
+  <footer>
+    <h3 class="featured_blog__item-title">
+      <a href="{{ article.url }}">{{ article.title }}</a>
+    </h3>
+    <div class="featured_blog__item-author">
+      {{- 'blogs.articles.author' | t: author: article.author -}}
+      {%- assign published_at = article.published_at | date: "%B %d, %Y" -%}
+      <span class="featured_blog__item-publish"> {{ 'blogs.articles.published_at' | t: date: published_at }}</span>
+    </div>
+    {%- if show_excerpt -%}
+      <div class="featured_blog__item-excerpt">{{ article.excerpt_or_content | truncatewords: excerpt_limit}}</div>
+    {%- endif -%}
+    <div class="featured_blog__item-button">
+      <a href="{{article.url}}" class="btn btn-2">{{ 'general.article.read_more' | t}}</a>
+    </div>
+  </footer>
+</article>

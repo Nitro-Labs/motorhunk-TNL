@@ -1,0 +1,105 @@
+{%- liquid
+	assign current_sort = collection.sort_by | default: collection.default_sort_by
+-%}
+
+<div class="collection-toolbar">
+	<div class="collection-toolbar_wrapper">
+		<div class="collection-toolbar_item item-showing">
+			{%- capture hide_on_mobile -%}
+				{%- if template.suffix != blank -%}
+					{%- if template.suffix == 'sidebar' -%}
+						d-lg-none
+					{%- endif -%}
+				{%- else -%}
+					{%- if settings.collection_page == 'left-sidebar' -%}
+						d-lg-none
+					{%- endif -%}
+				{%- endif -%}
+			{%- endcapture -%}
+
+			{%- capture pagination_showing -%}
+				<span class="js-pagination-showing">
+					{%- if paginate.pages > 1 -%}
+						{%- assign from = paginate.current_offset | plus : 1 -%}
+						{%- if paginate.next -%}
+							{%- assign to = paginate.current_offset | plus: paginate.page_size -%}
+						{%- else -%}
+							{%- assign to = paginate.items -%}
+						{%- endif -%}
+						{%- assign count = paginate.items -%}
+						{{ 'collections.showing.items' | t: count: count, from: from, to: to }}
+					{%- else -%}
+						{{ 'collections.showing.all' | t: count: paginate.items }}
+					{%- endif -%}
+				</span>
+			{%- endcapture -%}
+
+			<a href="#" onclick="return false" class="js-toggle-sb {{hide_on_mobile}}" data-target="sidebarDrawer" data-role="open">{{ 'collections.general.filter' | t}}</a>
+			{%- if template.suffix != blank -%}
+				{%- if template.suffix != 'infinite' -%}
+					{{pagination_showing}}
+				{%- endif -%}
+			{%- else -%}
+				{%- if settings.collection_page != 'infinite' -%}
+					{{pagination_showing}}
+				{%- endif -%}
+			{%- endif -%}
+		</div>
+		<div class="collection-toolbar_item item-sort-by js-collection-sort-container">
+			<div class="sort-by-desktop d-none d-lg-block" id="select_desk_container">
+				<ul class="dropdown-select" id="select_desk">
+					{%- for option in collection.sort_options -%}
+						{%- if option.value == current_sort -%}
+							{%- assign current_sort_name = option.name -%}
+							{%- assign selected = 'selected' -%}
+						{%- else -%}
+							{%- assign selected = '' -%}
+						{%- endif -%}
+						<li class="option" data-value="{{option.value}}">
+							<a href="{{collection.url | within: option.value}}"></a>
+						{{option.name}}</li>
+						{%- capture option_html -%}<option value="{{option.value}}" {{selected}}>{{option.name}}</option>{%- endcapture -%}
+						{%- assign options = options | append: option_html -%}
+					{%- endfor -%}
+				</ul>
+
+				<a href="#" onclick="return false" class="select-title" >
+					<span class="sort-label">{{- 'collections.general.sort_by' | t -}}</span>
+					<span class="title" id="select_desk_title">{{current_sort_name}}</span>
+					<span class="svg_element-ui">
+						{%- render 'svg' type: 'angle-down' -%}
+					</span>
+				</a>
+			</div>
+			<div class="sort-by-mobile d-lg-none" id="mobile-select-container">
+				<select>
+					{{options}}
+				</select>
+				<span class="svg_element-ui">
+					{%- render 'svg' type: 'angle-down' -%}
+				</span>
+			</div>
+		</div>
+		<div class="collection-toolbar_item item-grid-view">
+			<ul class="toolbar_view-list d-flex" id="grid_style_list">
+				{%- capture class -%}
+					{%- if settings.collection_page == 'no-sidebar' or template.suffix == 'no-sidebar' or settings.collection_page == 'infinite' or template.suffix == 'infinite'-%}
+						{%- render 'grid-class' value: '2,1,1' %} grid-gap-md-30 grid-gap-15
+					{%- else -%}
+						d-grid grid-1 grid-gap-md-30 grid-gap-15
+					{%- endif -%}
+				{%- endcapture -%}
+				<li class="view-item" data-style="product_style-list" data-class="{{class}}">
+					<a href="#" onclick="return false">
+						<span class="svg-element-ui">{%- render 'svg', type: 'grid-view-1' -%}</span>
+					</a>
+				</li>
+				<li class="view-item active" data-style="product_style-grid" data-class="{%- render 'grid-class' value: items_resp %} grid-gap-md-30 grid-gap-15">
+					<a href="#" onclick="return false">
+						<span class="svg-element-ui">{%- render 'svg', type: 'grid-view-2' -%}</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

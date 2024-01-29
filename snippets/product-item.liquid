@@ -1,0 +1,246 @@
+
+{%- if product != blank -%}
+	{%- liquid
+		assign first_variant    = product.variants | first
+		assign selected_variant = product.first_available_variant | default: first_variant
+
+		assign image = selected_variant.image | default: product.featured_image
+		assign price = selected_variant.price
+		assign metafield  = product.metafields.c_f
+		assign showVendor = settings.show_vendor
+		assign imageRatio = settings.product_image_ratio | replace: 'auto', '100%'
+		assign imageCrop  = settings.product_image_crop
+
+		assign compare_price    = selected_variant.compare_at_price
+		assign collectionSelect = nil
+		assign title_line_limit = settings.product_title_limit
+
+		if settings.product_customize_ratio != blank
+			assign imageRatio = 1 | divided_by: settings.product_customize_ratio.aspect_ratio | times: 100 | append: '%'
+		endif
+	-%}
+	{%- capture form_id -%}product_form_{{product.id}}_{{id}}{%- endcapture -%}
+	{%- if collection.handle != 'all' and collection.handle != 'frontpage' and collection.handle != 'all-products' -%}
+		{%- assign collectionSelect = collection -%}
+	{%- endif -%}
+
+	{%- capture productLabel -%}++{{ product.tags | join: '++' | downcase }}++{%- endcapture -%}
+	{%- capture form_classes -%}product-form product-form-{{ product.id }} js-form-add-to-cart{%- endcapture -%}
+	{%- capture productPrice -%}
+		<p class="product-price">
+			{%- if selected_variant.available -%}
+				{%- if compare_price > price -%}
+					<span class="price-sale js-money">{{ price | money }}</span>
+					<del class="price-compare js-money">{{ compare_price | money }}</del>
+				{%- else -%}
+					<span class="price js-money">{{ price | money }}</span>
+				{%- endif -%}
+			{%- else -%}
+				<span class="price soldout">{{- 'products.product.sold_out' | t -}}</span>
+			{%- endif -%}
+		</p>
+	{%- endcapture -%}
+
+	{%- capture btnPreCart1 -%}
+		{%- unless catalogMode == true -%}
+			<div class="card-button preCart-button">
+				<button class="btn btn-link-cart{% if hoverStyle == '3' %} btn-1{% endif %}{% unless selected_variant.available %} soldout{% endunless %}" title="{% if selected_variant.available %}{{- 'products.product.add_to_cart' | t -}}{% else %}{{- 'products.product.sold_out' | t -}}{% endif %}">
+					{%- if hoverStyle == '3'-%}
+						<span class="button-label">{% if selected_variant.available %}{{- 'products.product.add_to_cart' | t -}}{% else %}{{- 'products.product.sold_out' | t -}}{% endif %}</span>
+					{%- else -%}
+						<span class="svg-element-ui">{%- render 'svg', type: 'productCart' -%}</span>
+					{%- endif -%}
+				</button>
+			</div>
+		{%- endunless -%}
+	{%- endcapture -%}
+
+	{%- capture cardClass -%}
+	|hover-{{settings.product_card_hover_style}}
+	{% if imageCrop %}|imageCrop-{{imageCrop}}{% endif %}
+	{%- endcapture -%}{%- assign cardClass = cardClass | strip | split: '|' | join: ' ' -%}
+
+	<div class="product-card js-product-card balance-row-{{title_line_limit}}">
+		<div class="featured-product_wrapper {{cardClass}}">
+
+			<div class="product-card_header">
+				{%- if metafield.countdown_timer != blank -%}
+					{%- liquid
+						assign countdown_timer =  metafield.countdown_timer | split: '/'
+					-%}
+					{%- capture countdown_timer -%}
+						{{-countdown_timer[1]-}}/{{-countdown_timer[0]-}}/{{-countdown_timer[2]-}}
+					{%- endcapture -%}
+					{%- render 'countdown' date: countdown_timer -%}
+
+				{%- endif -%}
+				<figure class="product-card_image">
+					<a href="{{product.url}}">
+						{%- liquid
+							if image == blank
+								render 'svgset', type: 'default-image', imagePadding: imageRatio
+							else
+								render 'image-style', image: image, imagePadding: imageRatio
+							endif
+						-%}
+					</a>
+				</figure>
+
+				<div class="product-card_label label_ui-group">
+					{%- if productLabel contains '++label new++' -%}
+						<span class="label_ui label_ui-new">{{- 'products.label.new' | t -}}</span>
+					{%- endif -%}
+					{%- if productLabel contains '++label hot++' -%}
+						<span class="label_ui label_ui-hot">{{- 'products.label.hot' | t -}}</span>
+					{%- endif -%}
+					{%- if compare_price > price -%}
+						{%- if salePercent != true and metafield.countdown_timer == blank -%}
+							<span class="label_ui label_ui-sale">{{- 'products.label.sale' | t -}}</span>
+						{%- else -%}
+							<span class="label_ui label_ui-sale label_ui-sale-percent">
+								{{ compare_price | minus: price | times: 100.0 | divided_by: compare_price | round }}%
+							</span>
+						{%- endif -%}
+					{%- endif -%}
+				</div>
+
+				{%- if settings.enable_product_wishlist or settings.enable_product_compare and settings.wishlist_app != 'none'-%}
+					<div class="featured_product-overlay overlay-ui multi-button-overlay">
+						{%- if settings.enable_product_wishlist -%}
+							<div class="card-button wlcp-target wl-target">
+								<span class="svg-element-ui">
+									{% comment %} {%- render 'button', type: 'wishlist_add', product: product -%} {% endcomment %}
+									{%- render 'wishlist_default_button' type: 'add', product_handle: product.handle -%}
+								</span>
+							</div>
+						{%- endif -%}
+
+						{%- if settings.enable_product_compare -%}
+							<div class="card-button wlcp-target cp-target">
+								<span class="svg-element-ui">
+									{% comment %} {%- render 'button', type: 'compare_add', product: product -%} {% endcomment %}
+									{%- render 'compare_default_button' type: 'add', product_handle: product.handle -%}
+								</span>
+							</div>
+						{%- endif -%}
+
+
+						{% comment %} <div class="card-button">
+							<a href="#" onclick="return false" draggable="false" class="btn-quick-view" data-handle="{{ product.handle }}" title="{{- 'products.product.quick_view' | t -}}">
+								{%- render 'svg', type: 'eyes' -%}
+							</a>
+						</div> {% endcomment %}
+						{%- if hoverStyle == '2' -%}{{btnPreCart}}{%- endif -%}
+					</div>
+				{%- endif -%}
+
+				{%- if hoverStyle == '3' -%}{{btnPreCart}}{%- endif -%}
+			</div>
+
+			<div class="product-card_body">
+				<div class="product-card_row">
+					{%- if showVendor -%}
+						<small class="product-card_vendor">
+							<a href="{{ product.vendor | url_for_vendor }}">{{ product.vendor }}</a>
+						</small>
+					{%- endif -%}
+
+					<h3 class="product-card_name">
+						<a href="{{product.url}}">{{product.title}}</a>
+					</h3>
+					{%- if settings.review_app != 'none' -%}
+						<div class="product-card_review review-{{settings.review_app}}">
+							{%- render 'review', product: product, type: 'badge' -%}
+						</div>
+					{%- endif -%}
+				</div>
+				<div class="product-card_footer">
+					{%- if selected_variant.available -%}
+						{{ productPrice }}
+
+						<div class="product-card_action">
+							<form method="post" action="{{routes.cart_add_url}}" accept-charset="UTF-8" class="product-form js-form-add-to-cart" enctype="multipart/form-data" novalidate="novalidate">
+								<input type="hidden" name="form_type" value="product" />
+								<input type="hidden" name="utf8" value="✓"/>
+								<input type="hidden" name="id" value="{{selected_variant.id}}">
+								<button type="submit" name="add" class="btn btn-add-to-cart">
+									{%- render 'svg', type: 'cart' -%}
+									{%- render 'svg' type: 'card-loading' -%}
+								</button>
+							</form>
+						</div>
+					{%- else -%}
+						{{ productPrice }}
+					{%- endif -%}
+				</div>
+			</div>
+
+		</div>
+	</div>
+{%- else -%}
+
+
+	{%- capture cardClass -%}
+		hover-{{settings.product_card_hover_style}}
+		{% if imageCrop %}imageCrop-{{imageCrop}}{% endif -%}
+	{%- endcapture -%}
+
+	<div class="product-card js-product-card">
+		<div class="featured-product_wrapper {{cardClass}}">
+
+			<div class="product-card_header">
+				<figure class="product-card_image">
+					<a href="#" onclick="return false;" style="pointer-events: none;">
+						{%- capture image_placeholder -%}product-{% cycle 1,2,3,4,5,6  %}{%- endcapture -%}
+						{{ image_placeholder | placeholder_svg_tag }}
+					</a>
+				</figure>
+
+				{%- if settings.enable_product_wishlist or settings.enable_product_compare and settings.wishlist_app != 'none'-%}
+					<div class="featured_product-overlay overlay-ui multi-button-overlay">
+						{%- if settings.enable_product_wishlist -%}
+							<div class="card-button wlcp-target wl-target">
+								<span class="svg-element-ui">
+									{%- render 'wishlist_default_button' type: 'add', product_handle: product.handle -%}
+								</span>
+							</div>
+						{%- endif -%}
+
+						{%- if settings.enable_product_compare -%}
+							<div class="card-button wlcp-target cp-target">
+								<span class="svg-element-ui">
+									{%- render 'compare_default_button' type: 'add', product_handle: product.handle -%}
+								</span>
+							</div>
+						{%- endif -%}
+
+						{%- if settings.product_card_hover_style == '2' -%}{{btnPreCart}}{%- endif -%}
+					</div>
+				{%- endif -%}
+
+				{%- if settings.product_card_hover_style == '3' -%}{{btnPreCart}}{%- endif -%}
+			</div>
+
+			<div class="product-card_body">
+				<div class="product-card_row">
+					{%- if showVendor -%}
+						<small class="product-card_vendor">
+							<a href="#" onclick="return false">Vendor</a>
+						</small>
+					{%- endif -%}
+
+					<p class="product-card_name">
+						<a href="#" onclick="return false">Product Title</a>
+					</p>
+				</div>
+				<div class="product-card_footer">
+					<p class="product-price">
+						<span class="price-sale js-money">{{ 9999 | money }}</span>
+						<del class="price-compare js-money">{{ 1200 | money }}</del>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</div>
+{%- endif -%}

@@ -1,0 +1,40 @@
+{%- liquid
+ 	if type == 'mobile'
+	 	assign _logo 		 	= section.settings.logo_mobi | default: section.settings.logo
+	 	assign _logoMaxWidth 	= section.settings.logo_mobi_max_width | strip | remove: 'px'
+	 	assign _logo_size 	 	= _logoMaxWidth | append: 'x'
+	 	assign _logo_size_2x  	= _logoMaxWidth | times: 2 | append: 'x'
+	 	assign _logo_size_max 	= _logoMaxWidth | append: 'px'
+ 	else
+	 	assign _logo 		 	= section.settings.logo
+	 	assign _logoMaxWidth 	= section.settings.logo_max_width | strip | remove: 'px'
+	 	assign _logo_size 	 	= _logoMaxWidth | append: 'x'
+	 	assign _logo_size_2x  	= _logoMaxWidth | times: 2 | append: 'x'
+	 	assign _logo_size_max 	= _logoMaxWidth | append: 'px'
+ 	endif
+-%}
+
+{%- capture logoSrc -%}
+	{%- if _lazyload -%}{{ _logo | img_url: _logo_size }} 1x,{{ _logo | img_url: _logo_size_2x }} 2x
+	{%- else -%}{{- _logo | img_url: _logo_size -}}
+	{%- endif -%}
+{%- endcapture -%}
+
+<figure class="logo-wrapper logo-type{{type | capitalize }}">
+	<a href="/" title="{{ shop.name | escape }}" class="logo-site">
+		{%- unless _logo == blank -%}
+			<noscript><img src="{{ _logo | img_url: _logo_size }}"/></noscript>
+			<img {% if _lazyload %}class="lazyload" data-srcset{% else %}src{% endif %}="{{ logoSrc | strip_newlines }}" alt="{{ shop.name | escape }}"/>
+		{%- else -%}
+			<h1>{{shop.name | uppercase }}</h1>
+		{%- endunless -%}
+	</a>
+</figure>
+
+{%- capture block_css -%}
+	{%- unless _logo_size_max == blank -%}
+		{{- class }} .logo-wrapper.logo-type{{type | capitalize }} img{max-width: {{ _logo_size_max }};}
+	{%- endunless -%}
+{%- endcapture -%}
+{%- if type == 'mobile' -%}{%- capture block_css -%}@media (max-width: 991px){ {{- block_css -}} }{%- endcapture -%}{%- endif -%}
+{%- assign section_css = section_css | append: block_css -%}

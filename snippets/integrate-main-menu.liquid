@@ -1,0 +1,126 @@
+<script>
+  (() => {
+    let desktopLoaded = false;
+    let mobileLoaded = false;
+    document.addEvent("desktop-lazyloaded", intergateEditorDesktop, { once: true });
+    document.addEvent("mobile-lazyloaded", intergateEditorMobile, { once: true });
+
+    function intergateEditorDesktop() {
+      desktopLoaded = true;
+      document.addEvent(
+        "common.js loaded",
+        () => {
+          let container = document.getElementById("main-mega-menu").firstElementChild;
+          let horizontalContainer = document.getElementById("header_main_menu");
+
+          document.addEvent("shopify:block:select", ({ detail: { sectionId, blockId, load } }) => {
+            if (sectionId === "{{section.id}}") {
+              if (load) {
+                container = document.getElementById("main-mega-menu").firstElementChild;
+              }
+              let blockElement = container.querySelector(`.block-${blockId}`);
+              let { id } = blockElement.closest(".mega-menu-wrapper").dataset;
+              let dropdownElement = horizontalContainer.querySelector(`.js-lazy-menu[data-target-id="${id}"]`);
+              let navItem = dropdownElement.closest("li.mega-menu");
+              navItem.dispatchEvent(new CustomEvent("mouseover"));
+              navItem.addClass("active");
+              let blockActive = dropdownElement.querySelector(`.block-${blockId}`);
+              if (load) {
+                blockElement.addClass("element-active");
+                blockActive.outerHTML = blockElement.outerHTML;
+              }
+              blockActive.addClass("element-active");
+              AT.debounce(() => blockActive.removeClass("element-active"), 2000)();
+            }
+          });
+
+          document.addEvent("shopify:block:deselect", ({ detail: { sectionId, blockId } }) => {
+            if (sectionId === "{{section.id}}") {
+              horizontalContainer.querySelector(".menu-item.active").removeClass("active");
+              horizontalContainer.querySelectorAll(".element-active").removeClass("element-active");
+            }
+          });
+        },
+        { once: true },
+      );
+      triggerEevent("desktop");
+    }
+
+    function intergateEditorMobile() {
+      mobileLoaded = true;
+      document.addEvent(
+        "common.js loaded",
+        () => {
+          let mainMegaContainer = document.getElementById("main-mega-menu").lastElementChild;
+          let headerContainer = document.getElementById("header-mobile-container");
+          let drawerContainer = document.getElementById("mobile-drawer-main");
+          let openDrawerButton = headerContainer.querySelector(".js-main-drawer-open-button");
+          let closeDraweButton = drawerContainer.getElementsByClassName("js-btn-close");
+          let insertDrawer = false;
+
+          document.addEvent("shopify:section:select", ({ detail: { sectionId } }) => {
+            if (sectionId === "{{section.id}}") {
+              openDrawerButton.click();
+              insertDrawer = true;
+            }
+          });
+
+          document.addEvent("shopify:section:deselect", ({ detail: { sectionId } }) => {
+            if (sectionId === "{{section.id}}") {
+              closeDraweButton[0].click();
+            }
+          });
+
+          document.addEvent("shopify:block:select", ({ detail: { sectionId, blockId, load } }) => {
+            if (sectionId === "{{section.id}}") {
+              if (!insertDrawer) {
+                openDrawerButton.click();
+                insertDrawer = true;
+              }
+              if (load) {
+                mainMegaContainer = document.getElementById("main-mega-menu").lastElementChild;
+              }
+              let blocksDrawer = mainMegaContainer.querySelectorAll(`.block-${blockId}`);
+              let dropdownMega = blocksDrawer[0].closest(".mega-menu-wrapper");
+              let { id } = dropdownMega.dataset;
+              let dropdownDrawer = drawerContainer.querySelector(`.dropdown-menu[data-target-id='${id}']`);
+              dropdownDrawer.previousElementSibling.click();
+
+              if (load) {
+                dropdownDrawer.innerHTML = dropdownMega.innerHTML;
+                dropdownDrawer.dispatchEvent(new CustomEvent("reInit-event"));
+              }
+
+              let blockActive = drawerContainer.querySelectorAll(`.block-${blockId}`);
+              blockActive.addClass("element-active");
+            }
+          });
+
+          document.addEvent("shopify:block:deselect", ({ detail: { sectionId, blockId } }) => {
+            if (sectionId === "{{section.id}}") {
+              drawerContainer.querySelectorAll(".dropdown-menu.is-open").removeClass("is-open");
+              drawerContainer.getElementsByClassName("element-active").removeClass("element-active");
+            }
+          });
+        },
+        { once: true },
+      );
+      triggerEevent("mobile");
+    }
+
+    function triggerEevent(type) {
+      switch (type) {
+        case "desktop":
+          if (mobileLoaded) {
+            document.dispatchEvent(new CustomEvent("common.js loaded"));
+          }
+          break;
+        case "mobile":
+          if (desktopLoaded) {
+            document.dispatchEvent(new CustomEvent("common.js loaded"));
+          }
+          break;
+      }
+    }
+  })();
+</script>

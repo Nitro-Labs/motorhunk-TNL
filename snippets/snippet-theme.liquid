@@ -1,0 +1,255 @@
+{%- case type -%}
+	{%- when 'section_id' -%}
+	    {%- if section.settings.title contains '[:' -%}
+	      {%- assign __section_id = section.settings.title | split: '[:' | last -%}
+	      {%- capture __section_id -%}{{ __section_id | split: ']' | first | strip }}{%- endcapture -%}
+	      <div id="{{__section_id}}"></div>
+	    {%- endif -%}
+
+	{%- when 'sectionHeading' -%}
+
+		{%- liquid
+		 	assign sectionHeading_align = section.settings.sectionHeading_align | default: 'auto'
+		-%}
+
+		{%- capture sectionHeadingContent -%}
+			{%- for i in (1..2) -%}
+				{%- liquid
+				 	assign sectionHeading_text 				= 'sectionHeading_text_' | append: i
+				 	assign sectionHeading_cl 				= 'sectionHeading_cl_' | append: i
+				 	assign sectionHeading_text 				= section.settings[sectionHeading_text]
+				 	assign sectionHeading_cl 				= section.settings[sectionHeading_cl] | default: 'rgba(0,0,0,0)'
+				-%}
+				{%- capture sectionHeadingID -%}{{- sectionID }} .section_title-text-{{i}}{%- endcapture -%}
+
+
+				{%- unless sectionHeading_text == blank -%}
+
+					{%- capture block_css -%}
+						{%- unless sectionHeading_cl == 'rgba(0,0,0,0)' -%}{{- sectionHeadingID }}{color: {{sectionHeading_cl}};}{%- endunless -%}
+					{%- endcapture -%}
+					{%- assign section_css = section_css | append: block_css -%}
+
+					<div class="section_title-text-{{i}}">
+						{%- if i == 1 -%}{{- headingIcon -}}{%- endif -%}
+						{{- sectionHeading_text -}}
+					</div>
+				{%- endunless -%}
+			{%- endfor -%}
+		{%- endcapture -%}
+
+		{%- if sectionHeadingContent != blank or countdownDate != blank -%}
+			<div class="section_title-wrapper{% unless sectionHeading_align == 'auto' %} text-{{sectionHeading_align}}{% endunless %}">
+				{%- unless sectionHeadingContent == blank -%}
+					<div class="section_title-inner">{{sectionHeadingContent}}</div>
+				{%- endunless -%}
+			</div>
+		{%- endif -%}
+
+	{%- when 'sectionCSS' -%}
+		{%- liquid
+			assign _lazyload = true
+			assign _bg_color = section.settings.section_bg_color | default: 'rgba(0,0,0,0)'
+		-%}
+
+		{%- capture blockCSS -%}
+			{%- if _bg_color != 'rgba(0,0,0,0)' -%}background-color123: {{_bg_color}};{%- endif -%}
+		{%- endcapture -%}
+
+		{%- render 'css-resp', classID: ID, css_values: blockCSS -%}
+		{% unless no_padding %}
+			{%- render 'css-resp', classID: ID, css_value: section.settings.section_padding -%}
+		{%- endunless -%}
+
+		{%- unless section.settings.section_bg_image == blank -%}
+			{%- liquid
+				assign _bg_image 			= section.settings.section_bg_image | img_url: 'master'
+				assign _bg_size 			= section.settings.section_bg_size
+				assign _bg_repeat 			= section.settings.section_bg_repeat
+				assign _bg_position 		= section.settings.section_bg_position
+				assign _bg_fixed 			= section.settings.section_bg_fixed
+			-%}
+
+			{%- capture blockCSS -%}
+				{%- if _bg_fixed 				 -%}background-attachment: fixed;{%- endif -%}
+				{%- unless _lazyload 			 -%}background-image: url({{_bg_image}});{%- endunless -%}
+				{%- unless _bg_size 	== blank -%}background-size: {{		_bg_size		}};{%- endunless -%}
+				{%- unless _bg_repeat 	== blank -%}background-repeat: {{	_bg_repeat		}};{%- endunless -%}
+				{%- unless _bg_position == blank -%}background-position: {{	_bg_position	}};{%- endunless -%}
+			{%- endcapture -%}
+			{%- capture ID -%}{{ID}}.bg-image{%- endcapture -%}
+			{%- render 'css-resp', classID: ID, css_values: blockCSS -%}
+		{%- endunless -%}
+
+
+
+	{%- when 'productGridV2' -%}
+	    {%- liquid
+	      assign __card_bg_color        = '#FFFFFF'
+	      assign __card_border_radius   = '4px'
+	      assign __card_padding         = ''
+	    -%}
+	    {%- capture firstValues -%}
+	      {%- unless __card_bg_color == 'rgba(0,0,0,0)' -%}background-color: {{__card_bg_color}};{%- endunless -%}
+	      {%- render  'css-resp', type: 'value', showFirst: true, css_value: __card_border_radius, css_property: 'border-radius' -%}
+	      {%- render  'css-resp', type: 'value', showFirst: true, css_value: __card_padding, css_property: 'padding' -%}
+	    {%- endcapture -%}
+	    {%- render 'css-resp', classID: sectionID, nextClassID: ' .featured_product__item', css_values: firstValues -%}
+	    {%- unless __card_border_radius == blank -%}{{- sectionID}} .featured_product__item-action{border: none;border-radius: 0 0 4px 4px;}{%- endunless -%}
+
+	    {{- sectionID }} .section_content-body .tns-inner:after,
+	    {{- sectionID }} .section_content-body > .row:after,
+	    {{- sectionID }} .section_content-body .product-section{border: none;}
+	{%- when 'verify' -%}
+		{%- if request.design_mode -%}
+			<style>:root{--body-cl:#5b6c8f;--body-link-color:#103178;--heading-cl:#103178;--input-bg-cl:#f0f2f5;--border-radius:42px;--main-cl:#103178;--btn1-bg-color:#ff9923;--btn1-color:#fff;--btn1-border-color:#ff9923;--btn1-hover-bg-color:#103178;--btn1-hover-color:#fff;--btn1-hover-border-color:#103178}@-webkit-keyframes hvr-icon-bob{0%,to{transform:translateY(-8px)}to{transform:translateY(0)}}@keyframes hvr-icon-bob{0%,to{transform:translateY(-8px)}to{transform:translateY(0)}}#verifyCode{display:none}#verifyCode:after{content:"";top:0;left:0;bottom:0;height:100vh;z-index:-1;visibility:hidden;opacity:0;transition:.35s ease-in-out 0s}#verifyCode:after,#verifyCode>div{background:#fff;position:fixed;right:0}#verifyCode>div{left:50%;top:50%;z-index:995;width:calc(100% - 30px);max-width:700px;max-height:95vh;overflow:hidden;overflow-y:auto;transform:translate(-50%, -50.1%);padding:0;box-shadow:0 0 8px rgba(0,0,0,0.15)}#verifyCode .dialog-body{color:var(--body-cl)}#verifyCode .dialog-body>strong{padding:20px;display:block}@media (min-width: 992px){#verifyCode .dialog-body>strong{padding:20px 30px}}#verifyCode .dialog-body>p{margin:0;padding:0 20px 30px}@media (min-width: 992px){#verifyCode .dialog-body>p{padding:0 30px 30px}}#verifyCode .line{width:100%;height:1px;display:block;background:#f0f2f5}#verifyCode form{padding:20px}@media (min-width: 992px){#verifyCode form{padding:20px 30px}}@media (min-width: 768px){#verifyCode form .verify-form-group:last-of-type{display:flex;flex-direction:row;align-items:center;justify-content:space-between}}#verifyCode form .verify-form-group>a{color:var(--body-link-color);margin-bottom:15px;display:block;font-weight:400}@media (min-width: 768px){#verifyCode form .verify-form-group>a{margin-bottom:0}}#verifyCode form.fail-to-verify input[type=text]{border:1px solid red}#verifyCode h1{font-size:30px;padding:20px 20px 0;font-weight:600;color:var(--heading-cl)}@media (min-width: 992px){#verifyCode h1{padding:20px 30px 0}}#verifyCode p{margin:0 0 20px}#verifyCode #verify-error{color:red}#verifyCode input[type=text]{width:100%;margin-bottom:20px;height:46px;padding:10px 25px;background:var(--input-bg-cl);border:1px solid var(--input-bg-cl);outline:none;border-radius:var(--border-radius)}#verifyCode input[type=text]:focus{box-shadow:inset 0 0 0 2px var(--main-cl)}#verifyCode input[type=submit]{cursor:pointer;height:46px;padding:10px 25px;background:var(--btn1-bg-color);color:var(--btn1-color);border:1px solid var(--btn1-border-color);font-weight:600;width:100%;outline:none;border-radius:var(--border-radius)}@media (min-width: 768px){#verifyCode input[type=submit]{width:auto}}#verifyCode input[type=submit]:focus{box-shadow:none}@media (min-width: 1025px){#verifyCode input[type=submit]:hover{background:var(--btn1-hover-bg-color);color:var(--btn1-hover-color);border-color:var(--btn1-hover-border-color)}}#verifyCode.is-open{display:block}#verifyCode.is-open:after{visibility:visible;opacity:1;z-index:100}a[data-dialog-trigger="#themeGuide"]{position:fixed;bottom:15px;left:20px;z-index:99;padding:0;-webkit-animation-name:hvr-icon-bob;animation-name:hvr-icon-bob;-webkit-animation-duration:.65s;animation-duration:.65s;-webkit-animation-delay:.2s;animation-delay:.2s;-webkit-animation-iteration-count:infinite;animation-iteration-count:infinite;-webkit-animation-direction:alternate;animation-direction:alternate}#themeGuide a[data-dialog-close]{width:30px;height:30px;z-index:9;display:flex;align-items:center;justify-content:center;position:absolute;top:20px;right:20px;padding:0}#themeGuide a[data-dialog-close] svg path{fill:var(--main-cl)}#themeGuide>div{position:fixed;left:20px;top:auto;right:20px;bottom:20px;transform:translate(0);max-width:100%;background:#fff;width:auto;padding:20px;max-height:600px;overflow-x:hidden;overflow-y:auto;z-index:995;border-radius:4px;box-shadow:0 0 8px rgba(0,0,0,0.15)}@media (min-width: 576px){#themeGuide>div{max-width:400px;width:100%;right:auto;left:20px;padding:30px}}#themeGuide .guide-heading{color:var(--heading-cl);margin:20px 0;font-weight:600}#themeGuide ul{margin:0;padding:0;list-style:disc inside none}#themeGuide ul li{color:var(--body-link-color);line-height:1.45}#themeGuide ul li a{text-decoration:none;color:inherit}@media (min-width: 1025px){#themeGuide ul li:hover>a{font-weight:600}}</style>
+			<dialog id="verifyCode" class="modal-ui" aria-hidden="true">
+				<div role="dialog" aria-modal="true" aria-labelledby="verifyCode-title">
+					<div id="verifyCode-content">
+						<div class="dialog-body" data-notify-content>
+							<strong>Active theme purchase code</strong>
+							<span class="line"></span>
+							<h1>Add License Key/Purchase Code</h1>
+
+							<form action="/" id="verifyCodeForm" method="POST">
+								<p>Enter your purchase code and hit return/enter. Find out how to get your purchase code.</p>
+								<div class="verify-form-group">
+									<input type="text" name="pcode" placeholder="Purchase code (e.g. xxxxxxxxxx)" pattern="[(a-z0-9)]{8}-[(a-z0-9)]{4}-[(a-z0-9)]{4}-[(a-z0-9)]{4}-[(a-z0-9)]{12}">
+									<p id="verify-error" style="display: none;">Please try again!</p>
+								</div>
+
+								<div class="verify-form-group">
+									<a id="arnHowGetPCode" href="https://support.arenacommerce.com/support/solutions/articles/6000116407-how-to-find-your-themeforest-item-purchase-code">How to get License key?</a>
+									<input type="submit" value="Active License Key">
+								</div>
+							</form>
+							<p>A purchase code (license) is only valid for One Domain. Are you using this theme on a new domain? Purchase a new license here to get a new purchase code.</p>
+							<style>
+								body.not-verify{max-height: 100vh!important; overflow: hidden!important;}
+							</style>
+						</div>
+					</div>
+				</div>
+			</dialog>
+			<script>
+				( function(){
+					const url = `https://xadmin.arenacommerce.com/api/bizZdvfoBMDgRWtur7SIdPJ1y8ZIeKj9/`;
+
+					let form = document.getElementById('verifyCodeForm');
+					let dialog = document.getElementById('verifyCode');
+					let errorText = document.getElementById('verify-error');
+					/*
+					-------------------------------
+					CHANGE THEME NAME
+					-------------------------------
+					*/
+					let themeName = 'Chromium'; // <------------------------------------------
+
+					let rs = fetch(url+`get-active-code`, {
+						method: 'POST',
+						mode: 'cors',
+						header: {'Content-Type': 'application/json'},
+						body: JSON.stringify({shop: Shopify.shop, userAgent: window.navigator.userAgent})
+					});
+
+					rs.then(res => res.json()).then(e=>{
+
+						let code_list = e.code_list;
+
+						let existPC = [...code_list.filter(i=>i.theme_name.toLowerCase().includes((themeName).toLowerCase()))]
+
+						!existPC.length && hideContent();
+					})
+					.catch(e=>{
+						hideContent();
+					})
+
+					form.addEventListener('submit', e=>{
+						e.preventDefault();
+						form.querySelector('[name="pcode"]').checkValidity();
+
+						let key = form.querySelector('[name="pcode"]').value.trim();
+						hideContent();
+						_verify(key, form);
+					})
+
+					function hideContent(){
+						errorText.style.display = 'none';
+						form.classList.remove('fail-to-verify');
+
+						document.body.classList.add('not-verify');
+						dialog.classList.add('is-open');
+						document.getElementById('arnHowGetPCode').style.fontWeight = null;
+					}
+
+					function _failToVerify(e){
+						errorText.style.display = 'block';
+						errorText.textContent = e || 'Please try again!';
+						form.classList.add('fail-to-verify');
+					}
+
+					function _verify(key, form){
+						fetch(url + 'check-purchase-code/'+ key, {
+							method: 'GET',
+							mode: 'cors',
+							header: {'Content-Type': 'text/html'},
+						})
+						.then(e=>{
+							e.text().then(e=>{
+								let parser = new DOMParser();
+								console.log(parser);
+								let html = parser.parseFromString(e, "text/html")
+								let theme_name = html.getElementById('theme_name').textContent.toLowerCase().trim()
+								,author = html.getElementById('author-name').textContent.trim()
+
+								if(!(author == 'arenacommerce' && theme_name.includes((themeName).toLowerCase()))){
+									_failToVerify('Your license key invalid, please try again!');
+									return;
+								}
+
+								let theme_id = html.querySelector(`[theme-id]`).getAttribute('theme-id')
+								,sold_at = html.getElementById('sold_at').textContent.trim()
+								,supported_until = html.getElementById('supported_until').textContent.trim()
+
+								,data = {
+									shop: Shopify.shop
+									,theme_id : theme_id
+									,theme_name : theme_name
+									,sold_at : sold_at
+									,supported_until : supported_until
+									,userAgent: window.navigator.userAgent
+								};
+
+								fetch(url+`active-code/${key}`, {
+									method: 'POST',
+									mode: 'cors',
+									header: {'Content-Type': 'application/json'},
+									body: JSON.stringify(data)
+								})
+								.then(e=>{
+									e.json().then(resp=>{
+										if(resp.status != 'success'){
+											_failToVerify(resp.msg);
+											return;
+										}
+										document.body.classList.remove('not-verify');
+										dialog.remove();
+									})
+								})
+								.catch(error=>{
+									console.log('Error', error);
+									_failToVerify(error);
+								})
+							})
+						})
+						.catch(error=>{
+							console.log('Error', error);
+							_failToVerify('You purchase is invalid, please check again!');
+							document.getElementById('arnHowGetPCode').style.fontWeight = '600';
+
+						})
+					}
+				})();
+			</script>
+		{%- endif -%}
+{%- endcase -%}

@@ -1,0 +1,37 @@
+{%layout none%}
+{%- liquid
+  assign q = search.terms | split: '|' | first
+  assign excerpt = search.terms | split: 'excerpt:' | last | split: '|' | first
+  assign dp = search.terms | split: 'dp:' | last
+  assign article = articles[q]
+-%}
+<article class="featured_blog__item">
+  <header>
+    <figure class="featured_blog__item-image">
+      <a href="{{ article.url }}" aria-label="{{article.title}}">
+        {%- render 'image-style', image: article.image -%}
+      </a>
+    </figure>
+  </header>
+
+  <footer><div class="featured_blog__item-info">
+      {%- if dp == 'above' -%}
+        <span class="featured_blog__item-publish">{{ article.published_at | date: "%B %d, %Y" }}</span>
+      {%- endif -%}
+      <span class="featured_blog__item-author">{{ article.author }}</span>
+    </div>
+    <h3 class="featured_blog__item-title">
+      <a href="{{ article.url }}">{{ article.title }}</a>
+      {%- if dp == 'below' -%}
+        <span class="featured_blog__item-publish">{{ article.published_at | date: "%B %d, %Y" }}</span>
+      {%- endif -%}
+    </h3>
+
+    {%- if excerpt == 'true' -%}
+      <div class="featured_blog__item-excerpt">{{ article.excerpt_or_content | truncatewords: 20}}</div>
+    {%- endif -%}
+    <div class="featured_blog__item-button">
+      <a href="{{article.url}}" class="btn btn-2">{{ 'general.article.read_more' | t}}</a>
+    </div>
+  </footer>
+</article>

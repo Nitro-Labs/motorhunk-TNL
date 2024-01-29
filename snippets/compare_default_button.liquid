@@ -1,0 +1,45 @@
+{%- case type -%}
+  {%- when 'show' -%}
+    {%- case settings.wishlist_app -%}
+      {%- when 'default' -%}
+        {%- if settings.enable_product_compare and settings.wishlist_app != 'none' and shop.metafields.arena.wl_cp_settings.compare_settings.compare_enable == true -%}
+          {%- if settings.use_icons_from_arn_app -%}
+            {%- render 'arn_wl_cp_buttons' type: 'cp_show_btn' -%}
+          {%- else -%}
+            <a href="#" onclick="return false" class="position-relative {{ shop.metafields.arena.wl_cp_settings.compare_settings.compare_show_class }} {{ shop.metafields.arena.wl_cp_settings.compare_settings.show_class_icon.icon_id }} {% if shop.metafields.arena.wl_cp_settings.compare_settings.compare_enable == false %}disabled{% endif %}" data-arn-action="show">
+              <span>
+                {%- if custom_icon != blank -%}
+                  {{custom_icon}}
+                {%- else -%}
+                  {%- render 'svg', type: 'compare' -%}
+                {%- endif -%}
+
+                {% if shop.metafields.arena.wl_cp_settings.general_settings.show_number_status == true %}
+                  <span class="number">
+                    <span class="n-item" data-count>0</span>
+                  </span>
+                {% endif %}
+              </span>
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      {% comment %} end {% endcomment %}
+    {%- endcase -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'add' -%}
+    {%- case settings.wishlist_app -%}
+      {%- when 'default' -%}
+        {%- if settings.enable_product_compare and settings.wishlist_app != 'none' and shop.metafields.arena.wl_cp_settings.compare_settings.compare_enable == true -%}
+          {%- if settings.use_icons_from_arn_app -%}
+            {%- render 'arn_wl_cp_buttons' type: 'cp_add_btn', product_handle: product_handle -%}
+          {%- else -%}
+            <a href="#" onclick="return false" class="position-relative {{ shop.metafields.arena.wl_cp_settings.compare_settings.compare_add_class }} {{ shop.metafields.arena.wl_cp_settings.compare_settings.add_class_icon.icon_id }} {% if shop.metafields.arena.wl_cp_settings.compare_settings.compare_enable == false %}disabled{% endif %}" data-arn-action="add" data-handle="{{product_handle}}">
+              {%- render 'svg', type: 'compare' -%}
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      {% comment %} end {% endcomment %}
+    {%- endcase -%}
+  {% comment %} end {% endcomment %}
+{%- endcase -%}

@@ -1,0 +1,739 @@
+{%- if section.settings.boxed_layout -%}
+  {%- assign is_boxed = true -%}
+{%- endif -%}
+
+{%- liquid
+  assign grid_layout   = section.settings.grid_layout
+  unless grid_layout contains ','
+    assign grid_layout = grid_layout | append: ', 100%'
+  endunless
+-%}
+
+{%- assign sectionID = '.section-' | append: section.id -%}
+{%- assign section_id = '.section-' | append: section.id -%}
+
+<div class="section-{{section.id}}" data-section-type="footer-widget" data-section-id="{{section.id}}">
+  {%- if is_boxed -%}<div class="container">{%- endif -%}
+
+    <div class="section_content-wrapper d-grid">
+      {%- capture block_id %} .section_content-wrapper.d-grid{%- endcapture -%}
+      {%- for block in section.blocks -%}
+        {%- liquid
+          if block.type == 'style'
+            capture block_css
+              render 'snippet-footer', section_id: section_id, block_id: block_id, block: block
+            endcapture
+            assign section_css = section_css | append: block_css
+          else
+            render 'snippet-footer', section_id: section_id, block: block
+          endif
+        -%}
+      {%- endfor -%}
+    </div>
+
+  {%- if is_boxed -%}</div>{%- endif -%}
+</div>
+
+{%- capture sectionCss -%}
+  {%- liquid
+    render 'snippet-theme', type: 'sectionCSS', ID: sectionID
+    render 'css-resp', classID: sectionID, nextClassID: ' .section_content-wrapper.d-grid', css_value: grid_layout, css_property: 'grid-template-columns'
+    render 'css-resp', classID: sectionID, nextClassID: ' .section_content-wrapper.d-grid', css_value: section.settings.grid_spc, css_property: 'grid-gap'
+    echo section_css
+  -%}
+{%- endcapture -%}
+{%- assign sectionCss = sectionCss | strip_newlines -%}
+{%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Footer Widget"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000246691) before use."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section Padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_layout",
+      "label": {
+        "en": "Column Grid layout"
+      },
+      "default": "25% 25% 25% 25%, 100%",
+      "placeholder": {
+        "en": "E.g: 70% 30% or 100%"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_spc",
+      "label": {
+        "en": "Item spacing"
+      },
+      "default": "8px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": {
+        "en": "Menu"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          },
+          "info": {
+            "en": "Default is Menu title"
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "list_style",
+          "label": {
+            "en": "Show list style"
+          }
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": {
+            "en": "Menu"
+          }
+        }
+      ]
+    },
+    {
+      "type": "information",
+      "name": {
+        "en": "Information"
+      },
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block title"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Logo"
+          }
+        },
+        {
+          "type": "select",
+          "id": "logo_type",
+          "label": {
+            "en": "Logo type"
+          },
+          "options": [
+            {
+              "value": "image",
+              "label": {
+                "en": "Image"
+              }
+            },
+            {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "logo_max_width",
+          "label": {
+            "en": "Logo max width"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_image",
+          "label": {
+            "en": "Logo image"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "logo_svg",
+          "label": {
+            "en": "Logo SVG"
+          },
+          "info": {
+            "en": "Please enter SVG code."
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Content"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_content_1",
+          "label": {
+            "en": "Address"
+          }
+        },
+        {
+          "type": "html",
+          "id": "svg_content_1",
+          "label": {
+            "en": "Address SVG"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_content_2",
+          "label": {
+            "en": "Phone"
+          }
+        },
+        {
+          "type": "html",
+          "id": "svg_content_2",
+          "label": {
+            "en": "Phone SVG"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_content_3",
+          "label": {
+            "en": "Email"
+          }
+        },
+        {
+          "type": "html",
+          "id": "svg_content_3",
+          "label": {
+            "en": "Email SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Social Media"
+          }
+        },
+        {
+          "type": "text",
+          "id": "social_title",
+          "label": {
+            "en": "Title"
+          },
+          "default" : "Join Us:"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_social",
+          "label": {
+            "en": "Show social"
+          }
+        },
+        {
+          "type": "select",
+          "id": "social_icon_type",
+          "label" : "Icon type",
+          "options": [
+           {
+              "value": "",
+              "label": "Default"
+           },
+           {
+             "value": "-square",
+             "label": "Square"
+           },
+           {
+             "value": "-circle",
+             "label": "Circle"
+           }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": {
+        "en": "Newsletter"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "main_text_1",
+          "label": {
+            "en": "Text 1"
+          },
+          "default": "Join our newsletter"
+        },
+        {
+          "type": "textarea",
+          "id": "main_text_2",
+          "label": {
+            "en": "Text 2"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Form settings"
+          }
+        },
+        {
+          "type": "select",
+          "id": "form_type",
+          "label": {
+            "en": "Form Type:"
+          },
+          "options": [
+            {
+              "value": "mailchimp",
+              "label": {
+                "en": "Mailchimp"
+              }
+            },
+            {
+              "value": "klaviyo",
+              "label": {
+                "en": "Klaviyo"
+              }
+            },
+            {
+              "value": "shopify",
+              "label": {
+                "en": "Shopify"
+              }
+            }
+          ],
+          "default": "mailchimp"
+        },
+        {
+          "type" : "checkbox",
+          "id" : "enable_ajax",
+          "label" : "Enable Ajax",
+          "default": true
+        },
+        {
+          "type": "textarea",
+          "id": "form_url",
+          "label": {
+            "en": "Form URL"
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "Mailchimp: [Where do I get my MailChimp Form Action](https://www.arenacommerce.com/blogs/faq/shopify-theme-how-to-get-a-mailchimp-form-action-url)"
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "KLAVIYO: [Sign up](https://www.klaviyo.com/partner/signup?utm_source=0010V00002PVTlf&utm_medium=partner)"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "successful_message",
+          "label": {
+            "en" : "Successful message"
+          },
+          "info": "Only form type is 'Shopify'",
+          "default" : "Thanks for subscribing!"
+        },
+        {
+          "type": "range",
+          "id": "btn_style",
+          "label": {
+            "en": "Button style"
+          },
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Accept payment"
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "show_accept",
+          "label": {
+            "en": "Show"
+          }
+        },
+        {
+          "type": "text",
+          "id": "accept_payment_title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 1"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_1",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_1",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_1",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 2"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_2",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_2",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_2",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 3"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_3",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_3",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_3",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 4"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_4",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_4",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_4",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 5"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_5",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_5",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_5",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Payment 6"
+          }
+        },
+        {
+          "type": "select",
+          "id": "payment_type_6",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+           },
+           {
+             "value": "image",
+             "label": {
+               "en": "Image"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "payment_img_6",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "payment_icon_6",
+          "label": {
+            "en": "SVG"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style",
+      "name": {
+        "en": "[+] Color style"
+      },
+      "settings": [
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "border_radius",
+          "label": {
+            "en": "Border Radius"
+          },
+          "placeholder": {
+            "en": "E.g: 4px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": {
+            "en": "Heading color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "heading_font_weight",
+          "label": {
+            "en": "Heading Font Weight"
+          },
+          "min": 0,
+          "max": 900,
+          "step": 100,
+          "default": 0
+        },
+        {
+          "type": "text",
+          "id": "heading_font_size",
+          "label": {
+            "en": "Heading Font Size"
+          },
+          "placeholder": {
+            "en": "E.g: 18px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_1_color",
+          "label": {
+            "en": "Text 1 color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "link_color",
+          "label": {
+            "en": "Link color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "hover_link_color",
+          "label": {
+            "en": "Hover Link color"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

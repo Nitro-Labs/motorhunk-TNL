@@ -1,0 +1,197 @@
+  <script>window.BOOMR = {version:1}</script>
+
+<script type="application/javascript">
+  window.theme = Object.assign( window.theme || {}, {
+    {%- case template.name -%}
+      {%- when 'product' -%}
+        product: {{product | json}},
+    {%- endcase -%}
+    routes: {
+      rootUrl: "{{routes.root_url}}",
+      searchUrl: "{{routes.search_url}}",
+      collectionAllUrl: "{{routes.all_products_collection_url}}",
+      collectionsUrl: "{{routes.collections_url}}",
+      cartAdd: "{{routes.cart_add_url}}.js",
+      cartGet: "{{routes.cart_url}}.js",
+      cartChange: "{{routes.cart_change_url}}.js",
+      cartUpdate: "{{routes.cart_update_url}}.js",
+      cartClear: "{{routes.cart_clear_url}}.js"
+    },
+    settings: {
+      currencies:{
+        enable: {{settings.enable_currencies}}
+      },
+      language: {
+        enable: {{settings.enable_languages}}
+      },
+      shop: {
+        reviewApp: "{{settings.review_app}}"
+      },
+      header: {
+        sticky: {{settings.header_sticky}},
+        style: {{settings.header_style}},
+        enableMainMegaMenu: {{settings.enable_main_mega_menu | json}},
+      },
+      cart: {
+        type: "{{settings.cart_type}}",
+      },
+      search: {
+        useApp: "{{settings.use_search_app}}",
+        disable: {{settings.disable_search_ajax}},
+        limit: {{settings.search_limit | abs}},
+        type: "{{settings.search_type}}",
+        urlParams: "&resources[type]={{settings.search_type}}&resources[limit]={{settings.search_limit}}&resources[options][unavailable_products]={{settings.search_unavailable_products}}&resources[options][fields]=title,author,body,product_type,tag,variants.sku,variants.title,vendor"
+      },
+      collection: {
+        scrollTopWhenFilter: {{settings.scroll_top_when_filter}}
+      }
+    },
+    template: "{{template.name}}",
+    strings: {
+      klaviyoSuccess: "{{ 'general.form.klaviyo_success' | t}}",
+      soldOut: "{{ 'products.product.sold_out' | t}}",
+      item: "{{ 'general.text.item' | t}}",
+      items: "{{ 'general.text.items' | t}}",
+      tags: "{{ 'general.meta.tags' | t }}",
+      page: "{{ 'general.meta.page' | t}}",
+      shopName: "{{shop.name}}",
+      cartNumber: "{{ 'popup.cart_notify.number_in_cart' | t }}",
+      cartNumbers: "{{ 'popup.cart_notify.numbers_in_cart' | t }}",
+      cart: {
+        drawer: {
+          quantity: "{{ 'cart.drawer.quantity' | t}}"
+        },
+        lineItemMax: "{{ 'products.product.error_add_cart' | t}}",
+      },
+      shipping: {
+        oneResult: "{{ 'cart.shipping.one_result' | t}}",
+        manyResults: "{{ 'cart.shipping.many_results' | t}}",
+        notResult: "{{ 'cart.shipping.not_result' | t}}",
+        resultItem: "{{ 'cart.shipping.result_item' | t}}",
+        missingCountry: "{{ 'cart.shipping.missing_country' | t}}",
+        missingZip: "{{ 'cart.shipping.missing_zip' | t}}",
+      },
+      message: {
+        newsletterSuccess: "{{ 'message.newsletter.success' | t}}"
+      }
+    },
+    currency: {
+      type: "{{settings.currencies_type}}",
+      current: "{{cart.currency.iso_code}}",
+      pattern: "money_format",
+      symbol: "{{cart.currency.symbol}}",
+      format: "{{shop.money_format}}",
+    },
+    search: {
+      "config" : {
+        "resources[type]": "{{settings.search_type}}",
+        "resources[limit]": "{{settings.search_limit}}",
+        "resources[options][unavailable_products]": "{{settings.search_unavailable_products}}"
+      },
+      strings : {
+        product: "{{ 'general.search.product' | t }}",
+        article: "{{ 'general.search.article' | t}}",
+        collection: "{{ 'general.search.collection' | t}}",
+        page: "{{ 'general.search.page' | t}}",
+      }
+    },
+    assets: {
+      cartNotify: "{{'cart-notify.min.js' | asset_url}}",
+      search: "{{'search.min.js' | asset_url}}",
+      collectionFilter: "{{'filter.min.js' | asset_url}}",
+      currenciesUrl: "{{'currencies.min.js' | asset_url}}",
+      currenciesRateUrl: "{{'/services/javascripts/currencies.js' | within: shop}}",
+      defaultImage: "{{'default-image.jpg' | asset_img_url: 'master'}}",
+    }
+  });
+
+  (() => {
+    let arr = [
+      "{{'lazysizes.min.js' | asset_url}}",
+      "{{'tiny-slider.min.js' | asset_url}}",
+      "{{'common.min.js' | asset_url}}",
+      {%- case template.name -%}
+        {%- when 'index' -%}
+          "{{'home.min.js' | asset_url}}",
+        {%- when 'article' -%}
+          "{{'article-page.min.js' | asset_url}}",
+        {%- when 'cart' -%}
+          "{{'cart-page.min.js' | asset_url}}",
+        {%- when 'product' -%}
+          "{{'photoswipe.min.js' | asset_url}}",
+          {%- case template.suffix -%}
+            {%- when 'no-sidebar' -%}
+              "{{'product-no-sb-page.min.js' | asset_url}}",
+            {%- when 'with-sidebar' -%}
+              "{{'product-with-sb-page.min.js' | asset_url}}",
+            {%- else -%}
+              {%- case settings.product_page -%}
+                {%- when 'default' -%}
+                  "{{'product-page.min.js' | asset_url}}",
+                {%- when 'with-sidebar' -%}
+                  "{{'product-with-sb-page.min.js' | asset_url}}",
+                {%- when 'no-sidebar' -%}
+                  "{{'product-no-sb-page.min.js' | asset_url}}",
+              {%- endcase -%}
+          {%- endcase -%}
+        {%- when 'collection' -%}
+          {%- case template.suffix -%}
+            {%- when 'no-sidebar' -%}
+              "{{'collection-no-sidebar-page.min.js' | asset_url}}",
+            {%- when 'left-sidebar' -%}
+              "{{'collection-left-sidebar-page.min.js' | asset_url}}",
+            {%- when 'infinite' -%}
+              "{{'collection-infinite-page.min.js' | asset_url}}",
+            {%- else -%}
+              {%- case settings.collection_page -%}
+                {%- when 'left-sidebar' -%}
+                  "{{'collection-left-sidebar-page.min.js' | asset_url}}",
+                {%- when 'no-sidebar' -%}
+                  "{{'collection-no-sidebar-page.min.js' | asset_url}}",
+                {%- when 'infinite' -%}
+                  "{{'collection-infinite-page.min.js' | asset_url}}",
+              {%- endcase -%}
+          {%- endcase -%}
+        {% comment %} end {% endcomment %}
+
+        {%- when 'page' -%}
+          {%- case template.suffix -%}
+            {%- when 'about' -%}
+              "{{'about-page.min.js' | asset_url}}",
+          {%- endcase -%}
+      {%- endcase -%}
+    ];
+    document.addEvent('DOMContentLoaded',async () => {
+
+      for (const url of arr) {
+        await new Promise((reslove, rejcet) => {
+          let script = document.createElement("script");
+          script.src = url;
+          script.defer = true;
+          script.onload = () => {reslove(1);};
+          document.body.append(script);
+        })
+      }
+    }, {once: true});
+    window.addEvent('load', () => {
+      [
+        "{{'cart-notify.min.js' | asset_url}}",
+        {%- unless settings.disable_search_ajax -%}"{{'search.min.js' | asset_url}}",{%- endunless -%}
+        {%- if settings.enable_currencies -%}
+          "{{'currencies.min.js' | asset_url}}",
+          "{{'/services/javascripts/currencies.js' | within: shop}}",
+        {%- endif -%}
+      ].forEach( url => {
+        let link = document.createElement("link");
+        link.as = "script";
+        link.href = url;
+        link.rel = "preload";
+        document.head.append(link);
+      });
+    })
+  })();
+</script>
+
+
+{% comment %} compress {% endcomment %}
+

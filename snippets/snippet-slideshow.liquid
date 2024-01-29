@@ -1,0 +1,246 @@
+{%- liquid
+	assign isBoxed      = section.settings.boxed_layout
+	assign default_link = '#" onclick="return false'
+	assign slide_height = section.settings.slide_height
+	assign slider_id    = '#slider-' | append: section.id
+	assign controls_id  = '#controls-' | append: section.id
+	assign dots_id      = '#dots-' | append: section.id
+	assign sectionID    = '#section-' | append: section.id
+	assign bg_color     = section.settings.bg_color | default: default_color
+	assign total_item   = section.blocks | where: 'type', 'slide' | size
+
+	assign section_padding = section.settings.section_padding
+	assign section_margin  = section.settings.section_margin
+-%}
+
+{%- unless section.settings.bg_full -%}
+	{%- assign bg_class = ' .section-content' -%}
+{%- endunless -%}
+
+{%- if slide_height != blank -%}{%- assign disablePadding = true -%}{%- endif -%}
+
+<div class="home-slideshow" id="section-{{section.id}}" data-section-type="slideshow" data-section-id="{{section.id}}">
+	{%- if isBoxed -%}<div class="container">{%- endif -%}
+		<div class="section-content">
+
+			<div class="slider-container js-slider-container">
+				<div class="slider-wrapper">
+					<div class="js-slider-list slider-list slideshow-wrapper" id="slider-{{section.id}}">
+						{%- for block in section.blocks -%}
+							{%- case block.type -%}
+								{%- when 'slide' -%}
+									{%- comment -%}
+										**
+										* Slide Item
+										*
+									{%- endcomment-%}
+									{%- liquid
+										assign slideItemCount     = slideItemCount | plus: 1
+										assign slideImage         = block.settings.image
+										assign slideImage_URL     = block.settings.btn_url | default: default_link
+										assign text_1             = block.settings.text_1
+										assign text_2             = block.settings.text_2
+										assign text_3             = block.settings.text_3
+										assign text_4             = block.settings.text_4
+										assign btn_txt            = block.settings.btn_txt
+										assign btn_url            = block.settings.btn_url | default: default_link
+										assign product_to_sell    = block.settings.product_to_sell
+										assign product            = all_products[product_to_sell].selected_or_first_available_variant
+										assign show_product_label = block.settings.show_product_label
+										assign sale_text          = block.settings.sale_text
+
+										capture slideContentCheck
+											echo text_1 | strip_newlines
+											echo text_2 | strip_newlines
+											echo btn_txt | strip_newlines
+											echo product_to_sell
+										endcapture
+									-%}
+									{%- capture productLabel -%}++{{ all_products[product_to_sell].tags | join: '++' | downcase }}++{%- endcapture -%}
+									{%- capture blockID -%}.slide-{{block.id}}{%- endcapture -%}
+
+									<div class="slider-item col-12 slider-{{block.id}} {% if slideItemCount == 1 -%} tns-slide-active {%- endif -%}" data-index="{% increment slideIndex %}"{{block.shopify_attributes}}>
+										<div class="slide-banner">
+											<a href="{{slideImage_URL}}">
+												{%- unless slideImage == blank -%}
+													{%- render 'image-style', image: slideImage, disablePadding: disablePadding -%}
+													{%- capture block_css -%}
+														{%- render 'css-resp', classID: blockID, nextClassID: ' .slide-banner img', css_value: block.settings.image_position, css_property: 'object-position' -%}
+													{%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+												{%- else -%}
+													{%- render 'svgset', type: 'lifestyle' -%}
+												{%- endunless -%}
+											</a>
+										</div>
+
+										{%- comment -%}
+											**
+											* Slider Content
+											*
+										{%- endcomment-%}
+										{%- if slideContentCheck != blank -%}
+											<div class="slide-content-wrapper">
+												<a href="{{slide_image_URL}}" class="overlay-ui w-100 h-100" style="z-index: 1000;"></a>
+												<div class="slide-content-inner overlay-ui content_direction-{{_direction_content}}">
+
+												{%- if show_product_label -%}
+													{%- if productLabel contains '++label new++' -%}
+														<div class="slide-content-item content-product_label">
+															<span class="label_ui label_ui-new">{{- 'products.label.new' | t -}}</span>
+														</div>
+													{%- endif -%}
+													{%- if productLabel contains '++label hot++' -%}
+														<div class="slide-content-item content-product_label">
+															<span class="label_ui label_ui-hot">{{- 'products.label.hot' | t -}}</span>
+														</div>
+													{%- endif -%}
+												{%- endif -%}
+
+
+													{%- comment -%}
+														**
+														* Text content
+														*
+													{%- endcomment-%}
+													{%- unless text_1 == blank -%}<div class="slide-content-item content-text-1">{{text_1}}</div>{%- endunless -%}
+													{%- unless text_2 == blank -%}<div class="slide-content-item content-text-2">{{text_2}}</div>{%- endunless -%}
+													{%- unless text_3 == blank -%}<div class="slide-content-item content-text-3">{{text_3}}</div>{%- endunless -%}
+													{%- unless text_4 == blank -%}<div class="slide-content-item content-text-4">{{text_4}}</div>{%- endunless -%}
+
+													{%- comment -%}
+														**
+														* Product to sell
+														*
+													{%- endcomment-%}
+													{%- unless product_to_sell == blank -%}
+														{%- liquid
+															assign priceOri  = product.price
+															assign priceCom  = product.compare_at_price
+															assign showPrice = block.settings.show_product_price | default: false
+
+															if btn_url == 'javascript:void(0);'
+																assign btn_url = product.url
+															endif
+														-%}
+														{%- if showPrice -%}
+															<div class="slide-content-item content-product">
+																<p class="product-price">
+																	<span class="price js-money">{{priceOri | money }}</span>
+																	{%- if priceCom > priceOri -%}
+																		<del class="price-compare js-money">{{priceCom | money }}</del>
+																	{%- endif -%}
+																</p>
+															</div>
+														{%- endif -%}
+
+														{%- if sale_text != blank or show_product_label and priceCom > priceOri  -%}
+															{%- capture productSale_Popup -%}
+																<div class="slide-content-item content-sale-label overlay-ui" data-id="{{blockID}}">
+																	{%- unless sale_text == blank -%}<div class="sale-label">{{sale_text}}</div>{%- endunless -%}
+																	{%- if show_product_label and priceCom > priceOri -%}
+																	<div><span>-{{ product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | floor }}%</span></div>
+																	{%- endif -%}
+																</div>
+															{%- endcapture -%}
+														{%- endif -%}
+													{%- endunless -%}
+
+													{%- comment -%}
+														**
+														* Slide Button content
+														*
+													{%- endcomment-%}
+													{%- unless btn_txt == blank -%}
+														<div class="slide-content-item content-button">
+															<a href="{{btn_url}}" class="btn btn-slide btn-1">{{btn_txt}}</a>
+														</div>
+													{%- endunless -%}
+												</div>
+											</div>
+											{%- liquid
+												echo productSale_Popup
+												assign productSale_Popup = nil
+											-%}
+										{%- endif -%}
+									</div>
+
+									{%- comment -%}
+										**
+										* Slide CSS
+										*
+									{%- endcomment-%}
+
+									{%- if slideContentCheck != blank -%}
+										{%- for block in section.blocks offset: forloop.index -%}
+											{%- if block.type == 'slide' -%}{%- break -%}{%- endif -%}
+											{%- assign  blockType = block.type | remove: 'style_' -%}
+											{%- capture block_css -%}
+												{%- render 'snippet-slideshow-items', block: block, type: blockType, sectionID: sectionID, blockID: blockID -%}
+											{%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+										{%- endfor -%}
+									{%- endif -%}
+
+								{%- else -%}
+
+									{%- comment -%}
+										**
+										* Slide Item General Style
+										*
+									{%- endcomment-%}
+									{%- if slideItemCount > 0 -%}{%- continue -%}{%- endif -%}
+									{%- assign  blockType = block.type | remove: 'style_' -%}
+									{%- capture block_css -%}
+										{%- render 'snippet-slideshow-items', block: block, type: blockType, sectionID: sectionID, blockID: '' -%}
+									{%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+							{%- endcase -%}
+						{%- endfor -%}
+					</div>
+					{%- if total_item > 1 -%}
+						{%- render 'set-tns-config'
+							slider_id       : slider_id,
+							controls_id     : controls_id,
+							dots_id         : dots_id,
+							controls        : section.settings.controls
+							loop            : section.settings.loop
+							dots            : section.settings.dots,
+							customDots      : true,
+							autoplay        : section.settings.autoplay,
+							autoplay_timeout: section.settings.autoplay_timeout,
+							total_item      : total_item,
+							slideshow       : true
+						-%}
+					{%- endif -%}
+				</div>
+			</div>
+
+		</div>
+	{%- if isBoxed -%}</div>{%- endif -%}
+</div>
+
+{%- comment -%}
+	**
+	* Section Style sheet
+	*
+{%- endcomment-%}
+{%- capture sectionCss -%}
+		{%- render 'css-responsive' preClassID: sectionID, classID: ' .image__style', value_1: slide_height, property_1: 'padding-top' -%}
+		{%- if slide_height != blank -%}{{-sectionID}} .image__style img{object-fit: cover;}{%- endif -%}
+
+		{%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+			value_1: section_padding, property_1: 'padding'
+			value_2: section_margin,  property_2: 'margin'
+			value_3: bg_color,        property_3: 'background-color'-%}
+{%- endcapture -%}
+{%- assign sectionCss = sectionCss | strip_newlines -%}
+{%- unless sectionCss == blank -%}<style>{{- section_css -}}{{sectionCss}}</style>{%- endunless -%}
+
+<script>
+	window.theme = window.theme || {};
+	if(!!window.theme.sectionRegister){
+		!window.theme.sectionRegister.includes('slideshow') && (window.theme.sectionRegister = [...window.theme.sectionRegister, "slideshow"]);
+	}else{
+		window.theme.sectionRegister = ["slideshow"];
+	}
+</script>
+
+{% comment %} compress {% endcomment %}

@@ -1,0 +1,62 @@
+{%- liquid
+  assign currentDate = 'now' | date: '%s'
+  assign dateCompare = date | date: '%s'
+  assign array       = date | split: '/'
+  assign day         = array[0]
+  assign month       = array[1]
+  assign year        = array[2]
+  assign difference  = dateCompare | minus: currentDate
+-%}
+{%- if difference > 0 -%}
+  {% comment %}
+    {%- if difference > 86400 -%}
+      {%- assign day_label = difference | divided_by: 86400 | floor -%}
+      {%- assign difference = difference | modulo: 86400 -%}
+      {%- if day_label < 10 -%}
+        {%- assign day_label = day_label | prepend: '0' -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if difference > 3600 -%}
+      {%- assign hour_label = difference | divided_by: 3600 | floor  -%}
+      {%- assign difference = difference | modulo: 3600 -%}
+      {%- if hour_label < 10 -%}
+        {%- assign hour_label = hour_label | prepend: "0" -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if difference > 60 -%}
+      {%- assign minute_label = difference | divided_by: 60 | floor -%}
+      {%- assign difference = difference | modulo: 60 -%}
+      {%- if minute_label < 10 -%}
+        {%- assign minute_label = minute_label | prepend: '0' -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if difference > 1 -%}
+      {%- assign second_label = difference -%}
+      {%- if second_label < 10 -%}
+        {%- assign second_label = second_label | prepend: '0' -%}
+      {%- endif -%}
+    {%- endif -%}
+  {% endcomment %}
+  <div class="js-countdown countdown" data-countdown="{{month}}/{{day}}/{{year}}">
+    <div class="d-inline-block countdown_item days">
+
+      <span class="js-countdown-days number">00</span>
+      <span class="label">{{ 'date_format.days' | t}}</span>
+    </div>
+    <div class="d-inline-block countdown_item hours">
+      <span class="js-countdown-hours number">00</span>
+      <span class="label">{{ 'date_format.hours' | t}}</span>
+    </div>
+    <div class="d-inline-block countdown_item minutes">
+      <span class="js-countdown-minutes number">00</span>
+      <span class="label">{{ 'date_format.minutes' | t}}</span>
+    </div>
+    <div class="d-inline-block countdown_item seconds">
+      <span class="js-countdown-seconds number">00</span>
+      <span class="label">{{ 'date_format.seconds' | t}}</span>
+    </div>
+  </div>
+{%- endif -%}

@@ -1,0 +1,15 @@
+{%layout none%}
+
+{%- case settings.header_style -%}
+  {%- when '1' -%}
+    {%- section 'header-style-1' -%}
+  {%- when '2' -%}
+    {%- section 'header-style-2' -%}
+  {%- when '3' -%}
+    {%- section 'header-style-3' -%}
+  {%- when '4' -%}
+    {%- section 'header-style-4' -%}
+  {%- when '5' -%}
+    {%- section 'header-style-5' -%}
+
+{%- endcase -%}

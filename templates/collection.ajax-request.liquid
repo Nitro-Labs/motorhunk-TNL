@@ -1,0 +1,38 @@
+{%layout none%}
+{%- paginate collection.products by settings.collection_page_limit -%}
+  <div class="page-title">
+    {{ page_title }}{%- if current_tags -%}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+  </div>
+  {%- if paginate.next == blank -%}
+    <div class="last-page"></div>
+  {%- endif -%}
+  <div class="collection-pagination">
+    {%- if paginate.pages > 1 -%}
+      {%- include 'pagination' -%}
+    {%- endif -%}
+  </div>
+  {%- if collection.products.size >= 1 -%}
+    <div class="collection-products">
+      {%- for product in collection.products -%}
+        {%- render 'product-item' product: product -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="pagination-showing">
+    {%- if paginate.pages > 1 -%}
+      {%- assign from = paginate.current_offset | plus : 1 -%}
+      {%- if paginate.next -%}
+        {%- assign to = paginate.current_offset | plus: paginate.page_size -%}
+      {%- else -%}
+        {%- assign to = paginate.items -%}
+      {%- endif -%}
+      {%- assign count = paginate.items -%}
+      {{ 'collections.showing.items' | t: count: count, from: from, to: to }}
+    {%- else -%}
+      {{ 'collections.showing.all' | t: count: paginate.items }}
+    {%- endif -%}
+  </div>
+
+  {%- section 'collection-sidebar' -%}
+{%- endpaginate -%}

@@ -1,0 +1,99 @@
+{%- liquid
+  assign default_color = 'rgba(0,0,0,0)'
+-%}
+{%- capture styleBlockID -%}{{sectionID}} {{blockID}}{%- endcapture -%}
+
+{%- capture itemID -%}
+  {%- case type -%}
+    {%- when 'style_wrapper'  -%}.card_section-content.overlay-ui
+    {%- when 'style_button'   -%}{{ nextClassID | default: '.card_section-button a' }}
+  {%- endcase -%}
+{%- endcapture -%}{%- assign itemID = itemID | prepend: ' ' -%}
+
+{%- case type -%}
+  {%- when 'style_wrapper' -%}{%- comment -%} * * * * * * * * * * * * * * * * * * * * * * * * position * * * * * * * * * * * * *{%- endcomment-%}
+
+    {%- render 'css-responsive' preClassID: styleBlockID, classID: itemID,
+      value_1: block.settings.padding, property_1: 'padding'
+      value_2: block.settings.align, property_2: 'text-align'
+      -%}
+    {%- if block_style != blank -%}
+      {%- if block_style == "1" -%}
+        {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, css_value: block.settings.position, type: 'position' -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, css_value: block.settings.position, type: 'position' -%}
+    {%- endif -%}
+
+  {%- when 'style_content' -%}{%- comment -%} * * * * * * * * * * * * * * * * * * * * * * * * Text * * * * * * * * * * * * *{%- endcomment-%}
+    {%- for i in (1..4) -%}
+      {%- liquid
+        assign itemID     = ' .card_section-text-' | append: i
+        assign content_fs = 'content_fs_' | append: i
+        assign content_cl = 'content_cl_' | append: i
+        assign content_fw = 'content_fw_' | append: i
+        assign content_lh = 'content_lh_' | append: i
+        assign content_cl = block.settings[content_cl] | default: default_color | replace: default_color, ''
+        assign content_margin = 'content_margin_' | append: i
+
+      -%}
+
+      {%- render 'css-responsive' preClassID: styleBlockID, classID: itemID,
+        value_1: block.settings[content_fs],     property_1: 'font-size'
+        value_2: block.settings[content_margin], property_2: 'margin'
+        value_3: block.settings[content_lh],     property_3: 'line-height'
+        value_4: block.settings[content_fw],     property_4: 'font-weight'
+        value_5: content_cl,                     property_5: 'color'
+        -%}
+      {%- if i == 2 and content_cl != default_color -%}{{- styleBlockID }} {{ itemID }} svg path{fill: {{content_cl}};}{%- endif -%}
+
+    {%- endfor -%}
+
+  {%- when 'style_button' -%}{%- comment -%} * * * * * * * * * * * * * * * * * * * * * * * * Button * * * * * * * * * * * * *{%- endcomment-%}
+    {%- liquid
+      assign btn_cl = block.settings.btn_cl | default: default_color
+      assign btn_fw = block.settings.btn_fw
+
+      assign btn_bg_cl     = block.settings.btn_bg_cl | default: default_color
+      assign btn_border_cl = block.settings.btn_border_cl | default: default_color
+      assign btn_hover_cl  = block.settings.btn_hover_cl | default: default_color
+
+      assign btn_hover_bg_cl     = block.settings.btn_hover_bg_cl | default: default_color
+      assign btn_hover_border_cl = block.settings.btn_hover_border_cl | default: default_color
+      assign btn_border_width    = block.settings.btn_border_width | default: '(+=+)' | append: 'px', replace: '(+=+)px', ''
+    -%}
+
+    {%- capture btn_css -%}
+      font-weight: {{ btn_fw }};
+      {%- if btn_cl != default_color -%}color: {{btn_cl}};{%- endif -%}
+      {%- if btn_bg_cl != default_color -%}background-color: {{btn_bg_cl}};{%- endif -%}
+      {%- if btn_border_cl != default_color -%}border-color: {{btn_border_cl}};{%- endif -%}
+      {%- if btn_border_width != blank -%}border-width:{{btn_border_width}};{%- endif -%}
+    {%- endcapture -%}
+
+    {%- if btn_css != blank -%}
+      {{-styleBlockID}} {{itemID}}{ {{-btn_css-}} }
+    {%- endif -%}
+
+    {%- render 'css-responsive' preClassID: styleBlockID, classID: itemID,
+      value_1: block.settings.btn_fs, property_1: 'font-size'
+      value_2: block.settings.btn_padding, property_2: 'padding'
+      value_3: block.settings.btn_margin, property_3: 'margin'
+      value_4: block.settings.btn_radius, property_4: 'border-radius'
+      -%}
+
+    {%- comment -%}
+      **
+      * Button Hover
+      *
+    {%- endcomment-%}
+    {%- assign itemID = itemID | append: ':hover' -%}
+    {%- capture firstValues -%}
+      {%- if btn_hover_cl != default_color -%}color: {{btn_hover_cl}};{%- endif -%}
+      {%- if btn_hover_bg_cl != default_color -%}background-color: {{btn_hover_bg_cl}};{%- endif -%}
+      {%- if btn_hover_border_cl != default_color -%}border-color: {{btn_hover_border_cl}};{%- endif -%}
+    {%- endcapture -%}
+    {%- if firstValues != blank -%}
+      {{sectionID}} {{itemID}}{ {{firstValues}}}
+    {%- endif -%}
+{%- endcase -%}

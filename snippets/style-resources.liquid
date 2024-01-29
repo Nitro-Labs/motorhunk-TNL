@@ -1,0 +1,122 @@
+{% include 'css_variables' %}
+<link href="{{'main_style.min.css' | asset_url}}" rel="stylesheet" as="style">
+<link href="{{'header-content.min.css' | asset_url}}" rel="stylesheet" as="style">
+<link href="{{'footer-content.min.css' | asset_url}}" rel="stylesheet" as="style">
+{%- case template.name -%}
+  {%- when 'index' -%}
+    <link href="{{'home-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'collection' -%}
+    <link href="{{'collection-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'product' -%}
+    <link href="{{'product-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'blog' -%}
+    <link href="{{'blog-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'cart' -%}
+    <link href="{{'cart-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'page' -%}
+    <link href="{{'about-contact-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+  {%- when 'article' -%}
+    <link href="{{'blog-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+{%- endcase -%}
+
+{%- if template contains 'customer' -%}
+  <link href="{{'account-page.min.css' | asset_url}}" rel="stylesheet" as="style">
+{%- endif -%}
+
+{%- assign layout = settings.theme_layout | downcase -%}
+{% if layout == 'rtl' %}
+  <link href="{{'rtl_theme.min.css' | asset_url}}" rel="stylesheet" as="style">
+{% endif %}
+
+
+{%- style -%}
+  {%- if request.design_mode -%}
+    .element-active{
+      animation: element-active 1s 2;
+    }
+
+    @keyframes element-active {
+      0% {background-color: {{ 'white' | color_modify: 'alpha', 1}};}
+      50%{background-color: {{settings.main_color | color_modify: 'alpha', 1}};}
+      100% {background-color: {{ 'white' | color_modify: 'alpha', 1}};}
+    }
+  {%- endif -%}
+  .sb-left-column .widget-menu .menu-item .dropdown-menu{transition: height 0.2s;}
+  .slider-container:not(.slider-initialized) {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .slider-container:not(.slider-initialized) .slider-item {
+    display: inline-block;
+    vertical-align: top;
+    white-space: normal;
+  }
+  .slider-item:not(.no-lazy).lazyload {
+    display: none !important;
+  }
+  .slider-item:not(.no-lazy).lazyloaded {
+    display: inline-block !important;
+  }
+  .slider-item:not(.no-lazy) .lazyload {
+    display: none !important;
+  }
+  .slider-item:not(.no-lazy) .lazyloaded {
+    display: inline-block !important;
+  }
+  .slider-item:not(.no-lazy).tns-slide-active .lazyload {
+    display: inline-block !important;
+  }
+  .slider-item:not(.no-lazy).tns-slide-active {
+    display: inline-block !important;
+  }
+  .visibility-hidden {
+    visibility: hidden;
+  }
+  .position-relative {position: relative !important;}
+  .position-absolute {position: absolute !important;}
+  .cursor-pointer{cursor: pointer}
+  .p-0{ padding: 0!important;}
+
+  .share-links.social-sharing svg{
+    width: 24px;
+  }
+  {%- if template.name == 'product' -%}
+    .product-status .in-stock,.product-status .out-stock{display: none;}
+    .product-status[data-status='1'] .in-stock{display: block;}
+    .product-status[data-status='0'] .out-stock{display: block;}
+  {%- endif -%}
+  {%- render 'snippet-heading-css' type: 'general'  -%}
+
+  {%- if settings.custom_color != blank -%}
+    {%- liquid
+      assign custom_color = settings.custom_color | split: ','
+    -%}
+    {%- for color in custom_color -%}
+      {%- if color != blank -%}
+        .custom-color[data-custom-color="{{color | split: ":" | first | strip | downcase}}"],.custom-color[data-custom-color="{{color | split: ":" | first | strip | downcase}}"] a{
+          color: {{color | split: ':' | last | strip}};
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+
+  .mega-menu-item .product-card_action{
+    display: none;
+  }
+
+  {% comment %} Product Card Style {% endcomment %}
+  {%- liquid
+    assign product_card_title_fs         = settings.product_card_title_fs
+    assign product_card_price_fs         = settings.product_card_price_fs
+    assign product_card_vendor_fs        = settings.product_card_vendor_fs
+    assign product_card_price_sale_fs    = settings.product_card_price_sale_fs
+    assign product_card_price_compare_fs = settings.product_card_price_compare_fs
+  -%}
+  {%- render 'css-responsive' preClassID: '.product-card', classID: ' .product-card_name a', value_1: product_card_title_fs, property_1: 'font-size'  -%}
+  {%- render 'css-responsive' preClassID: '.product-card', classID: ' .product-card_vendor a', value_1: product_card_vendor_fs, property_1: 'font-size'  -%}
+  {%- render 'css-responsive' preClassID: '.product-card', classID: ' .product-price .price', value_1: product_card_price_fs, property_1: 'font-size'  -%}
+  {%- render 'css-responsive' preClassID: '.product-card', classID: ' .product-price .price-sale', value_1: product_card_price_sale_fs, property_1: 'font-size'  -%}
+  {%- render 'css-responsive' preClassID: '.product-card', classID: ' .product-price .price-compare', value_1: product_card_price_compare_fs, property_1: 'font-size'  -%}
+{%- endstyle -%}
+
+{% comment %} compress {% endcomment %}

@@ -1,0 +1,73 @@
+<div id="shipping-calculator">
+
+  <div class="shipping-calculator_header">
+    <div class="title">{{section.settings.shipping_calculator_heading}}</div>
+  </div>
+  <div class="shipping-calculator_form">
+    <div class="form-wrapper">
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <select name="address[country]" data-default="{% if customer %}{{ customer.default_address.country }}{% elsif section.settings.shipping_calculator_default_country != '' %}{{ section.settings.shipping_calculator_default_country }}{% endif %}">
+              {% if customer %}
+                {%- assign default = customer.default_address.country -%}
+              {% elsif section.settings.shipping_calculator_default_country != '' %}
+                {%- assign default = section.settings.shipping_calculator_default_country -%}
+              {% endif %}
+
+              {%- capture country_default -%}value="{{default}}"{%- endcapture -%}
+              {%- capture country_default_replace -%}value="{{default}}" selected{%- endcapture -%}
+              {{-country_option_tags | replace: country_default, country_default_replace-}}
+            </select>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="form-group">
+            <select name="address[province]" class="d-none" data-default="{% if customer and customer.default_address.province != '' %}{{ customer.default_address.province }}{% endif %}">
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <input type="text" placeholder="{{ 'cart.shipping.zip_code' | t}}" name="address[zip]"{% if customer %} value="{{ customer.default_address.zip }}"{% endif %}/>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="form-group">
+            <a href="#" onclick="return false" class="btn btn-2 js-btn-submit-shipping">{{section.settings.shipping_calculator_submit_button_label}}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shipping-calculator_results js-shipping-calculator-results">
+    <div>
+      <p class="title"></p>
+      <ul></ul>
+    </div>
+  </div>
+</div>
+
+<script src="/services/countries.js" async defer onload="document.dispatchEvent(new CustomEvent('Countries loaded'))"></script>
+<style>
+  #shipping-calculator .form-group{margin-bottom: 20px;}
+  .template-cart .cart-content_bottom .shipping-calculator_header {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--color-second);
+    margin-bottom: 20px;
+  }
+  .shipping-calculator_results{
+    overflow: hidden;
+    transition: height 0.2s;
+    height: 0px;
+  }
+  .shipping-calculator_results p {
+    margin: 0;padding: 20px 0;
+  }
+</style>

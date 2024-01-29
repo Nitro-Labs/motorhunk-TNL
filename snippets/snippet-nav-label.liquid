@@ -1,0 +1,8 @@
+<span class="title">{{-link.title | replace: '(new)' | replace: '(hot)' | replace: '(sale)'-}}</span>
+{% if link.title contains '(new)' %}
+  <span class="label label-new">{{ 'general.header.new_label' | t}}</span>
+{% elsif link.title contains '(sale)' %}
+  <span class="label label-sale">{{ 'general.header.sale_label' | t}}</span>
+{% elsif link.title contains '(hot)' %}
+  <span class="label label-hot">{{ 'general.header.hot_label' | t}}</span>
+{%- endif -%}

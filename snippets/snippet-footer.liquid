@@ -1,0 +1,200 @@
+{%- case block.type -%}
+  {%- when 'style' -%}
+    {%- liquid
+      assign default_color = 'rgba(0,0,0,0)'
+      assign bg_color   = block.settings.background_color | default: default_color
+      assign link_color = block.settings.link_color | default: default_color
+      assign text_1_color = block.settings.text_1_color | default: default_color
+      assign border_radius = block.settings.border_radius
+      assign heading_color = block.settings.heading_color | default: default_color
+      assign hover_link_color  = block.settings.hover_link_color | default: default_color
+      assign heading_font_size = block.settings.heading_font_size
+      assign heading_font_weight = block.settings.heading_font_weight
+    -%}
+
+    {%- render 'css-responsive' preClassID: section_id,
+      value_1: bg_color, property_1: 'background-color'
+      value_2: border_radius, property_2: 'border-radius' -%}
+
+    {%- render 'css-responsive' preClassID: section_id, classID: ' .card_footer-title',
+      value_1: heading_color, property_1: 'color'
+      value_2: heading_font_size, property_2: 'font-size'
+      value_3: heading_font_weight, property_3: 'font-weight' -%}
+
+    {%- if text_1_color != default_color -%}{{- block_id }} .card_footer-text-1{color: {{text_1_color}};}{%- endif -%}
+    {%- if link_color != default_color -%}
+      {{- block_id }} .card_footer-body .link-color{color: {{link_color}};}
+      {{- block_id }} .card_footer-body input::placeholder{color: {{link_color}};}
+      {{- block_id }} .widget-social-icons svg{color: {{link_color}};}
+    {%- endif -%}
+    {%- if text_1_color != default_color -%}{{- block_id }} .card_footer-body input{color: {{text_1_color}};}{%- endif -%}
+    {%- if hover_link_color != default_color -%}
+      {{- block_id }} .card_footer-body ul li a:hover{color: {{hover_link_color}};}
+      {{- block_id }} .widget-social-icons svg:hover{color: {{hover_link_color}};}
+    {%- endif -%}
+
+  {%- else -%}
+
+    <section class="card_footer-item card_footer-{{block.type}} block-{{block.id}}"{{block.shopify_attributes}}>
+      {%- if  block.settings.title != blank -%}
+        <div class="card_footer-title">
+          <span class="title">{{ block.settings.title }}</span>
+          {%- if block.type == 'menu' -%}
+            <span class="js-btn-collapse collapse d-md-none" data-target="footer_collapse_{{block.id}}">{%- render 'svg' type: 'plus' -%}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="card_footer-body">
+        {%- case block.type -%}
+          {%- when 'menu' -%}
+            {%- liquid
+              assign __menu = block.settings.menu
+            -%}
+            <ul class="menu_list-wrapper {% if block.settings.list_style %}list-style{%- endif -%}" id="footer_collapse_{{block.id}}">
+              {%- if __menu != blank -%}
+                {%- for l in linklists[__menu].links -%}
+                  {%- render 'nav-link', l: l, class: "link-color" -%}
+                {%- endfor -%}
+              {%- else -%}
+                <li class="menu_list-item"><a href="#" onclick="return false" class="link-color">Lorem ipsum </a></li>
+                <li class="menu_list-item"><a href="#" onclick="return false" class="link-color">At lectus urna</a></li>
+                <li class="menu_list-item"><a href="#" onclick="return false" class="link-color">Ac feugiat</a></li>
+                <li class="menu_list-item"><a href="#" onclick="return false" class="link-color">Vel eros donec ac odio</a></li>
+                <li class="menu_list-item"><a href="#" onclick="return false" class="link-color">Tristique nulla</a></li>
+              {%- endif -%}
+            </ul>
+          {% comment %} end {% endcomment %}
+          {%- when 'newsletter' -%}
+            {%- liquid
+              assign __btn_style = block.settings.btn_style | preprend: 'btn-' | append: ' button__link'
+              assign enable_ajax = block.settings.enable_ajax
+            -%}
+
+            <div class="home-newsletter">
+              {%- for i in (1..2) -%}
+                {%- liquid
+                  assign __text = 'main_text_' | append: i
+                -%}
+                {%- unless block.settings[__text] == blank -%}
+                  <div class="main__text main__text-{{i}} card_footer-text {% if i == 1 %}card_footer-title{%else%}link-color{%- endif -%}">{{block.settings[__text]}}</div>
+                {%- endunless -%}
+              {%- endfor -%}
+              <style>
+
+              </style>
+              {%- render 'subscribe-form'
+                successful_message: block.settings.successful_message,
+                form_id: 'footer_form'
+                type: block.settings.form_type, url: block.settings.form_url, btnStyle: __btn_style, enable_ajax: enable_ajax-%}
+              <p class="link-color d-none form-success-message">{{block.settings.successful_message}}</p>
+              {%- if block.settings.show_accept -%}
+                <div class="accept-payment">
+                  <span class="card_footer-title title">{{block.settings.accept_payment_title}}</span>
+                  <div class="payment-list">
+                    {%- for i  in (1..6) -%}
+                      {%- liquid
+                        assign type = 'payment_type_' | append: i
+                        assign img  = 'payment_img_' | append: i
+                        assign icon = 'payment_icon_' | append: i
+                      -%}
+                      {%- if block.settings[type] == 'image'-%}
+                        {%- render 'image-style' image: block.settings[img] -%}
+                      {%- else -%}
+                        <span class="svg_element-ui">{{block.settings[icon]}}</span>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+          {% comment %} end {% endcomment %}
+          {%- when 'text' -%}
+            {%- liquid
+              assign text_content_1    = block.settings.text_content_1
+              assign text_content_2    = block.settings.text_content_2
+              assign btn_label         = block.settings.btn_label
+            -%}
+
+            {%- if text_content_1 != blank -%}<div class="card_footer-text card_footer-text-1">{{ text_content_1 }}</div>{%- endif -%}
+            {%- if text_content_2 != blank -%}<div class="card_footer-text card_footer-text-2">{{ text_content_2 }}</div>{%- endif -%}
+            {%- if btn_label != blank -%}
+              <div class="card_footer-button">
+                <a href="{{ block.settings.btn_url | default: 'javascript:void(0);' }}" class="btn btn-{{block.settings.btn_style}}">{{ btn_label }}</a>
+              </div>
+            {%- endif -%}
+          {% comment %} end {% endcomment %}
+          {%- when 'information' -%}
+            {%- liquid
+              assign text_content_1 = block.settings.text_content_1
+              assign svg_content_1  = block.settings.svg_content_1
+              assign text_content_2 = block.settings.text_content_2
+              assign svg_content_2  = block.settings.svg_content_2
+              assign text_content_3 = block.settings.text_content_3
+              assign svg_content_3  = block.settings.svg_content_3
+              assign logo_max_width   = block.settings.logo_max_width | strip
+            -%}
+
+            <div class="card_footer-logo">
+
+              {%- case block.settings.logo_type -%}
+                {%- when 'svg' -%}
+                  {% comment %} <img src="{{block.settings.logo_svg}}" alt="{{shop.name}}"> {% endcomment %}
+                    {%- assign replaceContent = '<svg style="max-width:{{max_width}}"' | replace: '{{max_width}}', logo_max_width  -%}
+                    <span class="svg-footer">
+                      {{block.settings.logo_svg | replace_first: '<svg', replaceContent }}
+                    </span>
+
+                {%- when 'image' -%}
+                  {%- assign max_width = logo_max_width | abs | append: 'x.' | prepend: '_' -%}
+                  {%- assign max_width_2 = logo_max_width | abs | times: 2 | append: 'x.' | prepend: '_' -%}
+                  <img alt="{{shpop.name}}"
+                        class="lazyload"
+                        data-srcset="
+                        {{ block.settings.logo_image | img_url: '1x1' | replace: '_1x1.', max_width }} 1x,
+                        {{ block.settings.logo_image | img_url: '1x1' | replace: '_1x1.', max_width_2 }} 2x">
+              {%- endcase -%}
+            </div>
+
+            {%- if text_content_1 != blank -%}
+              <div class="card_footer-text card_footer-text-1">
+                <span class="svg_element-ui">{{svg_content_1}}</span>
+                <span>{{ text_content_1 }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if text_content_2 != blank -%}
+              <div class="card_footer-text card_footer-text-1">
+                <span class="svg_element-ui">{{svg_content_2}}</span>
+                <span>{{ text_content_2 }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if text_content_3 != blank -%}
+              <div class="card_footer-text card_footer-text-1">
+                <span class="svg_element-ui">{{svg_content_3}}</span>
+                <span>{{ text_content_3 }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.show_social -%}
+              <div class="card_footer-social">
+                {% if block.settings.social_title != blank %}<span class="card_footer-title title">{{block.settings.social_title}}</span>{%- endif -%}
+                {%- render 'social-media-icons' type: block.settings.social_icon_type -%}
+              </div>
+            {%- endif -%}
+            {% liquid
+              assign classID =  ' .block-' | append: block.id
+            %}
+
+            {%- if logo_max_width != blank -%}
+              {%- capture block_css -%}
+                {%- render 'css-resp' preClassID: section_id, classID: classID , nextClassID: ' .card_footer-logo img', css_property: 'max-width', css_value: logo_max_width -%}
+              {%- endcapture -%}
+              <style>{{block_css}}</style>
+            {%- endif -%}
+          {% comment %} end {% endcomment %}
+        {%- endcase -%}
+      </div>
+    </section>
+{%- endcase -%}

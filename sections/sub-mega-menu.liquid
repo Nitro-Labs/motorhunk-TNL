@@ -1,0 +1,841 @@
+{%- liquid
+  assign triggerBlocks = section.blocks | where: 'type', 'trigger_mega'
+  assign default_link =  '#" onclick="return false'
+-%}
+
+{%- capture mega_template -%}
+  <div id="desktop">
+    {%- for block in section.blocks -%}
+      {%- if block.type != 'trigger_mega' -%} {%- continue -%} {%- endif -%}
+      {%- liquid
+        assign block_trigger_title = block.settings.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip | append: 'submenu' | md5
+        assign bg_img = blank
+      -%}
+
+      {%- if block.settings.bg_image != blank -%}
+        {%- capture bg_img -%}style="background-image: url('{{block.settings.bg_image | img_url: 'master'}}');"{%- endcapture-%}
+      {%- endif -%}
+      <div data-id="{{block_trigger_title}}" class="mega-menu-wrapper">
+        <div class="mega-menu-list block-{{block.id}} w-100" {{bg_img}} {{block.shopify_attributes}}>
+          <div class="row">
+
+            {%- for block in section.blocks offset: forloop.index -%}
+              {%- if block.type == 'trigger_mega' -%} {%- break -%} {%- endif -%}
+              <div class="mega-menu-item {{block.type}} block-{{block.id}}" {{block.shopify_attributes}}>
+                {%- case block.type -%}
+
+                  {%- when 'menu-list' -%}
+                    <ul class="menu-list_wrapper" >
+                      {%- for link in linklists[block.settings.menu].links -%}
+                        {%- assign title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip -%}
+                        <li class="menu-item title">
+                          <a href="{{link.url}}">
+                            {{title}}
+                            {%- render 'header-snippets' type: 'label', title: link.title -%}
+                          </a>
+                          {%- if link.links != blank -%}
+                            <ul class="menu-list child-list">
+                              {%- for child_link in link.links -%}
+                                {%- assign title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip -%}
+                                <li class="menu-item">
+                                  <a href="{{child_link.url}}">
+                                    {{title}}
+                                    {%- render 'header-snippets' type: 'label', title: link.title -%}
+                                  </a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endif -%}
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'mul-product' -%}
+                    <ul class="mul-product_wrapper">
+                      <li class="title">
+                        <a href="{{block.settings.title_url}}">{{block.settings.title}}</a>
+                      </li>
+                      {%- if block.settings.product_1 != blank or block.settings.product_2 != blank -%}
+                        {%- for i in (1..2) -%}
+                          {%- liquid
+                            assign product = 'product_' | append: i
+                            assign p = all_products[block.settings[product]]
+                          -%}
+                          <li>
+                            <div class="d-flex">
+                              <a href="{{p.url}}" class="image">
+                                <img src="{{p.featured_image | img_url: 'master'}}" alt="{{p.title}}">
+
+                                <div class="label_ui-group">
+                                  {%- assign all_tag = p | map: 'tags' | join: ',' | downcase -%}
+                                  {%- if all_tag contains 'label new' -%}
+                                    <div class="label label_ui-new">{{ 'general.label.new' | t}}</div>
+                                  {%- endif -%}
+
+                                  {%- if all_tag contains 'label hot' -%}
+                                    <div class="label label_ui-hot">{{ 'general.label.hot' | t}}</div>
+                                  {%- endif -%}
+
+                                  {%- if p.compare_at_price > p.price -%}
+                                    <div class="label label_ui-sale">{{ 'general.label.sale' | t}}</div>
+                                  {%- endif -%}
+                                </div>
+
+                              </a>
+
+                              <div class="info">
+                                <a href="{{p.url}}" class="name">{{p.title}}</a>
+                                <div class="price js-money">{{- p.price | money -}}</div>
+                              </div>
+
+                            </div>
+                          </li>
+                        {%- endfor -%}
+                      {%- else -%}
+                        {%- for i in (1..2) -%}
+                          {%- assign input = 'product-' | append: i -%}
+                          <li>
+                            <div class="d-flex">
+                              <a href="#" onclick="return false" class="image">
+                                {{ input | placeholder_svg_tag }}
+                              </a>
+                              <div class="info">
+                                <a href="#" onclick="return false" class="name">{{ 'general.product.product_title' | t}}</a>
+                                <div class="price">
+                                  <del class="compare-price js-money">{{ 9900 | money}}</del>
+                                  <span class="sale-price js-money">{{ 7800 | money}}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </ul>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'image' -%}
+                    {%- capture image -%}
+                      {%- if block.settings.image != blank -%}
+                          <img src="{{block.settings.image | img_url: 'master'}}" alt="{{block.settings.image.atl}}" class="lazyload">
+                      {%- else -%}
+                        {{ 'image' | placeholder_svg_tag }}
+                      {%- endif -%}
+                    {%- endcapture -%}
+                    <a href="{{block.settings.link | default: '#' | replace: '#', default_link}}">{{image}}</a>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'banner' -%}
+                    <div class="banner_wrapper text-center">
+                      <div style="background: {{block.settings.bg_color | default: 'rgba(0,0,0,0)' | replace: 'rgba(0,0,0,0)', 'unset'}}">
+                        <div class="image">
+                          {%- if block.settings.image != blank -%}
+                            <img src="{{block.settings.image | img_url: 'master'}}" alt="">
+                          {%- else -%}
+                            {{ 'image' | placeholder_svg_tag }}
+                          {%- endif -%}
+                        </div>
+                        <div class="text-container">
+                          {%- if block.settings.text_1 != blank -%}
+                            <h3 class="text-1">{{block.settings.text_1}}</h3>
+                          {%- endif -%}
+
+                          {%- if block.settings.text_2 != blank -%}
+                            <p class="text-2">{{block.settings.text_2}}</p>
+                          {%- endif -%}
+
+                        </div>
+
+                        {%- if block.settings.btn_label != blank -%}
+                          <div class="button">
+                            <a href="{{block.settings.btn_link}}" class="btn btn-{{block.settings.btn_style}}">{{block.settings.btn_label}}</a>
+                          </div>
+                        {%- endif -%}
+                      </div>
+
+                      {%- if block.settings.under_image != blank or block.settings.under_text != blank -%}
+                        <a href="{{block.settings.under_link}}" class="section-under">
+                          {%- if block.settings.under_image != blank -%}
+                            <img src="{{block.settings.under_image | img_url: 'master'}}" alt="">
+                          {%- endif -%}
+                          {%- if block.settings.under_text != blank -%}
+                            {{block.settings.under_text}}
+                          {%- endif -%}
+                        </a>
+                      {%- endif -%}
+                    </div>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'single-product' -%}
+                    {%- liquid
+                      assign product = all_products[block.settings.product]
+                    -%}
+                    {%- if product != blank -%}
+                      {%- render 'product-item' product: product, id: block.id -%}
+                    {%- else -%}
+                      <li class="block-{{block.id}} d-none"></li>
+                    {%- endif -%}
+                  {% comment %} end {% endcomment %}
+                {%- endcase -%}
+                {%- style -%}
+                  .mega-menu .mega-menu-item.block-{{block.id}}{
+                    width: {{block.settings.width}}%;
+                  }
+                {%- endstyle -%}
+              </div>
+            {%- endfor -%}
+
+          </div>
+          {%- style -%}
+            .mega-menu-list.block-{{block.id}}{
+              background-position: {{block.settings.bg_position}};
+              background-size    : {{block.settings.bg_size}};
+              background-repeat  : {{block.settings.bg_repeat}};
+            }
+          {%- endstyle -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div id="mobile">
+    {%- for block in section.blocks -%}
+      {%- if block.type != 'trigger_mega' -%} {%- continue -%} {%- endif -%}
+      {%- liquid
+        assign title =  block.settings.title
+        assign block_trigger_title = block.settings.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip | append: 'sub' | md5
+      -%}
+      <div data-id="{{block_trigger_title}}" class="mega-menu-wrapper">
+        <ul class="menu-list block-{{block.id}}">
+          <li class="menu-item title">
+            <span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="sub-menu-child-{{ title | append: 'sub' | md5}}">
+              {%- render 'svg' type: 'angle-left' -%}
+            </span>
+            <a href="#" onclick="return false"> {{ title }}</a>
+            <span class="js-btn-close btn-close svg_element-ui">
+              {%- render 'svg' type: 'close' -%}
+            </span>
+          </li>
+          {%- for block in section.blocks offset: forloop.index -%}
+            {%- if block.type == 'trigger_mega' -%} {%- break -%} {%- endif -%}
+
+            {%- case block.type -%}
+              {%- when 'menu-list' -%}
+                {%- liquid
+                  assign menu = block.settings.menu
+                -%}
+                {%- for link in linklists[menu].links -%}
+                  {%- liquid
+                    assign title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'
+                  -%}
+                  {%- capture targetID -%}sub-menu-grandchild-{{link.title | md5 }}{%- endcapture -%}
+                  <li class="menu-item block-{{block.id}} {% if link.links != blank -%} dropdown-submenu {%- endif -%}">
+                    <a href="{{link.url}}" class="menu-item_title">
+                      <span class="title">{{title}}</span>
+                      {%- render 'header-snippets' type: 'label', title: link.title -%}
+                    </a>
+                    {%- if link.links != blank -%}
+                      <span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+                        {%- render 'svg' type: 'angle-right' -%}
+                      </span>
+                      <div class="dropdown-menu grandchild-menu" id="{{targetID}}">
+                        <ul class="menu-list">
+                          <li class="menu-item title">
+                            <span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+                              {%- render 'svg' type: 'angle-left' -%}
+                            </span>
+                            <a href="#" onclick="return false"> {{ title }}</a>
+                            <span class="js-btn-close btn-close svg_element-ui">
+                              {%- render 'svg' type: 'close' -%}
+                            </span>
+                          </li>
+
+                          {%- for child_link in link.links -%}
+                            <li class="menu-item">
+                              <a href="{{child_link.url}}" class="menu-item_title">
+                                <span class="title">{{child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' }}</span>
+                                {%- render 'header-snippets' type: 'label', title: child_link.title -%}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              {% comment %} end {% endcomment %}
+
+              {%- when 'mul-product' -%}
+                {%- liquid
+                  assign product_1 = all_products[block.settings.product_1]
+                  assign product_2 = all_products[block.settings.product_2]
+                  assign title = block.settings.block_title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'
+                -%}
+                {%- capture targetID -%}sub-menu-grandchild-{{block.id}}{%- endcapture -%}
+
+                <li class="menu-item dropdown-submenu block-{{block.id}}">
+                  <a href="{{link.url}}" class="menu-item_title">
+                    <span class="title">{{title}}</span>
+                    {%- render 'header-snippets' type: 'label', title: block.settings.block_title -%}
+                  </a>
+                  <span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+                    {%- render 'svg' type: 'angle-right' -%}
+                  </span>
+                  <div class="dropdown-menu grandchild-menu" id="{{targetID}}">
+                    <ul class="menu-list">
+                      <li class="menu-item title">
+                        <span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+                          {%- render 'svg' type: 'angle-left' -%}
+                        </span>
+                        <a href="#" onclick="return false"> {{ title }}</a>
+                        <span class="js-btn-close btn-close svg_element-ui">
+                          {%- render 'svg' type: 'close' -%}
+                        </span>
+                      </li>
+                      {%- for i in (1..2) -%}
+                        {%- liquid
+                          assign product_settings = 'product_' | append: i
+                          assign product = all_products[block.settings[product_settings]]
+                        -%}
+                        {%- if product != blank -%}
+                          <li class="menu-item mega-product h-auto">
+                            <div class="d-flex">
+                              <a href="{{product.url}}" class="image">
+                                <img src="{{product.featured_image | img_url: 'master'}}" alt="{{product.title}}">
+
+                                <div class="label_ui-group">
+                                  {%- assign all_tag = p | map: 'tags' | join: ',' | downcase -%}
+                                  {%- if all_tag contains 'label new' -%}
+                                    <div class="label label_ui-new">{{ 'general.label.new' | t}}</div>
+                                  {%- endif -%}
+
+                                  {%- if all_tag contains 'label hot' -%}
+                                    <div class="label label_ui-hot">{{ 'general.label.hot' | t}}</div>
+                                  {%- endif -%}
+
+                                  {%- if product.compare_at_price > product.price -%}
+                                    <div class="label label_ui-sale">{{ 'general.label.sale' | t}}</div>
+                                  {%- endif -%}
+                                </div>
+
+                              </a>
+
+                              <div class="info">
+                                <a href="{{product.url}}" class="name">{{product.title}}</a>
+                                <div class="price js-money">{{- product.price | money -}}</div>
+                              </div>
+
+                            </div>
+                          </li>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                </li>
+              {% comment %} end {% endcomment %}
+
+              {%- when 'banner' -%}
+
+                <li class="menu-item mega-banner h-auto block-{{block.id}}">
+                  <div class="banner_wrapper text-center">
+                    <div style="background: {{block.settings.bg_color | default: 'rgba(0,0,0,0)' | replace: 'rgba(0,0,0,0)', 'unset'}}">
+                      <div class="image">
+                        {%- if block.settings.image != blank -%}
+                          <img src="{{block.settings.image | img_url: 'master'}}" alt="">
+                        {%- else -%}
+                          {{ 'image' | placeholder_svg_tag }}
+                        {%- endif -%}
+                      </div>
+                      <div class="text-container">
+                        {%- if block.settings.text_1 != blank -%}
+                          <h3 class="text-1">{{block.settings.text_1}}</h3>
+                        {%- endif -%}
+
+                        {%- if block.settings.text_2 != blank -%}
+                          <p class="text-2">{{block.settings.text_2}}</p>
+                        {%- endif -%}
+
+                      </div>
+
+                      {%- if block.settings.btn_label != blank -%}
+                        <div class="button">
+                          <a href="{{block.settings.btn_link}}" class="btn btn-{{block.settings.btn_style}}">{{block.settings.btn_label}}</a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+
+                    {%- if block.settings.under_image != blank or block.settings.under_text != blank -%}
+                      <a href="{{block.settings.under_link}}" class="section-under">
+                        {%- if block.settings.under_image != blank -%}
+                          <img src="{{block.settings.under_image | img_url: 'master'}}" alt="">
+                        {%- endif -%}
+                        {%- if block.settings.under_text != blank -%}
+                          {{block.settings.under_text}}
+                        {%- endif -%}
+                      </a>
+                    {%- endif -%}
+                  </div>
+                </li>
+              {% comment %} end {% endcomment %}
+
+              {%- when 'single-product' -%}
+                <li class="menu-item mega-single-product h-auto block-{{block.id}}">
+                  {%- render 'product-item' product: all_products[block.settings.product], id: block.id -%}
+                </li>
+            {%- endcase -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endfor -%}
+  </div>
+{%- endcapture -%}
+
+{%- capture content -%}
+  {%- if request.design_mode -%}
+    <div id="sub-mega-menu" class="d-none">{{mega_template}}</div>
+  {%- else -%}
+    <template id="sub-mega-menu">{{mega_template}}</template>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- render 'compress' content: content -%}
+
+<script>window.theme = Object.assign(window.theme || {}, {subMegaMenu: {{triggerBlocks | map: 'settings' | map: 'title' | join: ',' | split: ',' | json}},})</script>
+{%- if request.design_mode -%}
+  {%- render 'integrate-sub-menu' section -%}
+{%- endif -%}
+
+{%- schema -%}
+  {
+    "name": {
+      "en": "Vertical mega menu"
+    },
+    "tag": "section",
+    "settings": [],
+    "blocks": [
+      {
+        "type": "trigger_mega",
+        "name": {
+          "en": "Trigger Navigation"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Mega Navigation"
+            },
+            "info": {
+              "en": "Please enter the title of the link you want to add the mega menu. E.x: Shop,Portfolio,.."
+            }
+          },
+          {
+            "type": "image_picker",
+            "id": "bg_image",
+            "label": {
+              "en": "Background image"
+            }
+          },
+          {
+            "type": "select",
+            "id": "bg_size",
+            "label": {
+              "en": "Background size"
+            },
+            "options": [
+              {
+                "value": "auto",
+                "label": {
+                  "en": "Auto"
+                }
+              },
+              {
+                "value": "cover",
+                "label": {
+                  "en": "Cover"
+                }
+              },
+              {
+                "value": "contains",
+                "label": {
+                  "en": "Contains"
+                }
+              }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "bg_position",
+            "label": {
+              "en": "Background position"
+            },
+            "options": [
+              {
+                "value": "left top",
+                "label": {
+                  "en": "Left Top"
+                }
+              },
+              {
+                "value": "left center",
+                "label": {
+                  "en": "Left Center"
+                }
+              },
+              {
+                "value": "left bottom",
+                "label": {
+                  "en": "Left Bottom"
+                }
+              },
+              {
+                "value": "right top",
+                "label": {
+                  "en": "Right Top"
+                }
+              },
+              {
+                "value": "right center",
+                "label": {
+                  "en": "Right Center"
+                }
+              },
+              {
+                "value": "right bottom",
+                "label": {
+                  "en": "Right Bottom"
+                }
+              },
+              {
+                "value": "center top",
+                "label": {
+                  "en": "Center Top"
+                }
+              },
+              {
+                "value": "center center",
+                "label": {
+                  "en": "Center Center"
+                }
+              },
+              {
+                "value": "center bottom",
+                "label": {
+                  "en": "Center Bottom"
+                }
+              }
+            ],
+            "default": "center center"
+          },
+          {
+            "type": "select",
+            "id": "bg_repeat",
+            "label": {
+              "en": "Background repeat"
+            },
+            "options": [
+              {
+                "value": "no-repeat",
+                "label": {
+                  "en": "No repeat"
+                }
+              },
+              {
+                "value": "repeat",
+                "label": {
+                  "en": "Repeat"
+                }
+              },
+              {
+                "value": "repeat-x",
+                "label": {
+                  "en": "Repeat X"
+                }
+              },
+              {
+                "value": "repeat-y",
+                "label": {
+                  "en": "Repeat Y"
+                }
+              }
+            ],
+            "default": "no-repeat"
+          }
+        ]
+      },
+      {
+        "type": "menu-list",
+        "name": {
+          "en": "--Menu list"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Block title"
+            }
+          },
+          {
+            "type": "link_list",
+            "id": "menu",
+            "label": {
+              "en": "Menu"
+            }
+          },
+          {
+            "type": "range",
+            "id": "width",
+            "label": {
+              "en": "Width"
+            },
+            "step": 1,
+            "min": 20,
+            "max": 100,
+            "unit": "%",
+            "default": 20
+          }
+        ]
+      },
+      {
+        "type": "mul-product",
+        "name": {
+          "en": "--Multiple product"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Title"
+            },
+            "default": "Products"
+          },
+          {
+            "type": "url",
+            "id": "title_url",
+            "label": {
+              "en": "Title link"
+            }
+          },
+          {
+            "type": "range",
+            "id": "width",
+            "label": {
+              "en": "Width"
+            },
+            "step": 1,
+            "min": 20,
+            "max": 100,
+            "default": 25,
+            "unit": "%"
+          },
+          {
+            "type": "product",
+            "id": "product_1",
+            "label": "Product 1"
+          },
+          {
+            "type": "product",
+            "id": "product_2",
+            "label": "Product 2"
+          }
+        ]
+      },
+      {
+        "type": "image",
+        "name": {
+          "en": "--Image"
+        },
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": {
+              "en": "Image"
+            }
+          },
+          {
+            "type": "range",
+            "id": "width",
+            "label": {
+              "en": "Width"
+            },
+            "step": 1,
+            "min": 20,
+            "max": 100,
+            "default": 25,
+            "unit": "%"
+          },
+          {
+            "type": "url",
+            "id": "link",
+            "label": {
+              "en": "Link"
+            }
+          }
+        ]
+      },
+      {
+        "type": "banner",
+        "name": {
+          "en": "--Banner"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Title"
+            }
+          },
+          {
+            "type": "color",
+            "id": "bg_color",
+            "label": {
+              "en": "Background color"
+            }
+          },
+          {
+            "type": "range",
+            "id": "width",
+            "label": {
+              "en": "Width"
+            },
+            "step": 1,
+            "min": 20,
+            "max": 100,
+            "default": 25
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": {
+              "en": "Image"
+            }
+          },
+          {
+            "type": "header",
+            "content": {
+              "en": "Text 1"
+            }
+          },
+          {
+            "type": "text",
+            "id": "text_1",
+            "label": {
+              "en": "Content"
+            },
+            "default": "30% Off"
+          },
+          {
+            "type": "header",
+            "content": {
+              "en": "Text 2"
+            }
+          },
+          {
+            "type": "text",
+            "id": "text_2",
+            "label": {
+              "en": "Content"
+            },
+            "default": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+          },
+          {
+            "type": "header",
+            "content": {
+              "en": "Button"
+            }
+          },
+          {
+            "type": "text",
+            "id": "btn_label",
+            "label": {
+              "en": "Label"
+            },
+            "default": "View Details"
+          },
+          {
+            "type": "url",
+            "id": "btn_link",
+            "label": {
+              "en": "Link"
+            }
+          },
+          {
+            "type": "range",
+            "id": "btn_style",
+            "label": {
+              "en": "Style"
+            },
+            "step": 1,
+            "min": 1,
+            "max": 3,
+            "default": 1
+          },
+          {
+            "type": "header",
+            "content": {
+              "en": "Section under"
+            }
+          },
+          {
+            "type": "image_picker",
+            "id": "under_image",
+            "label": {
+              "en": "Image"
+            }
+          },
+          {
+            "type": "text",
+            "id": "under_text",
+            "label": {
+              "en": "Text"
+            },
+            "default": "Lorem, ipsum dolor."
+          },
+          {
+            "type": "url",
+            "id": "under_link",
+            "label": {
+              "en": "Link"
+            }
+          }
+        ]
+      },
+      {
+        "type": "single-product",
+        "name": {
+          "en": "--Single product"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Title"
+            },
+            "default": "--Single product"
+          },
+          {
+            "type": "range",
+            "id": "width",
+            "label": {
+              "en": "Width"
+            },
+            "step": 1,
+            "min": 20,
+            "max": 100,
+            "default": 25
+          },
+          {
+            "type": "product",
+            "id": "product",
+            "label": "Product"
+          }
+        ]
+      }
+    ]
+  }
+{%- endschema -%}

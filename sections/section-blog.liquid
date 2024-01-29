@@ -1,0 +1,529 @@
+{%- liquid
+  assign default_color = 'rgba(0,0,0,0)'
+  assign isBoxed       = section.settings.boxed_layout
+  assign limit         = section.settings.limit
+  assign blog          = blogs[section.settings.blog]
+  assign bg_color      = section.settings.bg_color | default: default_color | replace: default_color, 'unset'
+  assign date_position = section.settings.date_position
+  assign block_heading = section.blocks | where: 'type',                                              'heading' | first
+  assign sectionID     = '#section-' | append: section.id
+  assign total_item    = limit
+  assign slider_id     = '#slider-' | append: section.id
+  assign controls_id   = '#controls-' | append: section.id
+  assign items_resp    = section.settings.items_resp
+  assign number_article_visible = items_resp | split: ',' | first | abs
+-%}
+
+{%- if section.settings.bg_full -%}
+  {%- assign bg_class = '' -%}
+{%- else -%}
+  {%- assign bg_class = '.section_content-wrapper' -%}
+{%- endif -%}
+
+{%- capture section_class -%}
+	{{- -}}home-blog
+	{{- -}}|style-{{- section.settings.blogs_style -}}
+{%- endcapture -%}{%- assign section_class = section_class | strip | split: '|' | join: ' ' -%}
+
+<div class="{{section_class}}" id="section-{{section.id}}" test="{{number_article_visible}}" data-section-type="featured-blog" data-section-id="{{section.id}}">
+  {%- if isBoxed -%}<div class="container">{%- endif -%}
+    <div class="section_content-wrapper {% if block_heading.settings.show_border_bottom -%} has-border-bottom {%- endif -%}">
+
+      {%- if block_heading != blank -%}
+        {%- render 'snippet-heading' config: block_heading.settings -%}
+      {%- endif -%}
+
+      <div class="section_content-body">
+
+        <div class="slider-container js-slider-container">
+          <div class="slider-wrapper">
+            <div class="slider-list" id="slider-{{section.id}}">
+              {%- for article in blog.articles limit: limit -%}
+                {%- if number_article_visible >= forloop.index  -%}
+                  <div class="slider-item blog-section">
+                    <article class="featured_blog__item">
+                      <header>
+                        <figure class="featured_blog__item-image">
+                          <a href="{{ article.url }}" aria-label="{{article.title}}">
+                            {%- render 'image-style', image: article.image -%}
+                          </a>
+                        </figure>
+                      </header>
+
+
+                      <footer><div class="featured_blog__item-info">
+                          {%- if date_position == 'above' -%}
+                            <span class="featured_blog__item-publish">{{ article.published_at | date: "%B %d, %Y" }}</span>
+                          {%- endif -%}
+                          <span class="featured_blog__item-author">{{ article.author }}</span>
+                        </div>
+                        <h3 class="featured_blog__item-title">
+                          <a href="{{ article.url }}">{{ article.title }}</a>
+                          {%- if date_position == 'below' -%}
+                            <span class="featured_blog__item-publish">{{ article.published_at | date: "%B %d, %Y" }}</span>
+                          {%- endif -%}
+                        </h3>
+
+                        {%- if section.settings.show_excerpt -%}
+                          <div class="featured_blog__item-excerpt">{{ article.excerpt_or_content | truncatewords: 20}}</div>
+                        {%- endif -%}
+                        <div class="featured_blog__item-button">
+                          <a href="{{article.url}}" class="btn btn-2">{{ 'general.article.read_more' | t}}</a>
+                        </div>
+                      </footer>
+                    </article>
+                  </div>
+                {%- else -%}
+                  <div class="slider-item blog-section lazy-article" data-url="{{routes.search_url}}?view=article-item&q={{article.handle}}|excerpt:{{section.settings.show_excerpt}}|dp:{{date_position}}"></div>
+                {%- endif -%}
+              {%- else -%}
+                {%- assign limit = limit | minus: 1 -%}
+                {%- for i in (0..limit) -%}
+                  <div class="slider-item blog-section">
+                    {%- include 'svgset', type: 'empty-article', svg_group: 'svg_groups' -%}
+                  </div>
+                {%- endfor -%}
+              {%- endfor -%}
+            </div>
+            {%- render 'set-tns-config'
+              slider_id       : slider_id,
+              controls_id     : controls_id,
+              controls        : section.settings.controls,
+              dots            : section.settings.dots,
+              loop            : section.settings.loop,
+              autoplay        : section.settings.autoplay,
+              autoplay_timeout: section.settings.autoplay_timeout,
+              items_resp      : items_resp,
+              padding         : section.settings.spacing_items,
+              total_item      : total_item,
+              classID         : sectionID
+              -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- if isBoxed -%}</div>{%- endif -%}
+</div>
+
+{%- capture sectionCss -%}
+  {{section_css}}
+  {%- render 'snippet-heading-css' section: block_heading, sectionID: sectionID -%}
+  {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+    value_1: bg_color, property_1: 'background-color',
+    value_2: section.settings.section_padding, property_2: 'padding'
+    value_3: section.settings.section_margin, property_3: 'margin' -%}
+{%- endcapture -%}
+
+<style>{{sectionCss | strip_newlines}}</style>
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("featured-blog") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "featured-blog"]);
+  }else{
+    window.theme.sectionRegister = ["featured-blog"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Blog posts"
+  },
+  "templates": ["index"],
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Plese see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000248063) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Blog' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Blog posts"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "LAYOUT"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "blogs_style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section margin"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      },
+      "default" : "20px 0px 20px 0px "
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section Padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      },
+      "default" : "20px 0px 20px 0px "
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "bg_full",
+      "label" : {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Blog settings"
+      }
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": {
+        "en": "Blog"
+      }
+    },
+    {
+      "type": "select",
+      "id": "date_position",
+      "label": "Date position",
+      "options": [
+        {
+          "value": "above",
+          "label": "Above title"
+        },
+        {
+          "value": "below",
+          "label": "Below title"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": {
+        "en": "Show Excerpt"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "3,1",
+      "placeholder": {
+        "en": "E.g: 3,1"
+      }
+    },
+    {
+      "type": "text",
+      "id": "spacing_items",
+      "label": {
+        "en": "Spacing between items"
+      },
+      "default": "10px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      }
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": {
+        "en": "Limit"
+      },
+      "step": 1,
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Slider settings"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "loop",
+      "label" : {
+        "en": "Loop"
+      },
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "controls",
+      "label": {
+        "en": "Controls"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "dots",
+      "label": {
+        "en": "Dots"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "autoplay",
+      "label" : {
+        "en": "Autoplay"
+      },
+      "default": false
+    },
+    {
+      "type" : "range",
+      "id": "autoplay_timeout",
+      "label": {
+        "en" : "Change slide every(s)"
+      },
+      "step": 0.5,
+      "min" : 2,
+      "max" : 10,
+      "unit" : "s",
+      "default" : 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "limit" : 1,
+      "name": {
+        "en": "Heading section"
+      },
+      "settings": [
+        {
+          "type": "header",
+          "content": {
+            "en": "General settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_heading_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "info": {
+            "en": "Order: top right bottom left"
+          },
+          "placeholder" : {
+            "en": "20px 0px 20px 0px"
+          },
+          "default" : "20px 0px 20px 0px"
+        },
+        {
+          "type": "select",
+          "id": "section_heading_align",
+          "label": {
+            "en": "Content Alignment"
+          },
+          "options": [
+            {
+              "value": "auto",
+              "label": {
+                "en": "Auto"
+              }
+            },
+            {
+              "value": "left",
+              "label": {
+                "en": "Left"
+              }
+            },
+            {
+              "value": "center",
+              "label": {
+                "en": "Center"
+              }
+            },
+            {
+              "value": "right",
+              "label": {
+                "en": "Right"
+              }
+            }
+          ]
+        },
+        {
+          "type" : "checkbox",
+          "id" : "show_border_bottom",
+          "label" : {
+            "en": "Show border bottom"
+          },
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Heading"
+          }
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": {
+            "en": "Heading"
+          },
+          "default": "Heading"
+        },
+        {
+          "type": "color",
+          "id": "section_heading_cl",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_heading_fs",
+          "label": {
+            "en": "Font size"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_heading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "step": 100,
+          "min": 100,
+          "max": 900,
+          "default": 600
+        },
+        {
+          "type": "text",
+          "id": "section_heading_lh",
+          "label": {
+            "en": "Line height"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Subheading"
+          }
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": {
+            "en": "Subheading"
+          },
+          "default" : "Lorem ipsum dolor sit amet."
+        },
+        {
+          "type": "color",
+          "id": "section_subheading_cl",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_fs",
+          "label": {
+            "en": "Font size"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "section_subheading_fw",
+          "label": {
+            "en" : "Font weight"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 400
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_lh",
+          "label": {
+            "en": "Line height"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Blog posts"
+      },
+      "category": "Blog",
+      "blocks": [
+        {
+          "type" : "heading"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

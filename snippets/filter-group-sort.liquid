@@ -1,0 +1,34 @@
+
+{%- if sort_type contains 'number' -%}
+  {%- assign tags_removed_prefix = tags | join: '[+=+]' | remove: prefix | split: '[+=+]' -%}
+  {%- assign tags_sorted = '' -%}
+
+  {%- capture sort_number -%}
+    {%- render 'sort-number' arr_number: tags_removed_prefix -%},{%- render 'sort-number' type: 1, arr_number: tags_removed_prefix -%}
+  {%- endcapture -%}
+
+  {%- assign sort_number_split = sort_number | strip | strip_newlines | split: ',' -%}
+
+  {%- for number in sort_number_split -%}
+    {%- assign index = number | split: '.' | last -%}
+    {%- if index != blank -%}
+      {%- assign index_abs = index | abs -%}
+      {%- assign tags_sorted = tags_sorted | append: ',' | append: tags[index_abs] -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- case sort_type -%}
+    {%- when 'number-low-high' -%}
+      {{tags_sorted | remove_first: ',' }}
+    {%- when 'number-high-low' -%}
+      {{tags_sorted | remove_first: ',' | split: ',' | reverse | join: ',' }}
+
+  {%- endcase -%}
+{%- else -%}
+  {%- case sort_type -%}
+    {%- when 'alphabet-a-z' -%}
+      {{tags | sort | join: ','}}
+    {%- when 'alphabet-z-a' -%}
+      {{tags | sort | reverse | join: ','}}
+  {%- endcase -%}
+{%- endif -%}

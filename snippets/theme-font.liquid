@@ -1,0 +1,21 @@
+<!--===== Theme Font Family ===== -->
+
+{%- capture gg_font -%}
+	{%- if settings.header_google_font != blank -%}{{-settings.header_google_font | strip -}}{%- endif -%}
+	{%- if settings.body_google_font != blank -%}|{{- settings.body_google_font | strip -}}{%- endif -%}
+{%- endcapture -%}
+
+{%- if gg_font != blank -%}
+	{%- assign gg_font = gg_font | split: '|' | uniq | join: '&display=swap&family=' -%}
+	<script type="text/javascript">
+		WebFontConfig = {
+			google: {
+				api: 'https://fonts.googleapis.com/css2',
+				families: ["{{gg_font | append: '&display=swap'}}"] }
+		};
+	</script>
+	{%- render 'webfont-script'  -%}
+	{% comment %} <script async src="{{'webfont.js' | asset_url}}"></script> {% endcomment %}
+{%- endif -%}
+
+{% comment %} compress {% endcomment %}

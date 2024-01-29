@@ -1,0 +1,25 @@
+{%- liquid
+  if l.url == '#'
+    assign l_url = 'javascript:void(0);'
+  else
+    assign l_url = l.url
+  endif
+  assign submenu = l.title | handle
+-%}
+
+{%- case type -%}
+  {%- when 'empty' -%}
+      <li class="{{class}} navbar-{{type}}"><a href="#" onclick="return false"><span>Lorem ipsum</span></a></li>
+  {%- else -%}
+
+    {%- if linklists[submenu].links.size > 0 -%}
+      {%- render 'nav-link-sub', l: l, class: class -%}
+    {%- else -%}
+
+      <li class="{{class}}{% if l.active  %} active{% endif %}" navlink-index="1">
+        <a href="{{ l_url }}" class="{{class}}">
+          <span>{{ l.title }}</span>
+        </a>
+      </li>
+    {%- endif -%}
+{%- endcase -%}

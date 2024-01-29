@@ -1,0 +1,111 @@
+{%- capture styleBlockID -%}{{sectionID}}{% unless blockID == blank %} {{blockID}}{% endunless %}{%- endcapture -%}
+{%- case type -%}
+
+  {%- when 'content' -%}{%- comment -%} * * * * * * * * * * * * * * * * * * * * * * * * Text * * * * * * * * * * * * *{%- endcomment-%}
+
+    {%- assign itemClass = itemClass | default: ' .card_section-text-' -%}
+    {%- for i in (1..2) -%}
+      {%- liquid
+        assign itemID               = itemClass | append: i
+        assign __content_fs         = 'content_fs_' | append: i
+        assign __content_cl         = 'content_cl_' | append: i
+        assign __content_fw         = 'content_fw_' | append: i
+        assign __content_margin     = 'content_margin_' | append: i
+        assign __content_lh         = 'content_lh_' | append: i
+
+        assign __content_cl         = block.settings[__content_cl] | default: 'rgba(0,0,0,0)'
+        assign __content_fw         = block.settings[__content_fw]
+        assign __content_fs         = block.settings[__content_fs]
+        assign __content_margin     = block.settings[__content_margin]
+        assign __content_lh         = block.settings[__content_lh]
+      -%}
+      {%- capture firstValues -%}
+        {%- unless __content_cl  == 'rgba(0,0,0,0)'-%}color : {{__content_cl}};{%- endunless -%}
+        {%- unless __content_fw               == 0 -%}font-weight : {{__content_fw}};{%- endunless -%}
+        {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'font-size', css_value: __content_fs -%}
+        {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'margin', css_value: __content_margin -%}
+        {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'line-height', css_value: __content_lh -%}
+      {%- endcapture -%}
+
+      {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, css_values: firstValues -%}
+      {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'font-size', css_value: __content_fs -%}
+      {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'margin', css_value: __content_margin -%}
+      {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'line-height', css_value: __content_lh -%}
+
+    {%- endfor -%}
+
+  {%- when 'button' -%}{%- comment -%} * * * * * * * * * * * * * * * * * * * * * * * * Button * * * * * * * * * * * * *{%- endcomment-%}
+    {%- assign itemID = itemClass | default: ' .card_section-button a' -%}
+
+    {%- liquid
+      assign __btn_cl                     = block.settings.btn_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_bg_cl                  = block.settings.btn_bg_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_border_cl              = block.settings.btn_border_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_hover_cl               = block.settings.btn_hover_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_hover_bg_cl            = block.settings.btn_hover_bg_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_hover_border_cl        = block.settings.btn_hover_border_cl | default: 'rgba(0,0,0,0)'
+      assign __btn_fw                     = block.settings.btn_fw
+      assign __btn_border_width_temp      = block.settings.btn_border_width
+      assign __btn_border_width           = __btn_border_width_temp | append: 'px'
+      assign __btn_fs                     = block.settings.btn_fs
+      assign __btn_padding                = block.settings.btn_padding
+      assign __btn_margin                 = block.settings.btn_margin
+      assign __btn_radius                 = block.settings.btn_radius
+    -%}
+
+    {%- capture firstValues -%}
+      {%- if __btn_fw > 0 -%}font-weight: {{ __btn_fw }};{%- endif -%}
+      {%- unless __btn_cl         == 'rgba(0,0,0,0)' -%}color: {{__btn_cl}};{%- endunless -%}
+      {%- unless __btn_bg_cl      == 'rgba(0,0,0,0)' -%}background-color: {{__btn_bg_cl}};{%- endunless -%}
+      {%- unless __btn_border_cl  == 'rgba(0,0,0,0)' -%}border-color: {{__btn_border_cl}};{%- endunless -%}
+      {%- unless __btn_border_width_temp == blank -%}{%- render  'css-resp', type: 'value', css_property: 'border-width', css_value: __btn_border_width -%}{%- endunless -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'font-size', css_value: __btn_fs -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'padding', css_value: __btn_padding -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'margin', css_value: __btn_margin -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'border-radius', css_value: __btn_radius -%}
+    {%- endcapture -%}
+
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_values: firstValues -%}
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'font-size', css_value: __btn_fs -%}
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'padding', css_value: __btn_padding -%}
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'margin', css_value: __btn_margin -%}
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, showLast: true, css_property: 'border-radius', css_value: __btn_radius -%}
+
+    {%- comment -%}
+      **
+      * Button Hover
+      *
+    {%- endcomment-%}
+    {%- assign itemID = itemID | append: ':hover' -%}
+    {%- capture firstValues -%}
+      {%- unless __btn_hover_cl         == 'rgba(0,0,0,0)' -%}color: {{__btn_hover_cl}};{%- endunless -%}
+      {%- unless __btn_hover_bg_cl      == 'rgba(0,0,0,0)' -%}background-color: {{__btn_hover_bg_cl}};{%- endunless -%}
+      {%- unless __btn_hover_border_cl  == 'rgba(0,0,0,0)' -%}border-color: {{__btn_hover_border_cl}};{%- endunless -%}
+    {%- endcapture -%}
+
+    {%- render 'css-resp', classID: styleBlockID, nextClassID: itemID, css_values: firstValues -%}
+
+
+  {%- when 'text' -%}
+
+    {%- liquid
+      assign __content_fs         = block.settings.content_fs
+      assign __content_cl         = block.settings.content_cl | default: 'rgba(0,0,0,0)'
+      assign __content_fw         = block.settings.content_fw
+      assign __content_margin     = block.settings.content_margin
+      assign __content_lh         = block.settings.content_lh
+    -%}
+    {%- capture firstValues -%}
+      {%- unless __content_cl  == 'rgba(0,0,0,0)'-%}color : {{__content_cl}};{%- endunless -%}
+      {%- unless __content_fw               == 0 -%}font-weight : {{__content_fw}};{%- endunless -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'font-size', css_value: __content_fs -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'margin', css_value: __content_margin -%}
+      {%- render  'css-resp', type: 'value', showFirst: true, css_property: 'line-height', css_value: __content_lh -%}
+    {%- endcapture -%}
+
+    {%- render 'css-resp', preClassID: preClassID, classID: classID, nextClassID: nextClassID, css_values: firstValues -%}
+    {%- render 'css-resp', preClassID: preClassID, classID: classID, nextClassID: nextClassID, showLast: true, css_property: 'font-size', css_value: __content_fs -%}
+    {%- render 'css-resp', preClassID: preClassID, classID: classID, nextClassID: nextClassID, showLast: true, css_property: 'margin', css_value: __content_margin -%}
+    {%- render 'css-resp', preClassID: preClassID, classID: classID, nextClassID: nextClassID, showLast: true, css_property: 'line-height', css_value: __content_lh -%}
+
+{%- endcase -%}

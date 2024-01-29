@@ -1,0 +1,285 @@
+{%- liquid
+
+  assign isBoxed  = section.settings.boxed_layout
+  assign loop     = section.settings.loop
+  assign nav      = section.settings.nav
+  assign autoplay = section.settings.autoplay
+  assign controls = section.settings.controls
+
+  assign default_link  = '#" onclick="return false;'
+  assign slide_height  = section.settings.slide_height
+  assign spacing_items = section.settings.spacing_items
+
+  assign autoplay_timeout = section.settings.autoplay_timeout
+  assign banner_spacing_items = section.settings.banner_spacing_items
+
+  assign banner_position = section.settings.banner_position
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+
+  assign sectionID   = '#section-' | append: section.id
+  assign slider_id   = '#slider-' | append: section.id
+  assign controls_id = '#controls-' | append: section.id
+  assign dots_id     = '#dots-' | append: section.id
+  assign total_item  = section.blocks | where: 'type', 'slide' | size
+
+-%}
+
+{%- if slide_height != blank -%}{%- assign disablePadding = true -%}{%- endif -%}
+
+{%- capture banner -%}
+  <div class="banner">
+    <div class="d-grid banner-wrapper h-100">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'banner' -%}
+          {% liquid
+            assign banner_count  = banner_count | plus: 1
+            assign banner_image  = block.settings.image
+            assign banner_height = block.settings.banner_height
+
+            assign text_1    = block.settings.text_1
+            assign text_2    = block.settings.text_2
+            assign text_3    = block.settings.text_3
+            assign btn_url   = block.settings.btn_url
+            assign btn_label = block.settings.btn_label
+            assign blockID   = '.block-' | append: block.id
+          %}
+          {%- capture banner_height -%}
+            @media screen and (max-width: 991.9px){
+              {{sectionID}} {{blockID}}{height: {{banner_height}};}
+            }
+          {%- endcapture -%}
+          {%- assign section_css = section_css | append: banner_height -%}
+          <div class="banner-item block-{{block.id}} position-relative"{{block.shopify_attributes}}>
+            <div class="image">
+              {%- if banner_image != blank -%}
+                {%- render 'image-style' image: banner_image, disablePadding: true, disable_position: true -%}
+              {%- else -%}
+                {%- capture collection_svg -%}collection-{%cycle 1,2%}{%- endcapture -%}
+                {{ collection_svg | placeholder_svg_tag | replace: '<svg', '<svg class="placeholder-svg overlay-ui w-100 h-100"'}}
+              {%- endif -%}
+            </div>
+
+            {%- capture textbox -%}
+              {%- if text_1 != blank -%}
+                <div class="text-1">{{text_1}}</div>
+              {%- endif -%}
+
+              {%- if text_2 != blank -%}
+                <div class="text-2">{{text_2}}</div>
+              {%- endif -%}
+
+              {%- if text_3 != blank -%}
+                <div class="text-3">{{text_3}}</div>
+              {%- endif -%}
+
+              {%- if btn_label != blank -%}
+                <a href="{{btn_url}}" class="btn btn-1 btn-custom">{{btn_label}}</a>
+              {%- endif -%}
+            {%- endcapture -%}
+
+            {%- if textbox != blank -%}
+              <div class="textbox overlay-ui">{{textbox}}</div>
+            {%- endif -%}
+          </div>
+          {%- for block in section.blocks offset: forloop.index -%}
+            {%- if block.type == 'banner' or block.type == 'slide' -%}{%- break -%}{%- endif -%}
+            {%- capture block_css -%}
+              {%- render 'snippet-slideshow-banner-item' block: block, sectionID: sectionID, blockID: blockID-%}
+            {%- endcapture -%}
+            {%- assign section_css = section_css | append: block_css -%}
+          {%- endfor -%}
+        {%- elsif block.type contains 'banner_' -%}
+          {%- if banner_count > 0 -%}{%- continue -%}{%- endif -%}
+          {%- capture block_css -%}
+            {%- render 'snippet-slideshow-banner-item' block: block, sectionID: sectionID -%}
+          {%- endcapture -%}
+          {%- assign section_css = section_css | append: block_css -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endcapture -%}
+
+<div class="home-slideshow-banner"id="section-{{section.id}}" data-section-type="slideshow-banner" data-section-id="{{section.id}}">
+  {%- if isBoxed -%}<div class="container">{%- endif -%}
+    <div class="section-content">
+      <div class="d-grid">
+        {%- if banner_position == 'left' -%}
+          {{banner}}
+        {%- endif -%}
+
+        <div class="slideshow-content">
+          <div class="slider-container js-slider-container">
+            <div class="slider-wrapper">
+              <div class="slider-list slideshow-wrapper" id="slider-{{section.id}}">
+                {%- for block in section.blocks -%}
+                  {%- case block.type -%}
+                    {%- when 'slide' -%}
+                      {%- comment -%}
+                        **
+                        * Slide Item
+                        *
+                      {%- endcomment-%}
+                      {%- liquid
+                        assign slide_item_count = slide_item_count | plus: 1
+                        assign slide_image      = block.settings.image
+                        assign slide_image_URL  = block.settings.image_url | default: '#' | replace: '#', default_link
+
+                        assign _text_1  = block.settings.text_1
+                        assign _text_2  = block.settings.text_2
+                        assign _text_3  = block.settings.text_3
+                        assign _text_4  = block.settings.text_4
+                        assign _btn_txt = block.settings.btn_txt
+                        assign _btn_url = block.settings.btn_url | default: '#' | replace: '#', default_link
+
+                        capture slide_content_check
+                          echo _text_1 | strip_newlines
+                          echo _text_2 | strip_newlines
+                          echo _text_3 | strip_newlines
+                          echo _text_4 | strip_newlines
+                          echo _btn_txt | strip_newlines
+                        endcapture
+                      -%}
+                      {%- capture blockID -%}.slide-{{block.id}}{%- endcapture -%}
+
+                      <div class="slide-item slider-item col-12 slide-{{block.id}}" data-index="{% increment slideIndex %}"{{block.shopify_attributes}}>
+                        <div class="slide-banner">
+                          <a href="{{slide_image_URL}}">
+                            {%- if slide_image != blank -%}
+                              {%- render 'image-style', image: slide_image, disablePadding: disablePadding -%}
+                              {%- capture block_css -%}
+                                {%- render 'css-resp', classID: blockID, nextClassID: ' .slide-banner img', css_value: block.settings.image_position, css_property: 'object-position' -%}
+                              {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                            {%- else -%}
+                              <span class="image__style" style="display: block;position:relative;">
+                                {%- capture lifestyle -%}lifestyle-{%cycle 1,2%}{%- endcapture -%}
+                                {{ lifestyle | placeholder_svg_tag | replace: '<svg', '<svg class="placeholder-svg overlay-ui w-100 h-100"'}}
+                              </span>
+                            {%- endif -%}
+                          </a>
+                        </div>
+
+                        {%- comment -%}
+                          **
+                          * Slide Content
+                          *
+                        {%- endcomment-%}
+                        {%- unless slide_content_check == blank -%}
+                          <div class="slide-content-wrapper">
+                            <div class="slide-content-inner overlay-ui">
+
+                              {%- comment -%}
+                                **
+                                * Text content
+                                *
+                              {%- endcomment-%}
+                              {%- unless _text_1 == blank -%}<div class="slide-content-item content-text-1">{{_text_1}}</div>{%- endunless -%}
+                              {%- unless _text_2 == blank -%}<div class="slide-content-item content-text-2">{{_text_2}}</div>{%- endunless -%}
+                              {%- unless _text_3 == blank -%}<div class="slide-content-item content-text-3">{{_text_3}}</div>{%- endunless -%}
+                              {%- unless _text_4 == blank -%}<div class="slide-content-item content-text-4">{{_text_4}}</div>{%- endunless -%}
+
+                              {%- comment -%}
+                                **
+                                * Slide Button content
+                                *
+                              {%- endcomment-%}
+                              {%- unless _btn_txt == blank -%}
+                                <div class="slide-content-item content-button">
+                                  <a href="{{_btn_url}}" class="btn btn-slide btn-1">{{_btn_txt}}</a>
+                                </div>
+                              {%- endunless -%}
+                            </div>
+                          </div>
+                        {%- endunless -%}
+                      </div>
+
+
+                      {%- comment -%}
+                        **
+                        * Slide CSS
+                        *
+                      {%- endcomment-%}
+
+                      {%- unless slide_content_check == blank -%}
+                        {%- for block in section.blocks offset: forloop.index -%}
+                          {%- if block.type == 'slide' -%}{%- break -%}{%- endif -%}
+                          {%- assign  block_type = block.type | remove: 'style_' -%}
+                          {%- capture block_css -%}
+                            {%- render 'snippet-slideshow-items', block: block, type: block_type, sectionID: sectionID, blockID: blockID -%}
+                          {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                        {%- endfor -%}
+                      {%- endunless -%}
+
+                    {%- else -%}
+
+                      {%- comment -%}
+                        **
+                        * Slide Item General Style
+                        *
+                      {%- endcomment-%}
+                        {%- if slide_item_count > 0 -%}{%- continue -%}{%- endif -%}
+                        {%- assign  block_type = block.type | remove: 'style_' -%}
+                        {%- capture block_css -%}
+                          {%- render 'snippet-slideshow-items', block: block, type: block_type, sectionID: sectionID, blockID: '' -%}
+                        {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                  {%- endcase -%}
+                {%- endfor -%}
+              </div>
+              {%- render 'set-tns-config'
+                slider_id  : slider_id,
+                controls_id: controls_id,
+                dots_id    : dots_id,
+                controls   : section.settings.controls,
+                loop       : section.settings.loop,
+                dots       : section.settings.dots,
+                customDots : true,
+                total_item : total_item,
+                slideshow: true
+                -%}
+            </div>
+          </div>
+        </div>
+
+        {%- if banner_position == 'right' -%}
+          {{banner}}
+        {%- endif -%}
+      </div>
+    </div>
+  {%- if isBoxed -%}</div>{%- endif -%}
+</div>
+{%- comment -%}
+  **
+  * Section Style sheet
+  *
+{%- endcomment-%}
+{%- capture sectionCss -%}
+    {%- render 'css-responsive', classID: sectionID, nextClassID: ' .slide-banner .image__style', value_1: slide_height, property_1: 'padding-top' -%}
+    {%- render 'css-responsive', classID: sectionID,
+      value_1: section.settings.section_padding, property_1: 'padding' -%}
+    {{- section_css -}}
+    {%- if slide_height != blank -%}{{- sectionID }} .image__style img{object-fit: cover;}{%- endif -%}
+    {%- assign spacing_item_first = spacing_items | split: ',' | first -%}
+    {%- case banner_position -%}
+      {%- when 'left' -%}
+        {%- assign grid_value = 'calc((100% - [-+-]) / 3 * 1) calc((100% - [-+-]) / 3 * 2), 100% , 100%' | replace: '[-+-]', spacing_item_first -%}
+        {%- render 'css-responsive' preClassID: sectionID, classID: '.section-content >.d-grid', value_1: grid_value, property_1: 'grid-template-columns', value_2: spacing_items, property_2: 'grid-gap' -%}
+      {%- when 'right' -%}
+        {%- assign grid_value = 'calc((100% - [-+-]) / 3 * 2) calc((100% - [-+-]) / 3 * 1), 100% , 100%' | replace: '[-+-]', spacing_item_first -%}
+        {%- render 'css-responsive' preClassID: sectionID, classID: '.section-content >.d-grid', value_1: grid_value, property_1: 'grid-template-columns', value_2: spacing_items, property_2: 'grid-gap' -%}
+    {%- endcase -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: '.d-grid.banner-wrapper', value_1: banner_spacing_items, property_1: 'grid-gap'  -%}
+{%- endcapture -%}
+{%- assign sectionCss = sectionCss | strip_newlines -%}
+{%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes('slideshow-banner') && (window.theme.sectionRegister = [...window.theme.sectionRegister, "slideshow-banner"]);
+  }else{
+    window.theme.sectionRegister = ["slideshow-banner"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}

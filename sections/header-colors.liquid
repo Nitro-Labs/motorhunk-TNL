@@ -1,0 +1,520 @@
+{%- style -%}
+  {%- liquid
+    assign default_color = 'rgba(0,0,0,0)'
+  -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'style_desk' -%}
+        {%- liquid
+          assign class            = '#header.header .header-desktop'
+          assign bg_color         = block.settings.bg_color | default: default_color
+          assign content_color    = block.settings.content_color | default: default_color
+          assign icon_color       = block.settings.icon_color | default: default_color
+          assign bg_cart_number   = block.settings.bg_cart_number  | default: default_color
+          assign text_cart_number = block.settings.text_cart_number | default: default_color
+
+          assign bg_vertical             = block.settings.bg_vertical | default: default_color
+          assign vertical_bg_hover_color = block.settings.vertical_bg_hover_color | default: default_color
+          assign vertical_content_color  = block.settings.vertical_content_color | default: default_color
+          assign vertical_hover_color    = block.settings.vertical_hover_color | default: default_color
+
+          assign vertical_dd_bg_color   = block.settings.vertical_dd_bg_color | default: default_color
+          assign vertical_dd_text_color = block.settings.vertical_dd_text_color | default: default_color
+        -%}
+
+        {{class}}{background-color: {{bg_color}}; color: {{content_color}}; --icon-color: {{icon_color}};}
+        {{class}} svg:not(.svg-logo) path {fill: currentColor;}
+        {{class}} svg:not(.svg-logo) {color: var(--icon-color);}
+        {%- if block.settings.transparent and template.name == 'index' -%}
+          {{class}}{background-color:transparent!important;}
+        {%- endif -%}
+        #header.header-sticky .header-content_top{background-color: {{bg_color}};}
+        {{class}} input[name="q"]{color: {{content_color}}}
+
+        {{class}} .number{
+          background-color: {{bg_cart_number}};
+          color: {{text_cart_number}};
+        }
+        {{class}} .header-content_bottom{
+          background-color: {{bg_vertical}};
+          color: {{vertical_content_color}};
+          --icon-color: {{vertical_content_color}};
+        }
+
+        {{class}} .horizontal-nav > ul > li:hover,{{class}} .horizontal-nav > ul > li.link-active,{{class}} .horizontal-nav > ul > li.active{
+          background-color: #c73a3b;
+          color: #ffffff;
+          --icon-color: {{vertical_hover_color}};
+        }
+        {{class}} .header-content_bottom .vertical-nav .wrapper svg{color: inherit;}
+
+        {{class}} .header-content_bottom .vertical-nav .dropdown-menu{
+          background-color: {{vertical_dd_bg_color}};
+          color: {{vertical_dd_text_color}};
+          --icon-color: {{vertical_dd_text_color}};
+        }
+        {{class}} .header-content_bottom .vertical-nav .dropdown-menu a{color: inherit;}
+
+        {% comment %} Horizontal Menu DropDown {% endcomment %}
+        {%- liquid
+          assign main_dropdown_bg_color = block.settings.main_dropdown_bg_color | default: default_color | replace: default_color , ""
+          assign main_dropdown_link_color = block.settings.main_dropdown_link_color | default: default_color | replace: default_color , ""
+          assign main_dropdown_hover_link_color = block.settings.main_dropdown_hover_link_color | default: default_color | replace: default_color , ""
+        -%}
+        {%- if main_dropdown_bg_color != blank -%} {{class}} .horizontal-nav .dropdown-menu {background-color: {{main_dropdown_bg_color}};} {%- endif -%}
+        {%- if main_dropdown_link_color != blank -%} {{class}} .horizontal-nav .dropdown-menu .menu-item > a, {{class}} .dropdown-menu .title > a{color: {{main_dropdown_link_color}};} {%- endif -%}
+        {%- if main_dropdown_hover_link_color != blank -%} {{class}} .horizontal-nav .dropdown-menu .menu-item:hover >a, {{class}} .dropdown-menu .mul-product_wrapper:hover .title a {color: {{main_dropdown_hover_link_color}};} {%- endif -%}
+
+        {% comment %} Vertical Menu {% endcomment %}
+        {%- liquid
+          assign second_dropdown_label_bg_color = block.settings.second_dropdown_label_bg_color | default: default_color | replace: default_color, ""
+          assign second_dropdown_label_content_color = block.settings.second_dropdown_label_content_color | default: default_color | replace: default_color, ""
+          assign second_dropdown_label_hover_bg_color = block.settings.second_dropdown_label_hover_bg_color | default: default_color | replace: default_color, ""
+          assign second_dropdown_label_hover_content_color = block.settings.second_dropdown_label_hover_content_color | default: default_color | replace: default_color, ""
+        -%}
+
+        {{class}} .vertical-nav .wrapper{
+          background-color: {{second_dropdown_label_bg_color}};
+          color: {{second_dropdown_label_content_color}};
+        }
+        {{class}} .vertical-nav:hover .wrapper{
+          background-color: {{second_dropdown_label_hover_bg_color}};
+          color: {{second_dropdown_label_hover_content_color}};
+        }
+
+
+      {% comment %} end {% endcomment %}
+
+      {%- when 'style_mobi' -%}
+        {%- liquid
+          assign class      = '#header.header .header-mobile'
+          assign bg_color   = block.settings.bg_color | default: default_color
+          assign icon_color = block.settings.icon_color | default: default_color
+          assign drawer_body_bg        = block.settings.drawer_body_bg | default: default_color
+          assign cart_icon_number      = block.settings.cart_icon_number | default: default_color
+          assign drawer_title_bg_color = block.settings.drawer_title_bg_color | default: default_color
+          assign drawer_body_content   = block.settings.drawer_body_content | default: default_color
+          assign cart_icon_background  = block.settings.cart_icon_background | default: default_color
+          assign second_nav_content    = block.settings.second_nav_content | default: default_color
+          assign second_nav_background = block.settings.second_nav_background | default: default_color
+          assign drawer_title_content_color = block.settings.drawer_title_content_color | default: default_color
+        -%}
+        {%- if bg_color != default_color or icon_color != default_color-%}
+          {{class}}{
+            {%- if bg_color != default_color -%}background-color: {{bg_color}};{%- endif -%}
+            {%- if icon_color != default_color -%}--icon-color: {{icon_color}};{%- endif -%}
+            }
+        {%- endif -%}
+        {{class}} svg:not(.svg-logo) path{fill: curentColor;}
+        {{class}} .menu-item > a{color: inherit;}
+        {{class}} .header-content_top svg , {{class}} .header-content_top svg {color: var(--icon-color);}
+
+        {%- if drawer_title_bg_color != default_color or drawer_title_content_color != default_color-%}
+          {{class}} li.title{
+            {%- if drawer_title_bg_color != default_color -%} background-color: {{drawer_title_bg_color}}; {%- endif -%}
+            {%- if drawer_title_content_color != default_color -%}color: {{drawer_title_content_color}};{%- endif -%}
+          }
+        {%- endif -%}
+
+        {%- if cart_icon_background != default_color or cart_icon_number != default_color-%}
+          {{class}} .header-cart .number{
+            background-color:{{cart_icon_background}};
+            color:{{cart_icon_number}};
+          }
+        {%- endif -%}
+
+        {%- if drawer_body_bg != default_color or drawer_body_content != default_color-%}
+          {{class}} .header-mobile_drawer .header-mobile__item .menu-list{
+            background-color: {{drawer_body_bg}};
+            color: {{drawer_body_content}};
+          }
+        {%- endif -%}
+
+        {%- if drawer_body_content != default_color -%}
+          {{class}} .header-content_drawer svg{color: {{drawer_body_content}};}
+        {%- endif -%}
+
+        {%- if  second_nav_background != default_color or second_nav_content != default_color-%}
+          {{class}} .vertical-nav{
+            {%- if second_nav_background != default_color -%}background-color:{{second_nav_background}};{%- endif -%}
+            {%- if second_nav_content != default_color -%}color:{{second_nav_content}};{%- endif -%}
+          }
+        {%- endif -%}
+      {% comment %} end {% endcomment %}
+    {%- endcase -%}
+  {%- endfor -%}
+{%- endstyle -%}
+
+{% comment %} compress {% endcomment %}
+
+{%- schema -%}
+{
+  "name": {
+    "en": "Header colors"
+  },
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "style_desk",
+      "limit": 1,
+      "name": {
+        "en": "Desktop settings"
+      },
+      "settings": [
+        {
+          "type" : "checkbox",
+          "id" : "transparent",
+          "label" : {
+            "en": "Transparent on Homepage"
+          },
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_color",
+          "label": {
+            "en": "Content color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": {
+            "en": "Icon color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_cart_number",
+          "label": {
+            "en": "Background Cart Icon number"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_cart_number",
+          "label": {
+            "en": "Cart Icon number"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Header Bottom Bar"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_vertical",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "vertical_bg_hover_color",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "vertical_content_color",
+          "label": {
+            "en": "Content color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "vertical_hover_color",
+          "label": {
+            "en": "Hover: Content color"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Horizontal Menu Dropdown"
+          }
+        },
+        {
+          "type": "color",
+          "id": "main_dropdown_bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "main_dropdown_link_color",
+          "label": {
+            "en": "Link Color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "main_dropdown_hover_link_color",
+          "label": {
+            "en": "Hover: Link Color"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Vertical Menu"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_dropdown_label_bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_dropdown_label_content_color",
+          "label": {
+            "en": "Content color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_dropdown_label_hover_bg_color",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_dropdown_label_hover_content_color",
+          "label": {
+            "en": "Hover: Content color"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Vertical Menu Dropdown"
+          }
+        },
+        {
+          "type": "color",
+          "id": "vertical_dd_bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "vertical_dd_text_color",
+          "label": {
+            "en": "Text color"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_mobi",
+      "limit": 1,
+      "name": {
+        "en": "Mobile settings"
+      },
+      "settings": [
+        {
+          "type": "header",
+          "content": {
+            "en": "Header Bar"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": {
+            "en": "Icon color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "cart_icon_background",
+          "label": {
+            "en": "Cart icon background"
+          }
+        },
+        {
+          "type": "color",
+          "id": "cart_icon_number",
+          "label": {
+            "en": "Cart icon number"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_nav_background",
+          "label": {
+            "en": "Second nav background"
+          }
+        },
+        {
+          "type": "color",
+          "id": "second_nav_content",
+          "label": {
+            "en": "Second nav content"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Drawer title style"
+          }
+        },
+        {
+          "type": "color",
+          "id": "drawer_title_content_color",
+          "label": {
+            "en": "Content color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "drawer_title_bg_color",
+          "label": {
+            "en": "Background Color"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Drawer body style"
+          }
+        },
+        {
+          "type": "color",
+          "id": "drawer_body_bg",
+          "label": {
+            "en": "Background"
+          }
+        },
+        {
+          "type": "color",
+          "id": "drawer_body_content",
+          "label": {
+            "en": "Content color"
+          }
+        }
+      ]
+    }
+  ]
+}
+{%- endschema -%}
+
+{% comment %}
+  ,
+  {
+    "type": "style_navigation",
+    "limit": 1,
+    "name": {
+      "en": "Navigation settings"
+    },
+    "settings": [
+      {
+        "type": "color",
+        "id": "bg_nav",
+        "label": {
+          "en": "Horizontal background"
+        }
+      },
+      {
+        "type": "text",
+        "id": "nav_size",
+        "label": {
+          "en": "Link font size"
+        },
+        "placeholder": {
+          "en": "E.g: 17px"
+        }
+      },
+      {
+        "type": "range",
+        "id": "nav_weight",
+        "label": {
+          "en": "Link weight"
+        },
+        "min": 100,
+        "max": 900,
+        "step": 100,
+        "default": 400
+      },
+      {
+        "type": "color",
+        "id": "nav_link_color",
+        "label": {
+          "en": "Link Color"
+        }
+      },
+      {
+        "type": "color",
+        "id": "nav_hover_color",
+        "label": {
+          "en": "Hover: Link Color"
+        }
+      },
+      {
+        "type": "color",
+        "id": "nav_bg_hover_color",
+        "label": {
+          "en": "Hover: Link Background Color"
+        }
+      },
+      {
+        "type": "header",
+        "content": {
+          "en": "Dropdown style"
+        }
+      },
+      {
+        "type": "color",
+        "id": "dd_bg_color",
+        "label": {
+          "en": "Background color"
+        }
+      },
+      {
+        "type": "color",
+        "id": "dd_text_color",
+        "label": {
+          "en": "Text color"
+        }
+      },
+      {
+        "type": "color",
+        "id": "dd_hv_text_color",
+        "label": {
+          "en": "Hover: Text Color"
+        }
+      },
+      {
+        "type": "color",
+        "id": "dd_hv_bg_color",
+        "label": {
+          "en": "Hover: Item background color."
+        }
+      }
+    ]
+  }
+{% endcomment %}

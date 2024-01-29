@@ -1,0 +1,705 @@
+{%- liquid
+  assign default_color   = 'rgba(0,0,0,0)'
+  assign sectionID       = '#section-' | append: section.id
+  assign layout          = section.settings.layout
+  assign bg_color        = section.settings.bg_color | default: default_color
+  assign bg_full         = section.settings.bg_full
+  assign bg_image        = section.settings.bg_image
+  assign bg_repeat       = section.settings.bg_repeat
+  assign bg_position     = section.settings.bg_position
+  assign bg_size         = section.settings.bg_size
+  assign items_resp      = section.settings.items_resp | default: '2,1'
+  assign grid_spc        = section.settings.grid_spc
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+-%}
+
+{%- if bg_full -%}
+  {%- capture bg_wide -%}{%- render 'bgset' image: bg_image -%}{%- endcapture -%}
+{%- else -%}
+{%- capture bg_boxed -%}{%- render 'bgset' image: bg_image -%}{%- endcapture-%}
+  {%- assign bg_class = ' .section-wrapper' -%}
+{%- endif -%}
+
+<div class="multiple-banner {{bg_wide}}" id="section-{{section.id}}" data-section-type="multiple-banner" data-section-id="{{section.id}}">
+  {%- if layout -%} <div class="container"> {%- endif -%}
+    <div class="section-wrapper {{bg_boxed}}">
+      <div class="section-content d-grid {% render 'grid-class' value: items_resp -%}">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign blockID = ' .block-' | append: block.id
+            assign banner_image = block.settings.banner_image
+            assign image_link   = block.settings.image_link
+            assign text_align   = block.settings.text_align
+          -%}
+
+          {%- capture block_class -%}
+            {{--}}banner-item
+            {{--}}|{{blockID | remove_first: ' .'}}
+          {%- endcapture -%}
+
+          <div class="{{block_class | split: '|' | join: ' '}}">
+            <div class="banner-item_wrapper" style="position: relative;">
+              <div class="banner-item_image">
+                <a href="{{image_link | default: '#'}}" class="image">
+                  {%- if banner_image != blank -%}
+                    {%- render 'image-style' image: banner_image -%}
+                  {%- else -%}
+                    {%- capture lifestyle -%}lifestyle-{% cycle 1,2 %}{%- endcapture -%}
+                    {{ lifestyle | placeholder_svg_tag | replace: '<svg', '<svg class="placeholder-svg"'}}
+                  {%- endif -%}
+                </a>
+              </div>
+              <div class="banner-item_content overlay-ui text-{{text_align}} justify-content-{{text_align | replace: 'left', 'start' | replace: 'right', 'end'}}">
+                {%- for i in (1..4) -%}
+                  {%- liquid
+                    assign text = 'text_' | append: i
+                    assign text = block.settings[text]
+                    if text == blank
+                      continue
+                    endif
+                    assign nextClassID = ' .text-' | append: i
+                    assign color       = 'text_color_' | append: i
+                    assign font_size   = 'text_fs_' | append: i
+                    assign margin      = 'text_mr_' | append: i
+                    assign font_weight = 'text_fw_' | append: i
+
+                    assign color       = block.settings[color] | default: default_color
+                    assign margin      = block.settings[margin]
+                    assign font_size   = block.settings[font_size]
+                    assign font_weight = block.settings[font_weight]
+                  -%}
+                  {%- capture style -%}
+                    {%- if color != default_color -%} color: {{color}}; {%- endif -%}
+                    font-weight: {{font_weight}};
+                  {%- endcapture -%}
+                  {%- if forloop.first -%}
+                    <h3 class="{{nextClassID | remove_first: ' .'}}" style="{{style}}">{{text}}</h3>
+                  {%- else -%}
+                    <div class="{{nextClassID | remove_first: ' .'}}" style="{{style}}">{{text}}</div>
+                  {%- endif -%}
+
+                  {%- capture css_values -%}
+                    {%- if font_size != blank -%}{%- render 'css-resp' type: 'value', showFirst: true, css_value: font_size, css_property: 'font-size' -%}{%- endif -%}
+                    {%- if margin != blank -%}{%- render 'css-resp' type: 'value', showFirst: true, css_value: margin, css_property: 'margin' -%}{%- endif -%}
+                  {%- endcapture -%}
+
+                  {%- capture text_css -%}
+                    {%- render 'css-resp' preClassID: sectionID, classID: blockID, nextClassID: nextClassID , css_values: css_values -%}
+                    {%- render 'css-resp' preClassID: sectionID, classID: blockID, nextClassID: nextClassID ,showLast: true, css_value: font_size, css_property: 'font-size' -%}
+                    {%- render 'css-resp' preClassID: sectionID, classID: blockID, nextClassID: nextClassID ,showLast: true, css_value: margin, css_property: 'margin' -%}
+                  {%- endcapture -%}
+                  {%- assign section_css = section_css | append: text_css -%}
+                {%- endfor -%}
+
+                {%- for i in (1..2) -%}
+                  {%- liquid
+                    assign btn_label  = 'btn_label_' | append: i
+                    assign btn_label  = block.settings[btn_label] | strip
+                    if btn_label == blank
+                      continue
+                    endif
+                    assign btn_url    = 'btn_url_' | append: i
+                    assign btn_icon   = 'btn_icon_' | append: i
+                    assign btn_bg_color   = 'btn_bg_color_' | append: i
+                    assign text_color = 'btn_text_color_' | append: i
+
+                    assign btn_url    = block.settings[btn_url]
+                    assign btn_icon   = block.settings[btn_icon]
+                    assign btn_bg_color   = block.settings[btn_bg_color] | default: default_color
+                    assign text_color = block.settings[text_color] | default: default_color
+                  -%}
+                  {%- if btn_label != blank -%}
+                    {%- capture style_inline -%}
+                      {%- if btn_bg_color != default_color -%} background-color: {{btn_bg_color}};{%- endif -%}
+                      {%- if text_color != default_color -%} color: {{text_color}};{%- endif -%}
+                    {%- endcapture -%}
+                    <a href="{{btn_url | default: '#'}}" class="btn btn-banner" style="{{style_inline}}">
+                      {{btn_icon}}
+                      <span>{{btn_label}}</span>
+                    </a>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- if layout -%} </div> {%- endif -%}
+</div>
+
+{%- capture sectionCSS -%}
+  {%- capture bg_css -%}
+    {%- if bg_color != default_color -%}background-color:{{bg_color}};{%- endif -%}
+    {%- if bg_image != blank -%}background-repeat:{{bg_repeat}};background-position:{{bg_position}};background-size:{{bg_size}};{%- endif -%}
+  {%- endcapture -%}
+  {%- if bg_css != blank -%}
+    {{-sectionID}} {{bg_class}}{ {{-bg_css-}} }
+  {%- endif -%}
+
+  {{-section_css-}}
+  {%- render 'css-responsive' preClassID: sectionID, value_1: section_padding, property_1: 'padding' ,value_2: section_margin, property_2: 'margin' -%}
+  {%- render 'grid-template-columns' preClassID: sectionID, classID: ' .d-grid', value: items_resp -%}
+  {%- render 'grid-spacing' preClassID: sectionID, classID: ' .d-grid', value: grid_spc  -%}
+  {% comment %} {%- render 'css-resp' preClassID: sectionID, classID: ' .d-grid' css_value: grid_spc, css_property: 'grid-gap' -%} {% endcomment %}
+{%- endcapture -%}
+
+{%- style -%}{{sectionCSS}}{%- endstyle -%}
+
+{% comment %} compress {% endcomment %}
+
+{%- schema -%}
+{
+  "name": {
+    "en": "Multiple banner"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/support/solutions/6000139952) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created 'Multiple banner' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Title"
+      },
+      "default" : "Multiple banner"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "layout",
+      "label" : {
+        "en": "Boxed layout"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section margin"
+      },
+      "info": {
+        "en": "E.g: 2px 10px 20px 0px. Order: Top Left Bottom Right."
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section padding"
+      },
+      "info": {
+        "en": "E.g: 2px 10px 20px 0px. Order: Top Left Bottom Right."
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default" : "2,1"
+    },
+    {
+      "type": "text",
+      "id": "grid_spc",
+      "label": {
+        "en": "Item spacing"
+      },
+      "default" : "10px"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "bg_full",
+      "label" : {
+        "en": "Full section background"
+      }
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": {
+        "en": "Background image"
+      }
+    },
+    {
+      "type": "select",
+      "id": "bg_size",
+      "label": {
+        "en": "Background size"
+      },
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Auto"
+          }
+        },
+        {
+          "value": "cover",
+          "label": {
+            "en": "Cover"
+          }
+        },
+        {
+          "value": "contain",
+          "label": {
+            "en": "Contain"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": {
+        "en": "Background position"
+      },
+      "options": [
+        {
+          "value": "left top",
+          "label": {
+            "en": "Left Top"
+          }
+        },
+        {
+          "value": "left center",
+          "label": {
+            "en": "Left Center"
+          }
+        },
+        {
+          "value": "left bottom",
+          "label": {
+            "en": "Left Bottom"
+          }
+        },
+        {
+          "value": "right top",
+          "label": {
+            "en": "Right Top"
+          }
+        },
+        {
+          "value": "right center",
+          "label": {
+            "en": "Right Center"
+          }
+        },
+        {
+          "value": "right bottom",
+          "label": {
+            "en": "Right Bottom"
+          }
+        },
+        {
+          "value": "center top",
+          "label": {
+            "en": "Center Top"
+          }
+        },
+        {
+          "value": "center center",
+          "label": {
+            "en": "Center Center"
+          }
+        },
+        {
+          "value": "center bottom",
+          "label": {
+            "en": "Center Bottom"
+          }
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "bg_repeat",
+      "label": {
+        "en": "Background repeat"
+      },
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": {
+            "en": "No repeat"
+          }
+        },
+        {
+          "value": "repeat",
+          "label": {
+            "en": "Repeat"
+          }
+        },
+        {
+          "value": "repeat-x",
+          "label": {
+            "en": "Repeat X"
+          }
+        },
+        {
+          "value": "repeat-y",
+          "label": {
+            "en": "Repeat Y"
+          }
+        }
+      ],
+      "default": "no-repeat"
+    }
+  ],
+  "blocks": [
+    {
+      "type" : "banner-item",
+      "name" : {
+        "en": "Banner item"
+      },
+      "settings" : [
+        {
+          "type": "header",
+          "content": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "banner_image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type" : "url",
+          "id" : "image_link",
+          "label" : {
+            "en": "Image link"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Content"
+          }
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label" : {
+            "en" : "Text alignment"
+          },
+          "options": [
+           {
+              "value": "left",
+              "label": {
+                "en": "Left"
+              }
+           },
+           {
+             "value": "center",
+             "label": {
+               "en": "Center"
+             }
+           },
+           {
+             "value": "right",
+             "label": {
+               "en": "Right"
+             }
+           }
+          ],
+          "default" : "center"
+        },
+        {
+          "type": "html",
+          "id": "text_1",
+          "label": {
+            "en": "Text 1"
+          },
+          "default" : "Lorem ipsum dolor sit."
+        },
+        {
+          "type": "color",
+          "id": "text_color_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "default" : "32px,24px"
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_1",
+          "label": {
+            "en" : "Font weight"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 700
+        },
+        {
+          "type": "text",
+          "id": "text_mr_1",
+          "label": {
+            "en": "Margin"
+          }
+        },
+        {
+          "type": "html",
+          "id": "text_2",
+          "label": {
+            "en": "Text 2"
+          },
+          "default" : "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+        },
+        {
+          "type": "color",
+          "id": "text_color_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_2",
+          "label": {
+            "en": "Font size"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_2",
+          "label": {
+            "en" : "Font weight"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 400
+        },
+        {
+          "type": "text",
+          "id": "text_mr_2",
+          "label": {
+            "en": "Margin"
+          }
+        },
+        {
+          "type": "html",
+          "id": "text_3",
+          "label": {
+            "en": "Text 3"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_color_3",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_3",
+          "label": {
+            "en": "Font size"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_3",
+          "label": {
+            "en" : "Font weight"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 400
+        },
+        {
+          "type": "text",
+          "id": "text_mr_3",
+          "label": {
+            "en": "Margin"
+          }
+        },
+        {
+          "type": "html",
+          "id": "text_4",
+          "label": {
+            "en": "Text 4"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_color_4",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_4",
+          "label": {
+            "en": "Font size"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_4",
+          "label": {
+            "en" : "Font weight"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 400
+        },
+        {
+          "type": "text",
+          "id": "text_mr_4",
+          "label": {
+            "en": "Margin"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Button 1"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_label_1",
+          "label": {
+            "en": "Button label"
+          },
+          "default" : "Show Now"
+        },
+        {
+          "type": "html",
+          "id": "btn_icon_1",
+          "label": {
+            "en": "Button icon"
+          }
+        },
+        {
+          "type" : "url",
+          "id" : "btn_url_1",
+          "label" : {
+            "en": "Button link"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_text_color_1",
+          "label": {
+            "en": "Text color"
+          },
+          "default" : "#fff"
+        },
+        {
+          "type": "color",
+          "id": "btn_bg_color_1",
+          "label": {
+            "en": "Background color"
+          },
+          "default" : "#000"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Button 2"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_label_2",
+          "label": {
+            "en": "Button label"
+          }
+        },
+        {
+          "type": "html",
+          "id": "btn_icon_2",
+          "label": {
+            "en": "Button icon"
+          }
+        },
+        {
+          "type" : "url",
+          "id" : "btn_url_2",
+          "label" : {
+            "en": "Button link"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_text_color_2",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_bg_color_2",
+          "label": {
+            "en": "Background color"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Multiple banner",
+      "category": "Banner",
+      "blocks" : [
+        {
+          "type" : "banner-item"
+        },
+        {
+          "type" : "banner-item"
+        }
+      ]
+    }
+  ]
+}
+{%- endschema -%}

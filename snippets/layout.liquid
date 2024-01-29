@@ -1,0 +1,101 @@
+{%- case request.page_type -%}
+	{%-
+	#####################
+	#
+	# INDEX
+	#
+	#####################
+	-%}
+	{%- when 'index' -%}
+		{%- if settings.enable_left_column -%}
+
+			{%- case settings.static_slideshow -%}
+				{%- when 'banner'		 -%}{%- section 'slideshow-with-banner' -%}
+				{%- when 'menu'			 -%}{%- section 'slideshow-with-menu' -%}
+				{%- when 'default'		 -%}{%- section 'section-slideshow' -%}
+			{%- endcase -%}
+
+
+			<div class="container">
+				<div class="row">
+				  <div class="col-3 d-none d-lg-block">{%- section 'section-left-column' -%}</div>
+				  <div class="col-12 col-lg-9">{{ content_for_layout }}</div>
+				</div>
+			</div>
+
+		{%- else -%}
+		  {{ content_for_layout }}
+		{%- endif -%}
+
+	{%-
+	#####################
+	#
+	# PRODUCT
+	#
+	#####################
+	-%}
+	{%- when 'product' -%}
+		{%- render 'layout-product', content_for_layout: content_for_layout -%}
+		{%- render 'product-schema' -%}
+
+	{%-
+	#####################
+	#
+	# COLLECTION
+	#
+	#####################
+	-%}
+	{%- when 'collection' -%}
+		{%- render 'layout-collection', content_for_layout: content_for_layout -%}
+
+	{%-
+	#####################
+	#
+	# PAGE
+	#
+	#####################
+	-%}
+	{%- when 'page' -%}
+		{%- assign _layout = settings.page_layout -%}
+
+		{%- if _layout == 'boxed' -%}<div class="container">{%- endif -%}
+
+		<div class="page{% if tempate.suffix != blank %} page-{{tempate.suffix}}{% endif %}">
+			<div class="page_wrapper">
+				<div class="page-content">{{ content_for_layout }}</div>
+			</div>
+		</div>
+
+		{%- if _layout == 'boxed' -%}</div>{%- endif -%}
+
+	{%-
+	#####################
+	#
+	# BLOG
+	#
+	#####################
+	-%}
+	{%- when 'blog' -%}
+		{%- render 'layout-blog', content_for_layout: content_for_layout -%}
+
+	{%-
+	#####################
+	#
+	# ARTICLE
+	#
+	#####################
+	-%}
+	{%- when 'article' -%}
+		{%- render 'layout-article', content_for_layout: content_for_layout -%}
+
+	{%-
+	#####################
+	#
+	# OTHER PAGES
+	#
+	#####################
+	-%}
+	{%- else -%}{{content_for_layout}}
+
+
+{%- endcase -%}

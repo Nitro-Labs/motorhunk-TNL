@@ -1,0 +1,38 @@
+{%- liquid
+  if section != blank
+    assign settings = section.settings
+  endif
+  assign default_color = 'rgba(0,0,0,0)'
+  assign margin        = settings.section_heading_margin
+  assign heading_fs    = settings.section_heading_fs
+  assign heading_lh    = settings.section_heading_lh
+  assign subheading_fs = settings.section_subheading_fs
+  assign subheading_lh = settings.section_subheading_lh
+-%}
+
+{%- case type -%}
+  {%- when 'general' -%}
+    {%- render 'css-responsive' classID: '.section_title-wrapper',value_1: margin, property_1: 'margin'-%}
+    {%- render 'css-responsive' classID: '.section_title-wrapper',classID: '.section_title-text-1',value_1: heading_fs, property_1: 'font-size',value_2: heading_lh, property_2: 'line-height'-%}
+    {%- render 'css-responsive' classID: '.section_title-wrapper',classID: '.section_title-text-2',value_1: subheading_fs, property_1: 'font-size',value_2: subheading_lh, property_2: 'line-height'-%}
+  {%- else -%}
+    {%- if section != blank -%}
+      {%- liquid
+        assign heading_cl    = section.settings.section_heading_cl | default: default_color | replace: default_color, ''
+        assign subheading_cl = section.settings.section_subheading_cl | default: default_color | replace: default_color, ''
+        assign align         = section.settings.section_heading_align
+        assign heading_fw    = section.settings.section_heading_fw
+        assign subheading_fw = section.settings.section_subheading_fw
+      -%}
+      {{--}}{{sectionID}}{
+        {%- if heading_cl != default_color -%} --section-heading-cl: {{heading_cl}}; {%- endif -%}
+        {%- if subheading_cl != default_color -%} --section-subheading-cl: {{subheading_cl}}; {%- endif -%}
+        {%- if align != 'auto' -%} --section-heading-align: {{align}}; {%- endif -%}
+        --section-heading-fw: {{heading_fw}};
+        --section-subheading-fw: {{subheading_fw}};
+      }
+      {%- render 'css-responsive' preClassID: sectionID,classID: '.section_title-wrapper',value_1: margin, property_1: 'margin'-%}
+      {%- render 'css-responsive' preClassID: sectionID,classID: '.section_title-wrapper',classID: '.section_title-text-1',value_1: heading_fs, property_1: 'font-size',value_2: heading_lh, property_2: 'line-height'-%}
+      {%- render 'css-responsive' preClassID: sectionID,classID: '.section_title-wrapper',classID: '.section_title-text-2',value_1: subheading_fs, property_1: 'font-size',value_2: subheading_lh, property_2: 'line-height'-%}
+    {%- endif -%}
+{%- endcase -%}

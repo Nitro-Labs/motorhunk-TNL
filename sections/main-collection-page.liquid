@@ -1,0 +1,154 @@
+{%- liquid
+  if section.settings.boxed_layout or settings.page_layout == 'boxed'
+    assign isBoxed = true
+  endif
+-%}
+{%- liquid
+  assign items_resp = section.settings.items_resp | default: '3,2,2'
+-%}
+{%- liquid
+  if settings.collection_page == 'infinite' or template.suffix contains 'infinite'
+    assign infiniteMode = true
+  endif
+-%}
+
+{%- capture section_class -%}
+  {{- -}}section-{{- section.id -}}
+  {{- -}}|layout-{{- _layout -}}
+  {{- -}}|product_style-grid
+{%- endcapture -%}{%- assign section_class = section_class | strip | split: '|' | join: ' ' -%}
+
+{%- paginate collection.products by settings.collection_page_limit -%}
+
+  <div class="{{section_class}}">
+    <div class="section_content-wrapper">
+
+      <div class="section_content-head">
+        {%- if _layout == 'boxed' -%}<div class="container">{%- endif -%}
+
+          <div class="page-heading">
+              <div class="collection-title">
+                  <h1>{{ collection.title }}</h1>
+                  {% comment %}
+                    {%- if current_tags -%}
+                        <h1>{{ collection.title }}/{{current_tags | join: '/'}}</h1>
+                        <small>({{ collection.products_count  }})</small>
+                    {%- else -%}
+                        <h1>{{ collection.title }}</h1>
+                        <small>({{ collection.all_products_count }})</small>
+                    {%- endif -%}
+                  {% endcomment %}
+              </div>
+          </div>
+
+          {%- render 'collection-toolbar', defaultView: settings.collection_page_limit, paginate: paginate, items_resp: items_resp -%}
+
+        {%- if _layout == 'boxed' -%}</div>{%- endif -%}
+      </div>
+
+
+      <div class="section_content-body">
+        <div id="col-main">
+          {%- if _layout == 'boxed' -%}<div class="container">{%- endif -%}
+            <div class="{%- render 'grid-class' value: items_resp %} grid-gap-md-30 grid-gap-15" id="product-grid-container">
+              {%- for product in collection.products -%}
+                {%- render 'product-item' product: product -%}
+              {%- endfor -%}
+            </div>
+
+            {%- if infiniteMode -%}
+              <span class="js-infinite-btn" data-page="1" style="margin-top: 30px;">
+                {%- render 'svg' type: 'is-loading' -%}
+              </span>
+            {%- else -%}
+              <div class="js-colletion-pagination-container">
+                {% comment %} {%- include 'pagination' -%} {% endcomment %}
+              </div>
+            {%- endif -%}
+          {%- if _layout == 'boxed' -%}</div>{%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endpaginate -%}
+
+
+{%- capture sectionCss -%}
+  {{- section_css -}}
+    {%- liquid
+      assign gridLayout = section.settings.grid_layout | append: ',100%,100%'
+      render 'css-resp', classID: '.layout-grid.d-grid', css_value: gridLayout, css_property: 'grid-template-columns'
+      render 'css-resp', classID: '.layout-grid.d-grid', css_value: section.settings.grid_gap, css_property: 'grid-gap'
+    -%}
+{%- endcapture -%}
+{%- assign sectionCss = sectionCss | strip_newlines -%}
+{%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+
+<script>
+  window.theme = Object.assign(window.theme || {}, {
+    collection: {
+      suffix: "{{template.suffix}}",
+      name: "{{collection.title}}",
+      url: "{{collection.url}}",
+      currentTags: [{%- for tag in current_tags -%}"{{tag | handle}}",{%- endfor -%}],
+      notFound: "{{ 'collections.general.no_product' | t}}"
+    }
+  });
+
+</script>
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+  {
+    "name": {
+      "en": "Collection page"
+    },
+    "tag": "section",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "boxed_layout",
+        "label": {
+          "en": "Boxed layout"
+        },
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "items_resp",
+        "label": {
+          "en": "Max number of items per row"
+        },
+        "default": "4,3,2",
+        "info": {
+          "en": "E.g: 4,3,2"
+        }
+      },
+                            {
+                            "type" : "header", "content": "Sidebar settings"
+                                                                            },
+    {
+      "type": "text",
+      "id": "grid_layout",
+      "label": {
+        "en": "Column Grid layout"
+      },
+      "default": "25% 75%",
+      "placeholder": {
+        "en": "E.g: 70% 30% or 100%"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_gap",
+      "label": {
+        "en": "Column Grid spacing"
+      },
+      "placeholder": {
+        "en": "E.g: 15px"
+      },
+      "default": "30px, 15px"
+    }
+    ]
+  }
+{% endschema %}

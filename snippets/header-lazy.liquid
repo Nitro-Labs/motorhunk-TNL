@@ -1,0 +1,198 @@
+{%- liquid
+  assign q = search.terms
+  if q contains 'linklists'
+    assign menu =  q | split: '[' | last | remove: ']'
+    assign type = 'linklists'
+  elsif q contains 'sublinks'
+    assign menu =  q | split: '[' | last | split: ']' | first
+    assign title =  q | split: 'title:' | last
+    for link in linklists[menu].links
+      assign title_md5 = link.title | md5
+      if  title_md5 == title
+        assign sublinks = link.links
+      endif
+    endfor
+    assign type = 'sublinks'
+  elsif q contains 'mobileDrawer'
+    assign type      = 'mobileDrawer'
+    assign menu      = q | split: '[' | last | split: ']' | first
+    assign title_md5 = q | split: ':' | last
+  elsif q contains 'cartDrawer'
+    assign type = 'cartDrawer'
+  elsif q contains 'dropdownCart'
+    assign type = 'dropdownCart'
+  endif
+-%}
+{%- case type -%}
+  {%- when 'linklists' -%}
+    {%- render 'header-snippets' type: 'menu', menu: menu  -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'sublinks' -%}
+    <ul class="menu-list">
+      {%- for child_link in sublinks -%}
+        <li class="menu-item {% if child_link.links != blank %}dropdown-submenu{%- endif -%}">
+          <a href="{{child_link.url}}">{{child_link.title}}</a>
+          {%- if child_link.links != blank -%}
+            <span class="svg_element-ui">
+              {%- render 'svg' type: 'angle-right' -%}
+            </span>
+            <div class="dropdown-menu grandchild-menu">
+              <ul class="menu-list">
+                {%- for grandchild_link in child_link.links -%}
+                  <li class="menu-item">
+                    <a href="{{grandchild_link.url}}">{{grandchild_link.title}}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'mobileDrawer' -%}
+    {%- for link in linklists[menu].links -%}
+      {%- liquid
+        assign link_md5   = link.title | md5
+        assign link_title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'
+      -%}
+      {%- if link_md5 == title_md5 and link.links != blank -%}
+        {%- capture targetID -%}main-menu-child-{{link_title | md5}}{%- endcapture -%}
+
+        <ul class="menu-list">
+          <li class="menu-item title">
+            <span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+              {%- render 'svg' type: 'angle-left' -%}
+            </span>
+            <a href="#" onclick="return false"> {{ link_title }}</a>
+            <span class="js-btn-close btn-close svg_element-ui">
+              {%- render 'svg' type: 'close' -%}
+            </span>
+          </li>
+          {%- for child_link in link.links -%}
+            {%- assign child_title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+            {%- capture targetID -%}main-menu-grandchild-{{child_link.title | md5}}{%- endcapture -%}
+            <li class="menu-item {% if child_link.links != blank -%} dropdown-submenu {%- endif -%}">
+              <a href="{{child_link.url}}" class="menu-item_title">
+                <span class="title">{{child_title}}</span>
+                {%- render 'header-snippets' type: 'label', title: child_link.title -%}
+              </a>
+              {%- if child_link.links != blank -%}
+                <span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+                  {%- render 'svg' type: 'angle-right' -%}
+                </span>
+                <div class="dropdown-menu grandchild-menu" id="{{targetID}}">
+                  <ul class="menu-list">
+                    <li class="menu-item title">
+                      <span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+                        {%- render 'svg' type: 'angle-left' -%}
+                      </span>
+                      <a href="#" onclick="return false"> {{ child_title }}</a>
+                      <span class="js-btn-close btn-close svg_element-ui">
+                        {%- render 'svg' type: 'close' -%}
+                      </span>
+                    </li>
+                    {%- for grandchild_link in child_link.links -%}
+                      <li class="menu-item">
+                        <a href="{{grandchild_link.url}}" class="menu-item_title">
+                          <span class="title">{{grandchild_link.title}}</span>
+                          {%- render 'header-snippets' type: 'label', title: grandchild_link.title -%}
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    {%- endfor -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'cartDrawer' -%}
+    <form action="{{routes.cart_url}}" novalidate>
+      <div class="drawer_header text-center">
+        <a href="#" onclick="return false" class="js-drawer-close btn-close">
+          {%- render 'svg' type: 'close' -%}
+        </a>
+        {{ 'cart.drawer.your_cart' | t}}
+      </div>
+      <ul class="cart-list">
+        {%- for line_item in cart.items -%}
+          <li class="js-cart-item cart-item animation-fade-index-{{forloop.index}}">
+            <span class="image">{%- render 'image-style' image: line_item.image -%}</span>
+            <div class="info">
+              <p class="name">
+              {{-line_item.product.title-}}
+              {%- unless line_item.product.has_only_default_variant -%}
+                <span class="option">{{line_item.options_with_values | map:'value' | join: '/'}}</span>
+              {%- endunless -%}
+              </p>
+              <p class="qty">
+                {{ 'cart.drawer.quantity' | t}}
+                <input type="number" name="updates[]" value="{{line_item.quantity}}" disabled>
+                <span class="money">{{line_item.final_line_price | money}}</span>
+              </p>
+
+            </div>
+            <a href="#" onclick="return false" class="btn-remove js-btn-remove" data-key="{{line_item.key}}">
+              {%- render 'svg' type: 'close' -%}
+              {%- render 'svg' type: 'card-loading' -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+      <div class="form-bottom">
+        <div class="wrap-progress">
+          <div class="sb-progress">
+            <span class="sb-progress-bar" style="width: 100%">100%</span>
+          </div>
+          <div class="sb-text">
+            Free shipping for orders over <span class="money">$100.00</span>
+          </div>
+        </div>
+        <div class="cart-total">
+          <span>{{ 'cart.drawer.cart_total' | t}}</span>
+          <span class="money">{{cart.total_price | money}}</span>
+        </div>
+        <div class="buttons">
+          <a href="{{routes.cart_url}}" class="btn btn-2">{{ 'cart.drawer.go_to_cart' | t}}</a>
+          <button name="checkout" type="submit" class="btn btn-1">{{ 'cart.drawer.checkout' | t}}</button>
+        </div>
+      </div>
+    </form>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'dropdownCart' -%}
+    <h3 class="title">{{ 'cart.dropdown.title' | t}}</h3>
+    <div class="form_wrapper">
+      <ul class="cart-list">
+        {%- for line_item in cart.items -%}
+          <li class="js-cart-item cart-item">
+            <div class="image">
+              <img src="{{line_item.image | img_url: '400px'}}" alt="{{line_item.product.title}}">
+            </div>
+            <div class="info">
+              <div class="name">{{line_item.product.title}} <span class="option">{{line_item.options_with_values | map: 'value' |  join: '/'}}</span></div>
+              <div class="quantity">{{line_item.quantity}} x <span class="momey">{{line_item.price | money}}</span></div>
+            </div>
+            <a href="#" class="js-btn-remove btn-remove" data-key="{{line_item.key}}">{%- render 'svg' type: 'close' -%}{%- render 'svg' type: 'card-loading' -%}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+    <div class="action">
+      <div class="subtotal">
+        <span>{{ 'cart.dropdown.subtotal' | t}}</span>
+        <span class="money">{{cart.total_price | money }}</span>
+      </div>
+      <div class="action_buttons">
+        <a href="{{routes.cart_url}}" class="btn btn-1">{{ 'cart.dropdown.view_cart' | t}}</a>
+        <a href="{{routes.checkout_url}}" class="btn btn-2">{{ 'cart.dropdown.checkout' | t}}</a>
+      </div>
+    </div>
+  {% comment %} end {% endcomment %}
+{%- endcase -%}

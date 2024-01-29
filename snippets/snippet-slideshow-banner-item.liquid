@@ -1,0 +1,89 @@
+{%- assign color_default = 'rgba(0,0,0,0)' -%}
+
+{%- case block.type -%}
+  {%- when 'banner_content_wrapper' -%}
+    {% liquid 
+      assign position = block.settings.position 
+      assign text_align = block.settings.text_align | default: 'left'
+      assign classID = ' .banner .banner-item' | append: blockID
+    %}
+
+    {%- render 'css-resp' preClassID: sectionID, classID: classID, nextClassID: ' .textbox', css_value: position, type: 'position' -%}
+    {%- render 'css-resp' preClassID: sectionID, classID: classID, nextClassID: ' .textbox',css_value: text_align, css_property: 'text-align' -%}
+  {% comment %} end {% endcomment %}
+  {%- when 'banner_paragraph' -%}
+    {%- for i in (i..3) -%}
+      {% liquid 
+        assign text_color = 'text_color_' | append: i
+        assign text_fs    = 'text_fs_' | append: i
+        assign text_fw    = 'text_fw_' | append: i
+        assign text_mr    = 'text_mr_' | append: i
+        assign text_lh    = 'text_lh_' | append: i
+
+        assign text_color = block.settings[text_color] | default: color_default
+        assign text_fs    = block.settings[text_fs]
+        assign text_fw    = block.settings[text_fw]
+        assign text_mr    = block.settings[text_mr]
+        assign text_lh    = block.settings[text_lh]
+
+        assign classID = ' .banner .banner-item' | append: blockID
+        assign nextClassID = ' .textbox .text-' | append: i
+      %}
+
+      {%- capture textID -%}{{sectionID}}{{classID}}{{nextClassID}}{%- endcapture-%}
+      {%- capture css_values -%}
+        {%- if text_color != color_default -%}color: {{text_color}};{%- endif -%}
+        {%- if text_fw > 0 -%}font-weight: {{text_fw}};{%- endif -%}
+				{%- render 'css-resp', type: 'value', showFirst: true, css_value: text_fs, css_property: 'font-size' -%}
+				{%- render 'css-resp', type: 'value', showFirst: true, css_value: text_mr, css_property: 'margin' -%}
+				{%- render 'css-resp', type: 'value', showFirst: true, css_value: text_lh, css_property: 'line-height' -%}
+      {%- endcapture -%}
+
+      {%- render 'css-resp', classID: textID, css_values: css_values -%}
+      {%- render 'css-resp', classID: textID, showLast: true, css_value: text_fs, css_property: 'font-size' -%}
+			{%- render 'css-resp', classID: textID, showLast: true, css_value: text_mr, css_property: 'margin' -%}
+			{%- render 'css-resp', classID: textID, showLast: true, css_value: text_lh, css_property: 'line-height' -%}
+    {%- endfor -%}
+  {% comment %} end {% endcomment %}
+  {%- when 'banner_btn' -%}
+    {% liquid 
+      assign font_size       = block.settings.font_size | strip
+      assign font_weight     = block.settings.font_weight
+      assign padding         = block.settings.padding | strip
+      assign border_radius   = block.settings.border_radius | strip
+
+      assign text_color      = block.settings.text_color | default: color_default
+      assign bg_color        = block.settings.bg_color | default: color_default
+      assign border_color    = block.settings.border_color | default: color_default
+
+      assign hv_text_color   = block.settings.hv_text_color | default: color_default
+      assign hv_bg_color     = block.settings.hv_bg_color | default: color_default
+      assign hv_border_color = block.settings.hv_border_color | default: color_default
+      
+    %}
+    {%- capture btnID -%}{{sectionID}} .banner .banner-item{{blockID}}{%- endcapture-%}
+    
+    {%- capture css_values -%}
+      {% if text_color != color_default %}color: {{text_color}};{%- endif -%}
+      {% if bg_color != color_default %}background-color: {{bg_color}};{%- endif -%}
+      {% if border_color != color_default %}border: 1px solid {{border_color}};{%- endif -%}
+      {% if font_weight != 0 %}font-weight: {{font_weight}};{%- endif -%}
+      {%- render 'css-resp' type: 'value', showFirst: true, css_value: font_size, css_property: 'font-size' -%}
+      {%- render 'css-resp' type: 'value', showFirst: true, css_value: border_radius, css_property: 'border-radius' -%}
+      {%- render 'css-resp' type: 'value', showFirst: true, css_value: padding, css_property: 'padding' -%}
+    {%- endcapture -%}
+
+    {%- render 'css-resp' classID: btnID, nextClassID: ' .btn-custom', css_values: css_values  -%}
+    {%- render 'css-resp' classID: btnID, nextClassID: ' .btn-custom', showLast: true, css_value: font_size, css_property: 'font-size' -%}
+    {%- render 'css-resp' classID: btnID, nextClassID: ' .btn-custom', showLast: true, css_value: border_radius, css_property: 'border-radius' -%}
+    {%- render 'css-resp' classID: btnID, nextClassID: ' .btn-custom', showLast: true, css_value: padding, css_property: 'padding' -%}
+
+    {% comment %} Hover {% endcomment %}
+    {%- capture hover_css -%}
+      {% if hv_text_color != color_default %}color: {{hv_text_color}};{%- endif -%}
+      {% if hv_bg_color != color_default %}background-color: {{hv_bg_color}};{%- endif -%}
+      {% if hv_border_color != color_default %}border-color: {{hv_border_color}};{%- endif -%}
+    {%- endcapture -%}
+
+    {%- render 'css-resp' classID: btnID, nextClassID: ' .btn-custom:hover', css_values: hover_css  -%}
+{%- endcase -%}

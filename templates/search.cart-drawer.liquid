@@ -1,0 +1,89 @@
+{% layout none %}
+<form action="{{routes.cart_url}}" method="post" novalidate>
+  <div class="drawer_header text-center">
+    <a href="#" onclick="return false" class="js-drawer-close btn-close">
+      {%- render 'svg' type: 'close' -%}
+    </a>
+    {{ 'cart.drawer.your_cart' | t}}
+  </div>
+  <div class="form_wrapper">
+    <ul class="js-cart-list cart-list">
+      <li class="js-cart-item cart-item animation-fade d-none template">
+        <a class="image js-url">
+          <img class="js-img">
+        </a>
+        <div class="info">
+          <a class="name js-url js-name"></a>
+          <span class="option js-option"></span>
+          <p class="qty">{{- 'cart.drawer.quantity' | t -}}<input type="number" class="js-qty" disabled><span class="money js-price"></span></p>
+        </div>
+        <a href="#" onclick="return false" class="btn-remove js-btn-remove">
+          {%- render 'svg' type: 'close' -%}
+          {%- render 'svg' type: 'card-loading' -%}
+        </a>
+      </li>
+      {%- for line_item in cart.items -%}
+        <li class="js-cart-item cart-item animation-fade" data-key="{{line_item.key}}">
+          <span class="image">
+            {%- if line_item.image != blank -%}
+              <img src="{{line_item.image | img_url: '200x'}}" alt="{{line_item.product.title}}">
+            {%- else -%}
+              <img src="{{'default-image.jpg' | asset_img_url: '200x'}}" alt="{{line_item.product.title}}">
+            {%- endif -%}
+          </span>
+          <div class="info">
+            <p class="name">{{-line_item.product.title-}}</p>
+            {%- unless line_item.product.has_only_default_variant -%}
+              <span class="option">{{line_item.options_with_values | map:'value' | join: '/'}}</span>
+            {%- endunless -%}
+            <p class="qty">
+              {{- 'cart.drawer.quantity' | t-}}
+              <input class="js-qty" type="number" name="updates[{{line_item.variant_id}}]" value="{{line_item.quantity}}" disabled>
+              <span class="money {% if settings.enable_currencies -%} js-money {%- endif -%}">{{line_item.final_price | money}}</span>
+            </p>
+
+          </div>
+          <a href="#" onclick="return false" class="btn-remove js-btn-remove" data-key="{{line_item.key}}">
+            {%- render 'svg' type: 'close' -%}
+            {%- render 'svg' type: 'card-loading' -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  <div class="form-bottom">
+    {% comment %} <div class="wrap-progress">
+      <div class="sb-progress">
+        <span class="sb-progress-bar" style="width: 100%">100%</span>
+      </div>
+      <div class="sb-text">
+        Free shipping for orders over <span class="money">$100.00</span>
+      </div>
+    </div> {% endcomment %}
+    <div class="cart-total">
+      <span>{{ 'cart.drawer.cart_total' | t}}</span>
+      <span class="js-cart-total-money money {% if settings.enable_currencies -%} js-money {%- endif -%}">{{cart.total_price | money}}</span>
+    </div>
+    {%- if settings.enable_terms_condition -%}
+      <div class="input-group terms-conditions">
+        <input type="checkbox" required id="drawer-required-input">
+        <label for="drawer-required-input">{{ 'cart.general.terms_and_conditions' | t}}</label>
+      </div>
+    {%- endif -%}
+    <div class="buttons">
+      <a href="{{routes.cart_url}}" class="btn btn-2">{{ 'cart.drawer.go_to_cart' | t}}</a>
+      <button name="checkout" type="submit" class="btn btn-1">{{ 'cart.drawer.checkout' | t}}</button>
+    </div>
+  </div>
+
+  <div class="empty text-center">{{ 'cart.drawer.empty' | t}}</div>
+</form>
+<style>
+  #cart-drawer-container[data-items="0"] .form_wrapper,#cart-drawer-container[data-items="0"] .form-bottom{
+    display: none;
+  }
+  #cart-drawer-container:not([data-items="0"]) .empty{
+    display: none;
+  }
+</style>

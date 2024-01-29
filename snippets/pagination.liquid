@@ -1,0 +1,40 @@
+{%- if paginate.pages > 1 -%}
+  {%- capture prevSVG -%}<svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.99237 6.88755L7 1.65864L4.80916 0L0 7L4.80916 14L7 12.3414L2.99237 6.88755Z"/></svg>{%- endcapture -%}
+  {%- capture nextSVG -%}<svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.00763 7.11245L0 12.3414L2.19084 14L7 7L2.19084 0L0 1.65863L4.00763 7.11245Z"/></svg>{%- endcapture -%}
+
+  <div class="pagination-holder">
+    <ul class="pagination">
+      {%- if paginate.previous -%}
+        <li>
+          <a href="{{ paginate.previous.url | append: id}}" title="{{'general.pagination.previous' | t }}" class="prev">
+            <span class="svg-element-ui">
+              {{ prevSVG }}
+            </span>
+          </a>
+        </li>
+      {%- endif -%}
+
+      {%- for part in paginate.parts -%}
+        {%- if part.is_link -%}
+          <li><a href="{{ part.url | append: id }}">{{ part.title }}</a></li>
+        {%- else -%}
+          {%- if part.title == '&hellip;' -%}
+          <li class="ellipsis"><span>{{ part.title }}</span></li>
+          {%- else -%}
+          <li class="active"><a href="javascript:;">{{ part.title }}</a></li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- if paginate.next -%}
+        <li>
+          <a href="{{ paginate.next.url | append: id}}" title="{{'general.pagination.next' | t }}" class="next">
+            <span class="svg-element-ui">
+              {{ nextSVG }}
+            </span>
+          </a>
+        </li>
+      {%- endif -%}
+    </ul>
+  </div>
+{%- endif -%}

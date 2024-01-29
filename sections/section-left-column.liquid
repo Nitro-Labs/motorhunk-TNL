@@ -1,0 +1,905 @@
+{%- liquid
+  assign testimonial_blocks = section.blocks | where: 'type', 'testimonial_item'
+  assign product_blocks     = section.blocks | where: 'type', 'product_item'
+  assign arr_block_item     = 'icon_item,logo_item,testimonial_item,product_item'
+  assign color_default      = 'rgba(0,0,0,0)'
+  assign sectionID          = '#section-' | append: section.id
+-%}
+
+<div class="sb-left-column" id="section-{{section.id}}" data-section-type="left-column" data-section-id="{{section.id}}">
+  <div class="section-wrapper">
+    {%- for block in section.blocks -%}
+      {%- if arr_block_item contains block.type -%}{%- continue -%}{%- endif -%}
+
+        {%- liquid
+          assign blockID     = 'block-' | append: block.id
+          assign classID     = ' .sb-widget.' | append: blockID | prepend: sectionID
+          assign bg_color    = block.settings.bg_color | default: color_default
+          assign block_title = block.settings.title
+        -%}
+        {%- capture bgset -%}
+          {%- render 'bgset' image: block.settings.bg_image -%}
+        {%- endcapture -%}
+      <div class="sb-widget widget-{{block.type}} {{blockID}} {{bgset}}" style="{%- if bg_color != color_default -%}background-color: {{bg_color}};{%- endif -%}background-repeat: no-repeat;background-size: cover;background-position:center">
+
+        {%- case block.type -%}
+          {%- when 'menu' -%}
+            <div class="sb-widget_title">
+              <h5>{{block_title}}</h5>
+            </div>
+
+            <ul class="menu-list" {{block.shopify_attributes}}>
+              {%- for link in linklists[block.settings.menu].links -%}
+                <li class="menu-item">
+                  <a href="{{link.url}}">{%- render 'snippet-nav-label' link: link -%}</a>
+
+                  {%- if link.links != blank -%}
+                    <a href="#" onclick="return false" class="js-btn-collapse collapse" data-target="child-link-{{block.id | append: forloop.index}}">
+                      {%- render 'svg' type: 'angle-down' -%}
+                    </a>
+                    <div class="dropdown-menu child-menu">
+                      <ul class="menu-list" id="child-link-{{block.id | append: forloop.index}}">
+                        {%- for child_link in link.links -%}
+                          <li class="menu-item">
+                            <a href="{{child_link.url}}">{%- render 'snippet-nav-label' link: child_link -%}</a>
+
+                            {%- if child_link.links != blank -%}
+                              <a href="#" onclick="return false" class="js-btn-collapse collapse" data-target="grandchild-link-{{block.id | append: forloop.index}}">
+                                {%- render 'svg' type: 'angle-down' -%}
+                              </a>
+                              <div class="dropdown-menu grandchild-menu">
+                                <ul class="menu-list" id="grandchild-link-{{block.id | append: forloop.index}}">
+                                  {%- for grandchild_link in child_link.links -%}
+                                    <li class="menu-item">
+                                      <a href="{{grandchild_link.url}}">{%- render 'snippet-nav-label' link: grandchild_link -%}</a>
+                                    </li>
+                                  {%- endfor -%}
+                                </ul>
+                              </div>
+                            {%- endif -%}
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'iconbox' -%}
+            <div class="icon-list">
+              {%- for block in section.blocks offset: forloop.index -%}
+                {%- if block.type != 'icon_item' -%} {%- break -%} {%- endif -%}
+                {%- liquid
+                  assign icon_image = block.settings.icon_image
+                  assign icon_type = block.settings.icon_type
+                  assign icon_svg = block.settings.icon_svg
+                -%}
+                <div class="card_section-item" {{block.shopify_attributes}}>
+                  <div class="card_section-item-inner">
+                    <div class="card_section-header">
+                      <div class="card_section-figure">
+                        {%- if icon_type == 'image' -%}
+                          {%- if icon_image -%}
+                            {%- render 'image-style' image: icon_image -%}
+                          {%- else -%}
+                            {{ 'image' | placeholder_svg_tag }}
+                          {%- endif -%}
+                        {%- else -%}
+                          {%- if icon_svg != blank -%}
+                            <span class="svg_element-ui">{{icon_svg}}</span>
+                          {%- else -%}
+                            <span class="svg_element-ui">{{ 'image' | placeholder_svg_tag }}</span>
+                          {%- endif -%}
+                        {%- endif -%}
+                      </div>
+                    </div>
+                    <div class="card_section-body">
+                      <div class="card_section-info">
+                        <p class="card_section-title">{{block.settings.title}}</p>
+                        <p class="card_section-subtitle">{{block.settings.subtitle}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              {%- endfor -%}
+            </div>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'logo-list' -%}
+            <div class="sb-widget_title">
+              <h5>{{block_title}}</h5>
+            </div>
+
+            <ul class="logo-list">
+              {%- for block in section.blocks offset: forloop.index -%}
+                {%- if block.type != 'logo_item' -%}{%- break -%}{%- endif -%}
+                {%- liquid
+                  assign type  = block.settings.type
+                  assign image = block.settings.image
+                  assign svg   = block.settings.svg
+                -%}
+                <li class="logo-item" {{block.shopify_attributes}}>
+                  <a href="{{block.settings.image_link}}">
+                    {%- if type == 'image' -%}
+                      {%- if image != blank -%}
+                        {%- render 'image-style' image: image -%}
+                      {%- else -%}
+                        {{ 'image' | placeholder_svg_tag }}
+                      {%- endif -%}
+                    {%- else -%}
+                      {%- if svg != blank -%}
+                        {{svg}}
+                      {%- else -%}
+                        {{ 'image' | placeholder_svg_tag }}
+                      {%- endif -%}
+                    {%- endif -%}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'banner' -%}
+            <div class="banner">
+              <div class="banner-wrapper">
+                <div class="textbox">
+                  {%- for i in (1..4) -%}
+                    {%- assign text = 'text_' | append: i -%}
+                    <div class="text-{{i}}">{{block.settings[text]}}</div>
+                  {%- endfor -%}
+                  <a href="{{block.settings.btn_url}}" class="btn btn-{{block.settings.btn_style}}">{{block.settings.btn_text}}</a>
+                </div>
+              </div>
+            </div>
+
+            {%- capture block_css -%}
+              {%- for i in (1..4) -%}
+                {%- liquid
+                  assign text_color  = 'text_color_' | append: i
+                  assign font_weight = 'fw_' | append: i
+                  assign font_size   = 'fs_' | append: i
+                  assign margin      = 'mr_' | append: i
+                  assign text_color  = block.settings[text_color] | default: color_default
+                  assign nextClassID = ' .textbox .text-' | append: i
+                -%}
+                {%- capture css_values -%}
+                  {%- if text_color != color_default -%} color: {{text_color}}; {%- endif -%}
+                  {%- render 'css-resp' type: 'value', css_value: block.settings[font_size], showFirst: true, css_property: 'font-size' -%}
+                  {%- render 'css-resp' type: 'value', css_value: block.settings[margin], showFirst: true, css_property: 'margin' -%}
+                  font-weight: {{block.settings[font_weight]}};
+
+                {%- endcapture -%}
+                {%- render 'css-resp' classID: classID, nextClassID: nextClassID, css_values: css_values  -%}
+                {%- render 'css-resp' classID: classID, nextClassID: nextClassID, showLast: true, css_value: block.settings[font_size], css_property: 'font-size' -%}
+                {%- render 'css-resp' classID: classID, nextClassID: nextClassID, showLast: true, css_value: block.settings[margin], css_property: 'margin' -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            {%- assign section_css = section_css | append: block_css -%}
+          {% comment %} end {% endcomment %}
+
+          {%- when 'testimonial-list' -%}
+            {%- liquid
+              assign slider_id   = '#slider-' | append: block.id
+              assign controls_id = '#controls-' | append: block.id
+              assign testimonial_block_count = 0
+            -%}
+            <div class="sb-widget_title">
+              <h5>{{block_title}}</h5>
+            </div>
+            <div class="testimonial-list js-slider-container slider-container">
+              <div class="slider-wrapper">
+                <div class="testimonial-content slider-list" id="slider-{{block.id}}">
+                  {%- for block in section.blocks offset: forloop.index -%}
+                    {%- if block.type != 'testimonial_item' -%} {%- break -%} {%- endif -%}
+                    {%- liquid
+                      assign testimonial_block_count = testimonial_block_count | plus: 1
+                      assign star = 'star-' | append: block.settings.rating
+                    -%}
+
+                    <div class="testimonial-item slider-item w-100">
+                        <div class="card_section-item-inner">
+                        <div class="card_testimonial-image">
+                          <div class="image">{%- render 'image-style' image: block.settings.image -%}</div>
+
+                          <div class="content">
+                            <p class="card_testimonial-author">{{block.settings.name}}</p>
+                            <div class="card_testimonial-rating rating">
+                              {%- render 'svg' type: star -%}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="card_testimonial-content">
+                          <div class="card_testimonial-review">{{block.settings.review}}</div>
+                        </div>
+                      </div>
+                    </div>
+                  {%- endfor -%}
+                </div>
+                {%- render 'set-tns-config'
+                  slider_id  : slider_id,
+                  controls_id: controls_id,
+                  slideshow  : true,
+                  controls   : true,
+                  total_item : testimonial_block_count
+                -%}
+              </div>
+            </div>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'product-list' -%}
+            {%- liquid
+              assign slider_id   = '#slider-' | append: block.id
+              assign controls_id = '#controls-' | append: block.id
+              assign product_block_count = 0
+            -%}
+            <div class="sb-widget_title">
+              <h5>{{block_title}}</h5>
+            </div>
+            <div class="product-list">
+              <div class="slider-container js-slider-container">
+                <div class="slider-wrapper">
+                  <div class="slider-list product-list_content" id="slider-{{block.id}}">
+                    {%- for block in section.blocks offset: forloop.index -%}
+                      {%- if block.type != 'product_item' -%} {%- break -%} {%- endif -%}
+                      {%- liquid
+                        assign product_block_count = product_block_count | plus: 1
+                        assign product_handle      = block.settings.product_handle
+                        assign product_selected    = all_products[product_handle]
+                      -%}
+                      <div class="w-100 product-item slider-item">
+                        {%- render 'product-item' product: product_selected, id: section.id -%}
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                  {%- render 'set-tns-config'
+                    slider_id  : slider_id,
+                    controls_id: controls_id,
+                    controls   : true,
+                    slideshow  : true,
+                    total_item : product_block_count
+                    -%}
+                </div>
+              </div>
+
+            </div>
+        {%- endcase -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+<style>{{section_css}}</style>
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("left-column") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "left-column"]);
+  }else{
+    window.theme.sectionRegister = ["left-column"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+{%- schema -%}
+{
+  "name": {
+    "en": "Left Column"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": {
+        "en": "Menu"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": {
+            "en": "Menu"
+          }
+        }
+      ]
+    },
+    {
+      "type": "iconbox",
+      "limit": 1,
+      "name": {
+        "en": "Icon Box"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "To add item. Please add block '--Icon item'"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        }
+      ]
+    },
+    {
+      "type": "icon_item",
+      "name": {
+        "en": "--Icon item"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": {
+            "en": "Subtitle"
+          }
+        },
+        {
+          "type": "select",
+          "id": "icon_type",
+          "label": {
+            "en": "Icon type"
+          },
+          "options": [
+            {
+              "value": "image",
+              "label": {
+                "en": "image"
+              }
+            },
+            {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": {
+            "en": "SVG"
+          }
+        }
+      ]
+    },
+    {
+      "type": "logo-list",
+      "limit": 1,
+      "name": {
+        "en": "Logo list"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "To add item. Please add content 'Logo item' "
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        }
+      ]
+    },
+    {
+      "type": "logo_item",
+      "name": {
+        "en": "--Logo Item"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block title"
+          },
+          "default" : "--Logo Item"
+        },
+        {
+          "type": "select",
+          "id": "type",
+          "label" : {
+            "en" : "Type"
+          },
+          "options": [
+           {
+              "value": "image",
+              "label": {
+                "en": "Image"
+              }
+           },
+           {
+             "value": "svg",
+             "label": {
+               "en": "SVG"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "html",
+          "id": "svg",
+          "label": {
+            "en": "SVG code"
+          }
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": {
+            "en": "Link"
+          }
+        }
+      ]
+    },
+    {
+      "type": "banner",
+      "name": {
+        "en": "Banner"
+      },
+      "settings": [
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "bg_image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text one settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_1",
+          "label": {
+            "en": "Text 1"
+          },
+          "default": "Lorem, ipsum dolor."
+        },
+        {
+          "type": "color",
+          "id": "text_color_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "fw_1",
+          "label": "Font weight",
+          "step": 100,
+          "min": 100,
+          "max": 900,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "mr_1",
+          "label": {
+            "en": "Margin"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text two settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_2",
+          "label": {
+            "en": "Text 2"
+          },
+          "default": "Lorem ipsum dolor sit."
+        },
+        {
+          "type": "color",
+          "id": "text_color_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "fs_2",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "fw_2",
+          "label": "Font weight",
+          "step": 100,
+          "min": 100,
+          "max": 900,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "mr_2",
+          "label": {
+            "en": "Margin"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text three settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_3",
+          "label": {
+            "en": "Text 3"
+          },
+          "default": "Lorem ipsum dolor sit amet."
+        },
+        {
+          "type": "color",
+          "id": "text_color_3",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "fs_3",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "fw_3",
+          "label": "Font weight",
+          "step": 100,
+          "min": 100,
+          "max": 900,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "mr_3",
+          "label": {
+            "en": "Margin"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text four settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_4",
+          "label": {
+            "en": "Text 4"
+          },
+          "default": "Lorem, ipsum dolor."
+        },
+        {
+          "type": "color",
+          "id": "text_color_4",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "fs_4",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "fw_4",
+          "label": "Font weight",
+          "step": 100,
+          "min": 100,
+          "max": 900,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "mr_4",
+          "label": {
+            "en": "Margin"
+          },
+          "info": {
+            "en": "E.g: 20px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Button settings"
+          }
+        },
+        {
+          "type": "select",
+          "id": "btn_style",
+          "label": {
+            "en": "Button style"
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "2"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "btn_text",
+          "label": {
+            "en": "Button label"
+          },
+          "default": "Shop Now"
+        },
+        {
+          "type": "text",
+          "id": "btn_url",
+          "label": {
+            "en": "Button link"
+          }
+        }
+      ]
+    },
+    {
+      "type": "testimonial-list",
+      "limit" : 1,
+      "name": {
+        "en": "Testimonial"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "To add item. Please add content '--Testimonial item'"
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "testimonial_item",
+      "name" : {
+        "en": "--Testimonial Item"
+      },
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block title"
+          },
+          "default" : "--Testimonial item"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Content"
+          }
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": {
+            "en": "Author's name"
+          },
+          "default" : "Author"
+        },
+        {
+          "type": "richtext",
+          "id": "review",
+          "label": {
+            "en": "Review"
+          },
+          "default" : "<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nostrum excepturi ipsa possimus nesciunt asperiores architecto ullam voluptatibus, sed provident repudiandae.</p>"
+        },
+        {
+          "type" : "range",
+          "id": "rating",
+          "label":{
+            "en" : "Rating"
+          },
+          "step": 1,
+          "min" : 1,
+          "max" : 5,
+          "default" : 5
+        }
+      ]
+    },
+    {
+      "type" : "product-list",
+      "limit" : 1,
+      "name" : {
+        "en": "Product list"
+      },
+      "settings" : [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "To add product item. Please add content 'Product item.'"
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          }
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "product_item",
+      "name" : {
+        "en": "--Product Item"
+      },
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block title"
+          },
+          "default" : "--Product Item"
+        },
+        {
+          "type" : "product",
+          "id" : "product_handle",
+          "label" : "Product"
+        }
+      ]
+    }
+  ]
+}
+{%- endschema -%}
+

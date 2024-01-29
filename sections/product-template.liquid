@@ -1,0 +1,374 @@
+{%- liquid
+  assign type = template.suffix
+-%}
+
+{%- case type -%}
+  {%- when 'no-sidebar' -%}
+    {%- render 'product-no-sidebar' section: section -%}
+  {%- when 'with-sidebar' -%}
+    {%- render 'product-with-sidebar' section: section -%}
+  {%- else -%}
+    {%- case settings.product_page -%}
+      {%- when 'default' -%}
+        {%- render 'product-default' section: section -%}
+      {%- when 'no-sidebar' -%}
+        {%- render 'product-no-sidebar' section: section -%}
+      {%- when 'with-sidebar' -%}
+        {%- render 'product-with-sidebar' section: section -%}
+    {%- endcase -%}
+
+{%- endcase -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("product-template") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "product-template"]);
+  }else{
+    window.theme.sectionRegister = ["product-template"];
+  }
+</script>
+
+{% schema %}
+{
+  "name": {
+    "en": "Product page"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Plese see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000247873) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Product template' section"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Standard - Description"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": "Standard tab are created base on your Product description content. If you'd like unique set of tabs for each product you should use heading 5 function"
+    },
+    {
+      "type": "checkbox",
+      "id": "multi_tab",
+      "label": "Use Multi-tabs with heading 5 tag",
+      "default": true,
+      "info": "We use heading 5 in Product's description to separate Multi-tabs, each <h5>Tabs Title</h5> will be considered as content separator and tabs title"
+    },
+    {
+      "type" : "checkbox",
+      "id" : "show_dynamic_checkout",
+      "label" : {
+        "en": "Show dynamic checkout"
+      },
+      "default": false
+    },
+    {
+      "type" : "checkbox",
+      "id" : "show_vendor",
+      "label" : {
+        "en": "Show vendor"
+      },
+      "default": true
+    },
+    {
+      "type" : "checkbox",
+      "id" : "show_sku",
+      "label" : {
+        "en": "Show sku"
+      },
+      "default": true
+    },
+    {
+      "type" : "checkbox",
+      "id" : "show_categories",
+      "label" : {
+        "en" : "Show categories"
+      },
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "status_when_variant_sold_out",
+      "label" : {
+        "en" : "Status of variant when sold out"
+      },
+      "options": [
+        {
+          "value": "default",
+          "label": {
+            "en": "Default"
+          }
+        },
+       {
+          "value": "hide",
+          "label": {
+            "en": "Hide"
+          }
+       },
+       {
+         "value": "disable",
+         "label": {
+           "en": "Disable"
+         }
+       }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "page",
+      "name": {
+        "en": "Static - Page"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "Static tab are created base on Page content. It's useful for some content that is same for all the products like Shipping term, Size Guide, and so on"
+          }
+        },
+        {
+          "type": "text",
+          "id": "page_title",
+          "label": {
+            "en": "Heading"
+          }
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": {
+            "en": "Select a Page"
+          }
+        }
+      ]
+    },
+    {
+      "type": "iconbox",
+      "limit": 1,
+      "name": {
+        "en": "Icon box"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          },
+          "default": "Icon box"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Icon 1"
+          }
+        },
+        {
+          "type": "html",
+          "id": "icon_1",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_1",
+          "label": {
+            "en": "Text"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Icon 2"
+          }
+        },
+        {
+          "type": "html",
+          "id": "icon_2",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_2",
+          "label": {
+            "en": "Text"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Icon 3"
+          }
+        },
+        {
+          "type": "html",
+          "id": "icon_3",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "text_3",
+          "label": {
+            "en": "Text"
+          }
+        }
+      ]
+    },
+    {
+      "type": "metafield-tab",
+      "name": {
+        "en": "Metafield Tab"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "Before use, please install [Advanced Custom Field App](https://apps.shopify.com/advanced-custom-field/#modal-show=AuthModal)."
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": {
+            "en": "Please add metafield for Shop object."
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Tab title"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Metafield"
+          }
+        },
+        {
+          "type": "text",
+          "id": "namespace",
+          "label": {
+            "en": "Namespace"
+          }
+        },
+        {
+          "type": "text",
+          "id": "key",
+          "label": {
+            "en": "Key"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Visible settings"
+          }
+        },
+        {
+          "type" : "checkbox",
+          "id" : "visible_all",
+          "label" : {
+            "en": "Visible all products."
+          },
+          "default": true
+        },
+        {
+          "type": "textarea",
+          "id": "vendor_visible",
+          "label": {
+            "en": "Enter the vendor you want visible the metafield tab."
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "collection_visible",
+          "label": {
+            "en": "Enter the collection title you want visible the metafield tab."
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "product_visible",
+          "label": {
+            "en": "Enter the product title you want visible the metafield tad."
+          }
+        },
+        {
+          "type": "select",
+          "id": "template_visible",
+          "label": {
+            "en": "Visible on template"
+          },
+          "options": [
+            {
+              "value": "default",
+              "label": {
+                "en": "1. Default"
+              }
+            },
+            {
+              "value": "with-sidebar",
+              "label": {
+                "en": "2. With Sidebar"
+              }
+            },
+            {
+              "value": "no-sidebar",
+              "label": {
+                "en": "3. No Sidebar"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

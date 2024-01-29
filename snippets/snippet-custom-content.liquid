@@ -1,0 +1,291 @@
+{%- case type -%}
+  {%- when 'paragraph' -%}
+		{%- comment -%}
+			**
+			* Main Content
+			*
+		{%- endcomment-%}
+		{%- for i in (1..2) -%}
+			{%- liquid
+				assign __text = 'main_text_' | append: i
+				assign __text = block.settings[__text]
+			-%}
+			{%- unless __text == blank -%}
+				<div class="main__text main__text-{{i}}">{{__text}}</div>
+			{%- endunless -%}
+		{%- endfor -%}
+
+
+		{%- comment -%}
+			**
+			* Sub Content
+			*
+		{%- endcomment-%}
+		<div class="sub__text-wrapper">
+			{%- for i in (1..2) -%}
+				{%- liquid
+					assign __svg 	= 'svg_' | append: i
+					assign __text 	= 'sub_text_' | append: i
+					assign __svg 	= block.settings[__svg]
+					assign __text 	= block.settings[__text]
+				-%}
+				{%- unless __text == blank -%}
+					<div class="sub__text sub__text-{{i}}">
+						{%- unless __svg == blank -%}<span class="svg-element-ui">{{__svg}}</span>{%- endunless -%}
+						<span class="sub__text-content">{{__text}}</span>
+					</div>
+				{%- endunless -%}
+			{%- endfor -%}
+		</div>
+
+
+		{%- comment -%}
+			**
+			* Button content
+			*
+		{%- endcomment-%}
+		{%- liquid
+			assign __btn_txt = block.settings.btn_txt
+			assign __btn_url = block.settings.btn_url | default: 'javascript:void(0);'
+		-%}
+		{%- unless __btn_txt == blank -%}
+			<div class="button__cotent">
+				<a href="{{__btn_url}}" class="btn btn-{{block.settings.btn_style}} button__link">
+					<span>{{ __btn_txt }}</span>
+				</a>
+			</div>
+		{%- endunless -%}
+
+	{%- when 'style_paragraph' -%}
+
+		{%- comment -%}
+			**
+			* Style for Paragraph
+			*
+		{%- endcomment-%}
+		{%- liquid
+			assign __type = block.settings.type | default: 'main'
+			if __type == 'main'
+				assign textID = '.main__text'
+			else
+				assign textID = '.sub__text-wrapper .sub__text'
+			endif
+		-%}
+
+		{%- for i in (1..2) -%}
+			{%- capture block_ID -%}{{sectionID}}{% unless blockID == '' %} .block-{{blockID}}{% endunless %} {{textID}}-{{i}}{%- endcapture -%}
+			{%- liquid
+				assign __main_text_cl 		= 'main_text_cl_' | append: i
+				assign __main_text_fw 		= 'main_text_fw_' | append: i
+				assign __main_text_fs 		= 'main_text_fs_' | append: i
+				assign __main_text_margin 	= 'main_text_margin_' | append: i
+				assign __main_text_lh 		= 'main_text_lh_' | append: i
+
+				assign __main_text_cl 		= block.settings[__main_text_cl] | default: 'rgba(0,0,0,0)'
+				assign __main_text_fw 		= block.settings[__main_text_fw]
+				assign __main_text_fs 		= block.settings[__main_text_fs]
+				assign __main_text_margin 	= block.settings[__main_text_margin]
+				assign __main_text_lh 		= block.settings[__main_text_lh]
+			-%}
+			{%- capture firstValues -%}
+				{%- unless __main_text_cl == 'rgba(0,0,0,0)' -%}color: {{__main_text_cl}};{%- endunless -%}
+				{%- unless __main_text_fw == 0 -%}font-weight: {{__main_text_fw}};{%- endunless -%}
+				{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'font-size', css_value: __main_text_fs -%}
+				{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'margin', css_value: __main_text_margin -%}
+				{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'line-height', css_value: __main_text_lh -%}
+			{%- endcapture -%}
+
+			{%- render 'css-resp', classID: block_ID, css_values: firstValues -%}
+			{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'font-size', css_value: __main_text_fs -%}
+			{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'margin', css_value: __main_text_margin -%}
+			{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'line-height', css_value: __main_text_lh -%}
+		{%- endfor -%}
+
+
+	{%- when 'style_button' -%}
+
+		{%- comment -%}
+			**
+			* Style for Button
+			*
+		{%- endcomment-%}
+		{%- capture block_ID -%}{{sectionID}}{% unless blockID == '' %} .block-{{blockID}}{% endunless %} .button__link{%- endcapture -%}
+		{%- capture SVG_ID -%}{{block_ID}} svg path{%- endcapture -%}
+		{%- liquid
+			assign __btn_cl                     = block.settings.btn_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_bg_cl                  = block.settings.btn_bg_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_border_cl              = block.settings.btn_border_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_hover_cl               = block.settings.btn_hover_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_hover_bg_cl            = block.settings.btn_hover_bg_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_hover_border_cl        = block.settings.btn_hover_border_cl | default: 'rgba(0,0,0,0)'
+			assign __btn_fw                     = block.settings.btn_fw
+			assign __btn_border_width_temp      = block.settings.btn_border_width
+			assign __btn_border_width           = __btn_border_width_temp | append: 'px'
+			assign __btn_fs                     = block.settings.btn_fs
+			assign __btn_padding                = block.settings.btn_padding
+			assign __btn_margin                 = block.settings.btn_margin
+			assign __btn_radius                 = block.settings.btn_radius
+		-%}
+
+		{%- capture firstValues -%}
+			{%- if __btn_fw > 0 -%}font-weight: {{ __btn_fw }};{%- endif -%}
+			{%- unless __btn_cl         == 'rgba(0,0,0,0)' -%}color: {{__btn_cl}};{%- endunless -%}
+			{%- unless __btn_bg_cl      == 'rgba(0,0,0,0)' -%}background-color: {{__btn_bg_cl}};{%- endunless -%}
+			{%- unless __btn_border_cl  == 'rgba(0,0,0,0)' -%}border-color: {{__btn_border_cl}};{%- endunless -%}
+			{%- unless __btn_border_width_temp == blank -%}{%- render  'css-resp', type: 'value', css_property: 'border-width', css_value: __btn_border_width -%}{%- endunless -%}
+			{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'font-size', css_value: __btn_fs -%}
+			{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'padding', css_value: __btn_padding -%}
+			{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'margin', css_value: __btn_margin -%}
+			{%- render  'css-resp', type: 'value', showFirst: true, css_property: 'border-radius', css_value: __btn_radius -%}
+		{%- endcapture -%}
+
+		{%- render 'css-resp', classID: block_ID, showLast: true, css_values: firstValues -%}
+		{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'font-size', css_value: __btn_fs -%}
+		{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'padding', css_value: __btn_padding -%}
+		{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'margin', css_value: __btn_margin -%}
+		{%- render 'css-resp', classID: block_ID, showLast: true, css_property: 'border-radius', css_value: __btn_radius -%}
+
+		{%- unless __btn_cl == 'rgba(0,0,0,0)' -%}{{- SVG_ID }}{fill: {{__btn_cl}};}{%- endunless -%}
+
+
+
+
+		{%- comment -%}
+		**
+		* Button Hover
+		*
+		{%- endcomment-%}
+		{%- assign block_ID = block_ID | append: ':hover' -%}
+		{%- capture firstValues -%}
+			{%- unless __btn_hover_cl         == 'rgba(0,0,0,0)' -%}color: {{__btn_hover_cl}};{%- endunless -%}
+			{%- unless __btn_hover_bg_cl      == 'rgba(0,0,0,0)' -%}background-color: {{__btn_hover_bg_cl}};{%- endunless -%}
+			{%- unless __btn_hover_border_cl  == 'rgba(0,0,0,0)' -%}border-color: {{__btn_hover_border_cl}};{%- endunless -%}
+		{%- endcapture -%}
+		{%- render 'css-resp', classID: block_ID, css_values: firstValues -%}
+
+  	{%- when 'html' -%}{{ block.settings.html }}
+
+  	{%- when 'video' -%}
+  		{%- liquid
+  			assign __videoURL 		= block.settings.video_url
+  			assign __placeholder 	= block.settings.placeholder
+  			assign __btn_label		= block.settings.btn_label
+  		-%}
+
+		<div class="video__ui" data-video-container>
+			<div class="video__ui-wrapper{% unless __placeholder == blank %} video__ui-has-placeholder{% endunless %}">
+				<div class="video__ui-placeholder">
+					{%- unless __placeholder == blank -%}
+						{%- render 'image-style', image: __placeholder -%}
+					{%- else -%}
+						{% comment %}{%- render 'svgset', type: 'lifestyle' -%}{% endcomment %}
+					{%- endunless -%}
+				</div>
+
+				<div class="video__ui-item{% unless __placeholder == blank %} overlay-ui{% endunless %}" data-video-item>
+					{%- if __videoURL contains 'iframe' -%}
+						{{ __videoURL }}
+					{%- else __videoURL != blank -%}
+						<video controls muted loop playsinline preload="auto" data-width="0" data-height="0" class="w-100 h-100"><source src="{{__videoURL}}" type="video/mp4"></video>
+					{%- endif -%}
+				</div>
+
+				{%- unless __btn_label == blank -%}
+					<div class="video__ui-btn overlay-ui">
+						<a href="#" onclick="return false" class="btn btn-{{block.settings.btn_style}} button__link" data-button-video>
+							<span class="button-label">{{ __btn_label }}</span>
+							<span class="btn-video-close">{%- render 'svg', type: 'close' -%}</span>
+						</a>
+					</div>
+				{%- endunless -%}
+			</div>
+		</div>
+
+	{%- when 'blog' -%}
+		{%- liquid
+			assign __blog 			= block.settings.blog
+			assign blog 			= blogs[__blog]
+			assign _total 		    = block.settings.total | times: 1
+			assign __enable_slider 	= block.settings.enable_slider
+		-%}
+		{%- capture gridClass -%}{%- render 'set-item-per-row', value: block.settings.items_resp -%}{%- endcapture -%}
+
+		<div class="row{% if __enable_slider %} slide_ui-element{% endif %}">
+		  {%- if __blog != blank and blog.articles.size > 0 -%}
+		    {%- for article in blog.articles limit: _total -%}
+		      	<section class="blog-section {{gridClass}}">
+			      	<article class="featured_blog__item">
+					  <header>
+					    <figure class="featured_blog__item-image">
+					      <a href="{{ article.url }}">
+					        {%- render 'image-style', image: article.image -%}
+					      </a>
+					    </figure>
+					    {%- if article.tags.size > 0 -%}
+					      <div class="featured_blog__item-label label_ui-group">
+					        {%- for tag in article.tags -%}
+					          <span class="label_ui label_ui-tag">{{- tag -}}</span>
+					        {%- endfor -%}
+					      </div>
+					    {%- endif -%}
+					  </header>
+
+
+					  <footer>
+					    <p class="featured_blog__item-title"><a href="{{ article.url }}" class="main__text-1">{{ article.title }}</a></p>
+					    <div class="featured_blog__item-info main__text-2">
+					      <span class="featured_blog__item-publish">{{ article.published_at | date: "%B %d, %Y" }}</span>
+					      <span class="featured_blog__item-author">{{ article.author }}</span>
+					    </div>
+					  </footer>
+					</article>
+		      	</section>
+		    {%- endfor -%}
+		  {%- else -%}
+		    {%- assign _total = _total | minus: 1 -%}
+		    {%- for i in (0.._total) -%}
+		      <section class="blog-section {{gridClass}}">
+		        {%- include 'svgset', type: 'empty-article', svg_group: 'svg_groups', inCustom: true -%}
+		      </section>
+		    {%- endfor -%}
+		  {%- endif -%}
+		</div>
+
+		{%- if __enable_slider -%}
+		  {%- render 'set-item-per-row', value: block.settings.items_resp, type: 'slider', itemClass: 'blog-section', gutter: '30' -%}
+		{%- endif -%}
+
+	{%- when 'newsletter' -%}
+		{%- liquid
+			assign __form_type 		= block.settings.form_type
+			assign __form_url 		= block.settings.form_url
+			assign __btn_txt 		= block.settings.btn_txt
+			assign __btn_style 		= block.settings.btn_style | preprend: 'btn-' | append: ' button__link'
+		-%}
+
+		<div class="home-newsletter">
+			{%- for i in (1..2) -%}
+				{%- liquid
+					assign __text = 'main_text_' | append: i
+					assign __text = block.settings[__text]
+				-%}
+				{%- unless __text == blank -%}
+					<div class="main__text main__text-{{i}}">{{__text}}</div>
+				{%- endunless -%}
+			{%- endfor -%}
+			{%- render 'subscribe-form', type: __form_type, formClass: block.settings.form_style, url: __form_url, btnStyle: __btn_style, btnLabel: __btn_txt -%}
+		</div>
+
+	{%- when 'separator' -%}
+		<div class="separator_line"></div>
+		{%- liquid
+			assign __color = block.settings.color | default: 'rgba(0,0,0,0)'
+		-%}
+		{%- unless __color == 'rgba(0,0,0,0)' -%}
+            {%- capture block_css -%}
+              {{- sectionID }} {{ blockID }} .separator_line{color: {{__color}};}
+            {%- endcapture -%}
+            {%- assign section_css = section_css | append: block_css -%}
+		{%- endunless -%}
+
+{%- endcase -%}

@@ -1,0 +1,114 @@
+
+<style>
+  {%- liquid
+    assign font_body_base_size = settings.body_font_size
+  -%}
+  :root {
+    --rtl-layout: {{ settings.enable_rtl }};
+    --body-font-family: {{settings.body_google_font | split: ':' | first | replace: '+', ' '}},sans-serif, open-sans-serif;
+    --font-heading: {{settings.header_google_font | split: ':' | first | replace: '+', ' '}},sans-serif, open-sans-serif;
+
+    --heading-size-h1: {{ settings.heading_size_1 }}px;
+    --heading-size-h2: {{ settings.heading_size_2 }}px;
+    --heading-size-h3: {{ settings.heading_size_3 }}px;
+    --heading-size-h4: {{ settings.heading_size_4 }}px;
+    --heading-size-h5: {{ settings.heading_size_5 }}px;
+    --heading-size-h6: {{ settings.heading_size_6 }}px;
+    --heading-1-weight: {{ settings.heading_weight_1 }};
+    --heading-2-weight: {{ settings.heading_weight_2 }};
+    --heading-3-weight: {{ settings.heading_weight_3 }};
+    --heading-4-weight: {{ settings.heading_weight_4 }};
+    --heading-5-weight: {{ settings.heading_weight_5 }};
+    --heading-6-weight: {{ settings.heading_weight_6 }};
+
+    --header-bg-desk: {{ settings.desk_bg_color }};
+    --header-text-color-desk: {{ settings.desk_text_color }};
+    --bg-cart-number: {{ settings.desk_bg_cart_number }};
+    --icon-number-color: {{ settings.desk_text_cart_number }};
+    --header-bg-mobile: {{ settings.mobi_bg_color }};
+    --header-text-color-mobile: {{ settings.mobi_text_color }};
+
+    --body-font-size: {{ font_body_base_size }};
+    --body-font-weight: {{ settings.body_font_weight }};
+    --main-color: {{ settings.main_color }};
+    --main-text-color: #ffffff;
+    --main-color-rgba: {{ settings.main_color | color_to_rgb | remove: 'rgb(' | remove: ')' }};
+    --body-border-color: {{ settings.main_border_color }};
+    --text-miscellaneous: {{ settings.text_other_color }};
+    --miscellaneous-color: {{ settings.miscellaneous_color }};
+    --body-bg-color: {{ settings.body_bg_color }};
+    --body-color: {{ settings.body_text_color }};
+    --body-second-color: {{ settings.text_second_color }};
+    --body-link: {{ settings.body_link_color }};
+    --border-radius-default: {{ settings.border_radius }};
+
+    --sale-lb-cl: {{ settings.sale_label_color }};
+    --sale-lb-bgcl: {{ settings.sale_label_bg_color }};
+    --hot-lb-cl: {{ settings.hot_label_color }};
+    --hot-lb-bgcl: {{ settings.hot_label_bg_color }};
+    --new-lb-cl: {{ settings.new_label_color }};
+    --new-lb-bgcl: {{ settings.new_label_bg_color }};
+
+    --section-heading-cl: {{ settings.section_heading_cl }};
+    --section-heading-fw: {{ settings.section_heading_fw }};
+    --section-heading-align: {{ settings.section_heading_align }};
+    --section-subheading-cl: {{ settings.section_subheading_cl }};
+    --section-subheading-fw: {{ settings.section_subheading_fw }};
+
+    --btn1-fw: {{ settings.btn1_fw }};
+    --btn1-cl: {{ settings.btn1_cl }};
+    --btn1-bg-cl: {{ settings.btn1_bg_cl }};
+    --btn1-hover-cl: {{ settings.btn1_hover_cl }};
+    --btn1-hover-bg-cl: {{ settings.btn1_hover_bg_cl }};
+    --btn1-border-width: {{ settings.btn1_border_width }};
+    --btn1-border-cl: {{ settings.btn1_border_cl }};
+    --btn1-hover-border-cl: {{ settings.btn1_hover_border_cl }};
+
+    --btn2-fw: {{ settings.btn2_fw }};
+    --btn2-cl: {{ settings.btn2_cl }};
+    --btn2-bg-cl: {{ settings.btn2_bg_cl }};
+    --btn2-hover-cl: {{ settings.btn2_hover_cl }};
+    --btn2-hover-bg-cl: {{ settings.btn2_hover_bg_cl }};
+    --btn2-border-width: {{ settings.btn2_border_width }};
+    --btn2-border-cl: {{ settings.btn2_border_cl }};
+    --btn2-hover-border-cl: {{ settings.btn2_hover_border_cl }};
+
+    --btn3-fw: {{ settings.btn3_fw }};
+    --btn3-cl: {{ settings.btn3_cl }};
+    --btn3-bg-cl: {{ settings.btn3_bg_cl }};
+    --btn3-hover-cl: {{ settings.btn3_hover_cl }};
+    --btn3-hover-bg-cl: {{ settings.btn3_hover_bg_cl }};
+    --btn3-border-width: {{ settings.btn3_border_width }};
+    --btn3-border-cl: {{ settings.btn3_border_cl }};
+    --btn3-hover-border-cl: {{ settings.btn3_hover_border_cl }};
+
+    --price-color: {{ settings.price_color }};
+    --price-compare-color: {{ settings.price_compare_color }};
+    --price-sale-color: {{ settings.price_sale_color }};
+    --rating-star-color: {{ settings.rating_star_color }};
+    --rating-star-empty-color: {{ settings.rating_star_empty_color }};
+
+    --footer-bg: {{ settings.footer_background_color }};
+    --footer-text-cl: {{ settings.footer_text_color }};
+
+    --color-second: #626262;
+
+    --product-item-name: 17px;
+    --product-item-price: 20px;
+
+    --body-14: 14px;
+
+    --breadcrumb-color-1: {{ settings.breadcrumb_color_1 }};
+    --breadcrumb-color-2: {{ settings.breadcrumb_color_2 }};
+
+    --bg-white: #ffffff;
+    --gutter-xlg: 40px;
+    --gutter-lg: 30px;
+    --gutter-md: 25px;
+    --gutter-sm: 20px;
+    --gutter-xs: 15px;
+    --gutter-xxs: 10px;
+  }
+</style>
+
+{% comment %} compress {% endcomment %}

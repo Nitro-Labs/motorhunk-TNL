@@ -1,0 +1,6 @@
+<footer class="footer" data-section-id="{{ 'footer' | md5}}" data-section-type="footer" data-url="{{routes.root_url}}?sections=footer-widget,footer">
+  {%- if request.design_mode -%}
+    {%- if settings.enable_footerWidget -%}{%- section 'footer-widget' -%}{%- endif -%}
+    {%- section 'footer' -%}
+  {%- endif -%}
+</footer>

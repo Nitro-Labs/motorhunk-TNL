@@ -1,0 +1,634 @@
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    assign default_color = 'rgba(0,0,0,0)'
+    assign isBoxed = section.settings.boxed_layout
+    assign section_id = '#section-' | append: section.id
+    assign announbar_bg_color    = section.settings.announbar_bg_color | default: default_color
+    assign announbar_text_color  = section.settings.announbar_text_color | default: default_color
+    assign announbar_icon_color  = section.settings.announbar_icon_color | default: default_color
+    assign border_bottom_opacity = section.settings.border_bottom_opacity | times: 0.01
+    assign border_bottom_size    = section.settings.border_bottom_size
+    assign border_bottom_color   = section.settings.border_bottom_color | default: default_color | color_modify: 'alpha', border_bottom_opacity
+  -%}
+
+  {%- capture section_visibility -%}
+    {%- if section.settings.visible_on_mobile-%}d-block {% else %} d-none {%- endif -%}
+    {%- if section.settings.visible_on_tablet-%}d-md-block {% else %} d-md-none {%- endif -%}
+    {%- if section.settings.visible_on_desktop-%}d-lg-block {% else %} d-lg-none {%- endif -%}
+  {%- endcapture -%}
+
+  <div class="announcement-bar {{section_visibility}}" id="section-{{section.id}}" data-section-type="announcement-bar" data-section-id="{{section.id}}">
+    {% if isBoxed %}<div class="container">{%- endif -%}
+
+      <div class="wrapper d-grid">
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'column' -%}
+            {%- assign column_count = column_count | plus: 1 -%}
+            {%- liquid
+              assign flex_align   = block.settings.align | default: 'center' | replace: 'left', 'flex-start' | replace: 'right', 'flex-end'
+              assign visible_on_mobile  = block.settings.visible_on_mobile
+              assign visible_on_tablet  = block.settings.visible_on_tablet
+              assign visible_on_desktop = block.settings.visible_on_desktop
+              assign column_index = forloop.index
+            -%}
+
+            {%- capture block_visibility -%}
+              {%- if visible_on_mobile-%} d-flex {% else %} d-none {%- endif -%}
+              {%- if visible_on_tablet -%} d-md-flex {% else %} d-md-none {%- endif -%}
+              {%- if visible_on_desktop -%} d-lg-flex {% else %} d-lg-none {%- endif -%}
+            {%- endcapture -%}
+
+            {%- capture block_id -%}{{section_id}} .block-{{block.id}}{%- endcapture -%}
+            <div class="annoubar-column block-{{block.id}} {{block_visibility}}" {{block.shopify_attributes}}>
+
+              {%- comment -%}
+                **
+                * Column Items
+                *
+              {%- endcomment-%}
+              {%- for block in section.blocks offset: column_index -%}
+                {%- if block.type == 'column' -%}{%- break -%}{%- endif -%}
+
+                {%- capture block_content -%}
+                  {%- case block.type -%}
+                    {%- when 'custom_text' -%}
+                      <div>
+                        {%- if block.settings.icon != 'none' -%}
+                          {%- render 'svg' type: block.settings.icon -%}
+                        {%- endif -%}
+                      </div>
+                      <div style="margin-left: 5px;">
+                        {{block.settings.text}}
+                      </div>
+                    {% comment %} end {% endcomment %}
+
+                    {%- when 'social_media' -%}
+                      {%- render 'social-media-icons' type: block.settings.social_icon_type -%}
+                      {%- if block.settings.social_icon_size != blank -%}
+                        <style>{{block_id}} svg{width: {{block.settings.social_icon_size}};height: {{block.settings.social_icon_size}}}</style>
+                      {%- endif -%}
+                    {% comment %} end {% endcomment %}
+
+                    {%- when 'account'-%}
+                      {%- if shop.customer_accounts_enabled or shop.customer_accounts_optional -%}
+                        <div class="account">
+                          {%- if customer -%}
+                            <a href="{{routes.account_url}}">
+                              {% render 'svg' type: 'user' %}
+                              <span>{{ 'customer.general.welcome' | t: name: customer.name}}</span>
+                            </a>
+                          {%- else -%}
+                            <a href="#" onclick="return false">
+                              {% render 'svg' type: 'user' %}
+                              <span>{{ 'section.announcement_bar.hello' | t}}</span>
+                            </a>
+                            <div class="account-action">
+                              <a href="{{routes.account_login_url}}">{{ 'section.announcement_bar.sign_in' | t}}</a>
+                              <a href="{{routes.account_register_url}}">{{ 'section.announcement_bar.register' | t}}</a>
+                            </div>
+                          {%- endif -%}
+                        </div>
+                      {%- endif -%}
+                    {% comment %} end {% endcomment %}
+
+                    {%- when 'currency_with_language'-%}
+                      <div class="currency-with-language p-0">
+                        <a href="#" onclick="document.dispatchEvent(new CustomEvent('open-modal-currencies-languages'));return false" class="js-currency-with-language">
+                          {% render 'svg' type: 'setting' %}
+                        </a>
+                      </div>
+                    {% comment %} end {% endcomment %}
+
+                    {%- when 'menu' -%}
+                      {% liquid
+                        assign menu_handle =  block.settings.menu
+                      %}
+                      <ul class="menu-list">
+                        {%- if menu_handle != blank -%}
+                          {%- for link in linklists[menu_handle].links -%}
+                            <li>
+                              {%- if link.url != '#' -%}
+                                <a href="{{link.url}}">{{link.title}}</a>
+                              {%- else -%}
+                                {{link.title}}
+                              {%- endif -%}
+                            </li>
+                          {%- endfor -%}
+                        {%- else -%}
+                          {%- for i in (1..3) -%}{%- render 'nav-link', type: 'empty' -%}{%- endfor -%}
+                        {%- endif -%}
+                      </ul>
+                    {% comment %} end {% endcomment %}
+                  {%- endcase -%}
+                {%- endcapture -%}
+
+                {%- if block_content != blank -%}
+                  <div class="annoubar-item" {{block.shopify_attributes}}>
+                    {{block_content}}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- capture block_css -%}
+                {%- render 'css-resp', classID: block_id, css_value: flex_align, css_property: 'justify-content' -%}
+              {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    {% if isBoxed %}</div>{%- endif -%}
+  </div>
+
+  {%- capture sectionCss -%}
+    {{-section_css-}}
+    {%- render 'css-responsive' preClassID: , classID: , value_1: , property_1:  -%}
+    .announcement-bar a{color: currentColor;}
+    {%- if announbar_bg_color != default_color -%} .announcement-bar{background-color: {{announbar_bg_color}};}{%- endif -%}
+    {%- if announbar_text_color != default_color -%}
+      .announcement-bar {color: {{announbar_text_color}};}
+    {%- endif -%}
+    {%- if announbar_icon_color != default_color -%}
+      .announcement-bar svg {color: {{announbar_icon_color}}!important;}
+    {%- endif -%}
+      .announcement-bar svg use {color: currentColor;}
+
+    {%- if border_bottom_color != default_color -%}{{-section_id}}{border-bottom: {{border_bottom_size}}px solid {{border_bottom_color}};}{%- endif -%}
+    {{--}}@media screen and (min-width: 992.1px){.announcement-bar .wrapper {grid-template-columns: repeat({{column_count}}, 1fr)}}
+    {%- render 'css-responsive', classID: section_id, nextClassID: '.wrapper', value_1: section.settings.grid_gap, property_1: 'grid-gap' -%}
+    {%- render 'css-responsive', classID: section_id, nextClassID: ' .annoubar-column', value_1: section.settings.grid_gap, property_1: 'gap' -%}
+  {%- endcapture -%}
+
+  {%- if sectionCss != blank -%}<style>{{sectionCss | strip_newlines}}</style>{%- endif -%}
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": {
+    "en": "Announcement Bar"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000246656) before use."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Section visibility"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "visible_on_mobile",
+      "label": {
+        "en" : "Visible on Mobile (devices screen < 768px)"
+      },
+      "default" : true
+    },
+    {
+      "type": "checkbox",
+      "id": "visible_on_tablet",
+      "label": {
+        "en" : "Visible on Tablet ( 768px <= devices screen < 992px)"
+      },
+      "default" : true
+    },
+    {
+      "type": "checkbox",
+      "id": "visible_on_desktop",
+      "label": {
+        "en" : "Visible on Desktop (devices screen >= 992px)"
+      },
+      "default" : true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout"
+      }
+    },
+    {
+      "type": "color",
+      "id": "announbar_bg_color",
+      "label": {
+        "en": "Background color"
+      },
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "announbar_text_color",
+      "label": {
+        "en": "Text color"
+      },
+      "default": "#5B6C8F"
+    },
+    {
+      "type": "color",
+      "id": "announbar_icon_color",
+      "label": {
+        "en": "Icon color"
+      },
+      "default": "#5B6C8F"
+    },
+    {
+      "type": "text",
+      "id": "grid_gap",
+      "label": {
+        "en": "Column Grid spacing"
+      },
+      "default" : "15px",
+      "placeholder": {
+        "en": "E.g: 15px"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Bottom border"
+      }
+    },
+    {
+      "type" : "range",
+      "id": "border_bottom_size",
+      "label": {
+        "en" : "Size"
+      },
+      "step": 1,
+      "min" : 1,
+      "max" : 4,
+      "unit" : "px",
+      "default" : 2
+    },
+    {
+      "type": "color",
+      "id": "border_bottom_color",
+      "label": {
+        "en": "Border color"
+      },
+      "default": "#103178"
+    },
+    {
+      "type": "range",
+      "id": "border_bottom_opacity",
+      "label": {
+        "en": "Border color opacity"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 10
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "limit": 5,
+      "name": {
+        "en": "Column"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block label"
+          },
+          "default": "Column"
+        },
+        {
+          "type": "text",
+          "id": "align",
+          "label": {
+            "en": "Alignment"
+          },
+          "placeholder": {
+            "en": "E.g: left or center"
+          },
+          "info": "Order: desktop, tablet, mobile",
+          "default" : "center"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Block visibility"
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "visible_on_mobile",
+          "label": {
+            "en" : "Visible on Mobile (devices screen < 768px)"
+          },
+          "default" : true
+        },
+        {
+          "type": "checkbox",
+          "id": "visible_on_tablet",
+          "label": {
+            "en" : "Visible on Tablet ( 768px <= devices screen < 992px)"
+          },
+          "default" : true
+        },
+        {
+          "type": "checkbox",
+          "id": "visible_on_desktop",
+          "label": {
+            "en" : "Visible on Desktop (devices screen >= 992px)"
+          },
+          "default" : true
+        }
+      ]
+    },
+    {
+      "type": "block_items",
+      "name": {
+        "en": "--Item Content"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block label"
+          }
+        },
+        {
+          "type": "select",
+          "id": "type",
+          "label": {
+            "en": "Content type"
+          },
+          "options": [
+            {
+              "value": "text",
+              "label": {
+                "en": "Text"
+              }
+            },
+            {
+              "value": "menu",
+              "label": {
+                "en": "Menu"
+              }
+            },
+            {
+              "value": "account",
+              "label": {
+                "en": "Account"
+              }
+            },
+            {
+              "value": "currency_with_language",
+              "label": {
+                "en": "Language & Currency"
+              }
+            }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": {
+            "en": "Content"
+          },
+          "default": "<p><b>100% Secure delivery</b> without contacting the courier</p>"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": {
+            "en": "Menu"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "menu",
+      "name" : {
+        "en" : "--Menu"
+      },
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en" : "Block title"
+          },
+          "default" : "--Menu"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": {
+            "en" : "Menu"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "account",
+      "name" : {
+        "en" : "--Account"
+      },
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en" : "Block title"
+          },
+          "default" : "--Account"
+        },
+        {
+          "type": "paragraph",
+          "content": {
+            "en" : "To show, please go to Settings => Checkout => Customer accounts"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "currency_with_language",
+      "name" : "--Currency and language",
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en" : "Block title"
+          },
+          "default" : "--Currency and language"
+        }
+      ]
+    },
+    {
+      "type" : "custom_text",
+      "name" : "--Custom text",
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en" : "Block title"
+          },
+          "default" : "--Custom text"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label" : {
+            "en" : "Icon"
+          },
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "email",
+              "label": "Email"
+            },
+            {
+              "value": "location",
+              "label": "Location"
+            },
+            {
+              "value": "phone",
+              "label": "Phone"
+            },
+            {
+              "value": "facebook",
+              "label": "Facebook"
+            },
+            {
+              "value": "instagram",
+              "label": "Instagram"
+            },
+            {
+              "value": "pinterest",
+              "label": "Pinterest"
+            },
+            {
+              "value": "twitter",
+              "label": "Twitter"
+            },
+            {
+              "value": "youtube",
+              "label": "Youtube"
+            },
+            {
+              "value": "vimeo",
+              "label": "Vimeo"
+            },
+            {
+              "value": "whatsapp",
+              "label": "Whatsapp"
+            },
+            {
+              "value": "paper-plane",
+              "label": "Paper plane"
+            },
+            {
+              "value": "fax",
+              "label": "Fax"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default" : "<p><a href='#'>info@chromium.com</a></p>"
+        }
+      ]
+    },
+    {
+      "type" : "social_media",
+      "name" : "--Social media",
+      "settings" : [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en" : "Block title"
+          },
+          "default" : "--Social media"
+        },
+        {
+          "type": "select",
+          "id": "social_icon_type",
+          "label" : {
+            "en" : "Icon type"
+          },
+          "options": [
+           {
+              "value": "",
+              "label": {
+                "en" : "Default"
+              }
+           },
+           {
+             "value": "-square",
+             "label": {
+               "en" : "Square"
+             }
+           },
+           {
+             "value": "-circle",
+             "label": {
+               "en" : "Circle"
+             }
+           }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "social_icon_size",
+          "label" : {
+            "en" : "Size"
+          },
+          "options": [
+           {
+              "value": "",
+              "label": "Default"
+           },
+           {
+             "value": "18px",
+             "label": "Medium"
+           },
+           {
+             "value": "24px",
+             "label": "Large"
+           }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "To settings, please go to Theme settings => Social Icons"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

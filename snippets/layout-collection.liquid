@@ -1,0 +1,118 @@
+{%- liquid
+	if settings.page_layout == 'boxed'
+		assign isBoxed = true
+	endif
+
+	if request.design_mode
+		assign type = template.suffix
+
+	elsif template.suffix == blank
+		assign type = settings.collection_page
+	else 
+		assign type = template.suffix
+	endif
+-%}
+
+{%- capture filter_container -%}
+	{%- if settings.enable_collection_filter -%}
+		{%- style -%}
+			#filter-collection .filter-wrapper{background: {{settings.collection_filter_bg_color}};}
+			#filter-collection .js-btn-reset {color: {{settings.collection_filter_text_color}};}
+		{%- endstyle -%}
+		<div class="filter" id="filter-collection">
+			<div class="filter-wrapper">
+				<div class="tabs-content">
+					<div class="tabs-content_item active">
+						<div class="tabs-content_wrapper">
+							{%- render 'filter-snippet' section: collection -%}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	{%- endif -%}
+{%- endcapture -%}
+
+
+{%- case type -%}
+
+	{%- 
+	#####################
+	#
+	# LEFT SIDEBAR
+	#
+	#####################
+	-%}
+	{%- when 'left-sidebar' -%}
+		<div class="container-wrapper">
+			{{filter_container}}
+			{%- if isBoxed -%}<div class="container">{%- endif -%}
+				<div class="layout-grid layout-grid--{{type}} d-grid" data-section-id="{{collection.id}}" data-section-type="collection-left-sidebar">
+					{%- section 'collection-sidebar' -%}
+
+					<div id="main-layout">{{content_for_layout}}</div>
+				</div>
+			{%- if isBoxed -%}</div>{%- endif -%}
+		</div>
+
+	{%- 
+	#####################
+	#
+	# RIGHT SIDEBAR
+	#
+	#####################
+	-%}
+	{%- when 'right-sidebar' -%}
+		<div class="container-wrapper">
+			{{filter_container}}
+			{%- if isBoxed -%}<div class="container">{%- endif -%}
+				<div class="layout-grid layout-grid--{{type}} d-grid" data-section-id="{{collection.id}}" data-section-type="collection-right-sidebar">
+					<div id="main-layout">{{content_for_layout}}</div>
+					{%- section 'collection-sidebar' -%}
+				</div>
+			{%- if isBoxed -%}</div>{%- endif -%}
+		</div>
+
+	{%- 
+	#####################
+	#
+	# INFINITE
+	#
+	#####################
+	-%}
+	{%- when 'infinite' -%}
+		<div class="container-wrapper">
+			{{filter_container}}
+			{%- if isBoxed -%}<div class="container">{%- endif -%}
+				<div class="layout-grid layout-grid--{{type}}" data-section-id="{{collection.id}}" data-section-type="collection-infinite">
+					<div id="main-layout">{{content_for_layout}}</div>
+				</div>
+			{%- if isBoxed -%}</div>{%- endif -%}
+		</div>
+
+
+	{%- 
+	#####################
+	#
+	# DEFAULT
+	#
+	#####################
+	-%}
+	{%- else -%}
+		<div class="container-wrapper">
+			{{filter_container}}
+
+			{%- if isBoxed -%}<div class="container">{%- endif -%}
+				<div class="layout-grid layout-grid--{{ type | default: 'no-sidebar' }}" data-section-id="{{collection.id}}" data-section-type="collection-no-sidebar">
+					<div id="main-layout">{{content_for_layout}}</div>
+				</div>
+			{%- if isBoxed -%}</div>{%- endif -%}
+
+			{%- capture sectionCss -%}
+				{%- render 'snippet-theme', type: 'productGridV2', sectionID: '#main-layout' -%}
+			{%- endcapture -%}
+			{%- assign sectionCss = sectionCss | strip_newlines -%}
+			{%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+		</div>
+
+{%- endcase -%}

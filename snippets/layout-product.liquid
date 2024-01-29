@@ -1,0 +1,42 @@
+{%- liquid
+	if request.design_mode
+		assign type = template.suffix
+	elsif template.suffix == blank
+		assign type = settings.product_page
+	else 
+		assign type = template.suffix
+	endif
+
+	assign show_recently_viewed = settings.show_recently_viewed
+	assign recently_viewed_except = settings.recently_viewed_except | split: ','
+	assign current_template = template.suffix | default: type
+-%}
+
+{%- for item in recently_viewed_except -%}
+	{%- assign item_handle = item | handle -%}
+	{%- if current_template == item_handle -%}
+		{%- assign show_recently_viewed = false -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{%- case type -%}
+	{%- when 'no-sidebar' 	-%}{{content_for_layout}}
+
+	{%- when 'with-sidebar' -%}
+		<div class="container">
+			<div class="row">
+				<div class="col-12 col-lg-8 col-xl-9">{{content_for_layout}}</div>
+				<div class="col-12 col-lg-4 col-xl-3">
+					{%- section 'product-sidebar' -%}
+				</div>
+			</div>
+		</div>
+
+	{%- else -%}<div class="container">{{content_for_layout}}</div>
+
+{%- endcase -%}
+{%- render 'snippet-product-zoom'  -%}
+
+{% comment %} compress {% endcomment %}
+
+<script>window.theme = Object.assign(window.theme || {}, {productHandle: {{product.handle | json}} })</script>

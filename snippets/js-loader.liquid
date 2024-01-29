@@ -1,0 +1,343 @@
+<script type='text/javascript'>
+	const ArenaRequireJS = () => {
+		// Object define module name to path
+		let modulesDefine = {
+			scripts: {
+				"home": "{{ 'home.js' | asset_url  }}",
+				"collection": "{{ 'collection-page.js' | asset_url }}",
+				"easytimer": "{{ 'easytimer.min.js' | asset_url }}",
+				"cart": "{{ 'cart-page.js' | asset_url  }}",
+				"blog": "{{ 'blog-page.js' | asset_url  }}",
+				"other-page" : "{{'other-page.js' | asset_url}}",
+				"product": "{{ 'product-page-default.js' | asset_url }}",
+				"product.no-sidebar": "{{ 'product-page-no-sidebar.js' | asset_url }}",
+				"product.with-sidebar": "{{ 'product-page-with-sidebar.js' | asset_url }}",
+				"lazysizes" : "{{ 'lazysizes.min.js' | asset_url }}",
+			},
+			styles: {},
+		}
+
+		// Object defined dependencies
+		let depsDefine = {
+			scripts: {
+			},
+			styles: {},
+		}
+		let initials = {
+			scripts: {},
+			styles: {},
+		}
+		let Queue = {
+			scripts: [],
+			styles: [],
+		}
+		let Loaded = {
+			scripts: [],
+			styles: [],
+		}
+		let InlineScript = {}
+		let InlineStyle = {}
+
+
+
+		return {
+			init() {
+				let requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                            window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+				let cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+				let start = window.mozAnimationStartTime ? window.mozAnimationStartTime : Date.now();  // Seulement supporté par Firefox. Les autre navigateurs peuvent utiliser quelque chose comme Date.now()..
+
+				let myReq; // Déclarer la variable globalement avant de lancer l'animation
+				let __this  = this;
+
+				function step(timestamp) {
+				  var progress = timestamp - start;
+				  let inlineScriptTags = document.querySelectorAll('script[data-arn-loader="inline"]');
+				  let inlineStyleTags = document.querySelectorAll('style[data-arn-loader="inline"]');
+
+				  /** Prepare for Script */
+				  for(let i = 0; i < inlineScriptTags.length; i++) {
+				  	if(!inlineScriptTags[i].getAttribute('id')) {
+				  		let deps = inlineScriptTags[i].getAttribute('deps');
+					  	InlineScript[`__inline_script_${i}`] = inlineScriptTags[i].innerHTML;
+					  	if(deps) {
+					  		depsDefine['scripts'][`__inline_script_${i}`] = JSON.parse(deps);
+					  	}
+					  	__this.require(`__inline_script_${i}`, 'scripts');
+					  	// set id for tag to mark position
+					  	inlineScriptTags[i].setAttribute('id', `__inline_script_${i}`);
+				  	} else {
+				  		continue;
+				  	}
+
+				  }
+
+
+				  /** Prepare for Script */
+				  for(let i = 0; i < inlineStyleTags.length; i++) {
+				  	if(!inlineStyleTags[i].getAttribute('id')) {
+				  		let deps = inlineStyleTags[i].getAttribute('deps');
+					  	InlineStyle[`__inline_style_${i}`] = inlineStyleTags[i].innerHTML;
+					  	if(deps) {
+					  		depsDefine['styles'][`__inline_style_${i}`] = JSON.parse(deps);
+					  	}
+					  	__this.require(`__inline_style_${i}`, 'styles');
+					  	// set id for tag to mark position
+					  	inlineStyleTags[i].setAttribute('id', `__inline_style_${i}`);
+				  	} else {
+				  		continue;
+				  	}
+
+				  }
+
+
+				  if (progress < 2000) {
+				    // Ne pas oublier de récupérer l'identifiant à chaque appel de la fonction
+				    myReq = requestAnimationFrame(step);
+				  }
+				}
+				myReq = requestAnimationFrame(step);
+			},
+
+			Queue: Queue,
+			loadStyleModule: function(styleName) {
+				function markLoaded() {
+					let idx = Loaded['styles'].findIndex((style) => style === styleName);
+					if(idx === -1) {
+						Loaded['styles'].push(styleName);
+					}
+				}
+
+				return new Promise((resolve, reject) => {
+					const tagType = (styleName.indexOf('__inline_style') === -1) ? 'link' : 'style';
+
+					let tag = document.createElement(tagType);
+
+					if(tagType === 'link') {
+						// Preload
+						tag.href = modulesDefine['styles'][styleName];
+						tag.rel = 'preload';
+						tag.as = 'style';
+						document.head.appendChild(tag);
+						tag.onload = function() {
+							markLoaded();
+							resolve({
+								styleName,
+								type: 'link',
+							})
+						}
+
+					} else {
+						markLoaded();
+						tag.innerHTML = InlineStyle[styleName];
+            			resolve({
+            				styleName,
+            				tag,
+            				type: 'style',
+            			});
+					}
+				})
+			},
+
+			loadScriptModule: function(scriptName) {
+				function markLoaded() {
+					let idx = Loaded['scripts'].findIndex((script) => script === scriptName);
+					if(idx === -1) {
+						Loaded['scripts'].push(scriptName);
+					}
+				}
+				return new Promise((resolve, reject) => {
+					const tagType = (scriptName.indexOf('__inline_script') === -1) ? 'link' : 'script';
+					let tag = document.createElement(tagType);
+					let userAgent = window.navigator.userAgent;
+
+					if(tagType === 'link') {
+						if(userAgent.indexOf('Firefox') === -1) {
+							// Preload
+							tag.href = modulesDefine['scripts'][scriptName];
+							tag.rel = 'preload';
+							tag.as = 'script';
+							document.head.appendChild(tag);
+							tag.onload = function() {
+								markLoaded();
+								resolve({
+									scriptName,
+									type: 'link',
+								})
+							}
+						}
+						//fallback firefox
+						else {
+							let script_tag = document.createElement('script');
+							script_tag.src = modulesDefine['scripts'][scriptName];
+
+							document.head.appendChild(script_tag);
+
+							script_tag.onload = function() {
+								setTimeout(() => {
+									markLoaded();
+									resolve({
+										scriptName,
+										type: 'no-preload-link',
+									})
+								}, 1)
+
+							}
+						}
+
+					} else {
+						tag.innerHTML = InlineScript[scriptName];
+						markLoaded();
+						resolve({
+							scriptName,
+							tag,
+							type: 'script',
+						});
+					}
+				});
+
+			},
+
+			orderScript: function() {
+				let cache = [];
+
+				function _updateCache(module, weight) {
+					let item = cache.find(a => a.scriptName === module);
+					if(!item) {
+						cache.push({
+							scriptName: module,
+							weight,
+							content: module.indexOf('__inline') !== -1 ? InlineScript[module] : '',
+						})
+					} else {
+						item.weight = weight;
+						if(module.indexOf('__inline') !== -1) {
+							item['content'] = InlineScript[module];
+						}
+					}
+
+				}
+
+				function _trackDeps(depName) {
+					let deps = depsDefine['scripts'][depName];
+					if(!deps) {
+						return 1;
+					} else {
+						let _depsCount = 0;
+						for(let i = 0; i < deps.length; i++) {
+							let _depName = deps[i];
+							_depsCount += _trackDeps(_depName);
+						}
+						return _depsCount
+					}
+
+				}
+
+				for(let i = 0; i < Queue['scripts'].length; i++) {
+					let module = Queue['scripts'][i];
+					let deps = depsDefine['scripts'][module];
+					if(deps && deps.length) {
+						let depsCount = 0;
+						for(let j = 0; j < deps.length; j++) {
+							depsCount += _trackDeps(deps[j]);
+						}
+						_updateCache(module, depsCount);
+					} else {
+						_updateCache(module, 0);
+
+					}
+
+				}
+				return cache;
+
+			},
+
+			// Load Modules and it's dependencies
+			loadModules: async function(type) {
+				if(type === 'scripts') {
+						let OrderedScript = this.orderScript();
+						OrderedScript.sort((a, b) => a.weight - b.weight)
+						Queue['scripts'] = OrderedScript.map(item => item.scriptName);
+
+						let loadModuleTasks = [];
+						for(let i = 0; i < Queue['scripts'].length; i++) {
+							let singleTask = await this.loadScriptModule(Queue[type][i]);
+							loadModuleTasks.push(singleTask);
+						}
+
+						let _loadScriptModules = await Promise.all(loadModuleTasks);
+						Queue['scripts'].map(script => {
+							let success_script = _loadScriptModules.find(item => item.scriptName === script);
+
+							if(success_script) {
+								if(success_script.type === 'link') {
+									let tag = document.createElement('script');
+									tag.src = modulesDefine['scripts'][success_script.scriptName];
+									tag.crossorigin = "anonymous";
+									tag.defer = true;
+									tag.async = true;
+									document.head.insertBefore(tag, document.head.childNodes[document.head.childNodes.length - 1].nextSibling);
+								} else if(success_script.type !== 'no-preload-link') {
+									setTimeout(() => {
+										let oldTag = document.getElementById(success_script.scriptName);
+													let parent = oldTag.parentNode;
+													parent.insertBefore(success_script.tag, oldTag);
+													oldTag.remove();
+									}, 50)
+
+								}
+							}
+
+						});
+						Queue['scripts'] = [];
+				}else if(type === 'styles') {
+					if(Queue['styles'].length === 0){
+						return
+					}
+					let loadModuleTasks = [];
+					for(let i = 0; i < Queue['styles'].length; i++) {
+						let singleTask = this.loadStyleModule(Queue[type][i]);
+						loadModuleTasks.push(singleTask);
+					}
+					let _loadStyleModules = await Promise.all(loadModuleTasks);
+					Queue['styles'].map(style => {
+						let success_style = _loadStyleModules.find(item => item.styleName === style);
+						if(success_style) {
+							if(success_style.type === 'link') {
+								let tag = document.createElement('link');
+								tag.href = modulesDefine['styles'][success_style.styleName];
+								tag.rel = 'stylesheet';
+								document.head.insertBefore(tag, document.head.childNodes[document.head.childNodes.length - 1].nextSibling);
+
+							} else {
+								let oldTag = document.getElementById(success_style.styleName);
+											let parent = oldTag.parentNode;
+											parent.insertBefore(success_style.tag, oldTag);
+											oldTag.remove();
+							}
+						}
+
+					});
+					Queue['styles'] = []
+
+					}
+			},
+
+			// Start load module entry
+			load: function() {
+				{% comment %} this.loadModules('styles'); {% endcomment %}
+				this.loadModules('scripts');
+			},
+
+			// Prepare to queue
+			require: function(name, type) {
+				// Add module to queue
+				Queue[type].push(name);
+			},
+		}
+	}
+	const Loader = ArenaRequireJS();
+	Loader.init();
+</script>

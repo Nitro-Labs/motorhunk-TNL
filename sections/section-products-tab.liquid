@@ -1,0 +1,668 @@
+{%- liquid
+  assign default_color   = 'rgba(0,0,0,0)'
+
+  assign isBoxed = section.settings.boxed_layout
+  assign total   = section.settings.total | abs
+
+  if total == blank or total == 0
+    assign total = 50
+  endif
+
+  assign items_resp = section.settings.items_resp | default: '5,3,2'
+  assign padding    = section.settings.grid_spc
+  assign tab_style  = section.settings.tab_style
+  assign bg_color   = section.settings.bg_color | default: default_color | replace: default_color, ''
+  assign controls   = section.settings.controls
+  assign sectionID  = '#section-' | append: section.id
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+  assign product_number_visible = items_resp | split: ','  | first | abs
+-%}
+
+{%- capture section_class -%}
+	home-products-tab
+  {% if controls -%}has-controls{%- endif -%}
+{%- endcapture -%}
+
+{%- capture banner -%}
+  <div class="col-3 d-none d-lg-block featured_group_tab-banner">
+    {% liquid
+      assign banner_image   = section.settings.banner_image
+      assign banner_heading = section.settings.banner_heading
+      assign banner_subheading = section.settings.banner_subheading
+      assign banner_heading_fz = section.settings.banner_heading_fz
+      assign banner_subheading_fz = section.settings.banner_subheading_fz
+      assign banner_heading_color = section.settings.banner_heading_color | default: default_color | replace: default_color , ''
+      assign banner_btn_label  = section.settings.banner_btn_label
+      assign banner_btn_link   = section.settings.banner_btn_link
+      assign banner_btn_margin = section.settings.banner_btn_margin
+      assign banner_subheading_color = section.settings.banner_subheading_color | default: default_color | replace: default_color , ''
+    %}
+    <div class="banner">
+      <div class="banner-image">
+        <div class="image">
+          {%- if banner_image != blank -%}
+            {% render 'image-style' image: banner_image %}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag }}
+          {%- endif -%}
+        </div>
+      </div>
+      <div class="banner-textbox overlay-ui">
+        {%- if banner_heading != blank or banner_subheading != blank -%}
+          <div class="banner_text">
+            {%- if banner_heading != blank -%}
+              <div class="heading">
+                <span>{{banner_heading}}</span>
+              </div>
+            {%- endif -%}
+            {%- if banner_subheading != blank -%}
+              <div class="subheading">
+                <span>{{banner_subheading}}</span>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+        {%- if banner_btn_label != blank -%}
+          <div class="banner-button">
+            <a href="{{banner_btn_link}}" class="btn btn-1">{{banner_btn_label}}</a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+  {%- capture banner_css -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: ' .featured_group_tab-banner .banner_text .heading',
+      value_1: banner_heading_color, property_1: 'color'
+      value_2: banner_heading_fz, property_2: 'font-size'
+      -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: ' .featured_group_tab-banner .banner_text .subheading',
+      value_1: banner_subheading_color, property_1: 'color'
+      value_2: banner_subheading_fz, property_2: 'font-size'
+      -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: ' .featured_group_tab-banner .banner_button',
+      value_1: banner_btn_margin, property_1: 'margin'
+      -%}
+  {%- endcapture -%}
+  {%- assign section_css = section_css | append: banner_css -%}
+{%- endcapture -%}
+
+{%- for block in section.blocks -%}
+  {%- liquid
+    assign collection      = collections[block.settings.collection]
+    assign collectionTitle = block.settings.title | default: collection.title
+    assign firstBlock  = forloop.first
+    assign slider_id   = '#slider-' | append: block.id
+    assign controls_id = '#controls-' | append: block.id
+    assign total_item  = collection.products.size
+  -%}
+  {%- capture tabPaneID -%}pane-{{block.id}}{{forloop.index}}{%- endcapture -%}
+  {%- capture classID -%}{{sectionID}} #{{tabPaneID}}{%- endcapture -%}
+
+  {%- capture tab_control_item -%}
+    <a href="#" onclick="return false" class="featured_group_tab-link {% if firstBlock %}active{% endif %} js-tab-control" data-target="#{{tabPaneID}}" {{block.shopify_attributes}}>
+      {{collectionTitle}}
+    </a>
+  {%- endcapture -%}
+  {%- assign tab_control_content = tab_control_content | append: tab_control_item -%}
+
+  {%- capture tab_pane_item -%}
+    <div class="featured_group_tab-pane{% if firstBlock %} active{% endif %} js-tab-content" id="{{tabPaneID}}">
+      <div class="featured_group_tab-pane-inner">
+        <div class="slider-container js-slider-container">
+          <div class="slider-wrapper">
+            <div class="slider-list js-slider-list" id="slider-{{block.id}}">
+              {%- for product in collection.products limit: total -%}
+                {%- if firstBlock and product_number_visible >= forloop.index -%}
+                  <div class="slider-item">
+                    {%- render 'product-item' id: section.id, product: product -%}
+                  </div>
+                {%- else -%}
+                  {%- if forloop.first -%}
+                    <div class="slider-item">
+                      {%- render 'product-item' id: section.id, product: product -%}
+                    </div>
+                  {%- else -%}
+                    <div class="slider-item lazy-product-card"
+                        data-id="{{product.id}}"
+                        data-handle="{{product.handle}}">
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- else -%}
+                {%- for i in (1..6) -%}
+                  {%- assign total_item = 6 -%}
+                  <div class="slider-item">
+                    {%- include 'product-item' -%}
+                  </div>
+                {%- endfor -%}
+              {%- endfor -%}
+            </div>
+            {%- render 'set-tns-config'
+              slider_id  : slider_id,
+              controls_id: controls_id,
+              items_resp: items_resp,
+              padding: padding,
+              controls: section.settings.controls,
+              dots: section.settings.dots,
+              total_item: total_item,
+              classID: classID
+              -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endcapture -%}
+
+  {%- assign tab_pane_content = tab_pane_content | append: tab_pane_item -%}
+{%- endfor -%}
+
+{%- capture products_tab -%}
+  <div class="featured_group_tab-header">
+    <div class="section_title-wrapper">
+      {%- if tab_style == '1' -%}
+        <div class="section_title-text-1">{{section.settings.section_title}}</div>
+      {%- endif -%}
+      {%- if section.blocks.size > 1 -%}
+        <div class="featured_group_tab-controls js-tab-controls">
+          {{tab_control_content}}
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+
+  <div class="featured_group_tab-body">
+    <div class="featured_group_tab-content js-tab-contents">{{ tab_pane_content }}</div>
+  </div>
+{%- endcapture -%}
+
+{%- unless section.settings.bg_full -%}
+  {%- assign bg_class = ' .section_content-wrapper' -%}
+{%- endunless -%}
+
+<div class="{{section_class}}" id="section-{{section.id}}" data-section-type="product-tab" data-section-id="{{section.id}}">
+  {%- if isBoxed -%}<div class="container">{%- endif -%}
+    <div class="section_content-wrapper">
+      <div class="section_content-body">
+        {%- if tab_style == '2' -%}
+          <div class="row">
+            {{banner}}
+            <div class="col-12 col-lg-9 featured_group_tab-ui">
+              {{products_tab}}
+            </div>
+          </div>
+        {%- else -%}
+          <div class="featured_group_tab-ui">
+            {{products_tab}}
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+  {%- if isBoxed -%}</div>{%- endif -%}
+</div>
+
+
+{%- capture sectionCss -%}
+  {{section_css}}
+  {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+    value_1: section_padding, property_1: 'padding'
+    value_2: section_margin, property_2: 'margin'
+    value_3: bg_color, property_3: 'background-color'
+    -%}
+{%- endcapture -%}{%- assign sectionCss = sectionCss | strip_newlines -%}
+<style>{{sectionCss}}</style>
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes('product-tab') && (window.theme.sectionRegister = [...window.theme.sectionRegister, "product-tab"]);
+  }else{
+    window.theme.sectionRegister = ["product-tab"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Products Tab"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000248060)"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Products Tab' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Products Tab"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "LAYOUT"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "tab_style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "1",
+          "label": "1. Tab default"
+        },
+        {
+          "value": "2",
+          "label": "2. Tab with Image"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section margin"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "richtext",
+      "id": "section_title",
+      "label": {
+        "en": "Title"
+      },
+      "info": "Doesn't work on \"Style 2\"",
+      "default" : "<p><b>Products</b> Tab</p>"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "bg_full",
+      "label" : {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": {
+        "en": "Background image"
+      }
+    },
+    {
+      "type": "select",
+      "id": "bg_size",
+      "label": {
+        "en": "Background size"
+      },
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Auto"
+          }
+        },
+        {
+          "value": "cover",
+          "label": {
+            "en": "Cover"
+          }
+        },
+        {
+          "value": "contain",
+          "label": {
+            "en": "Contain"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": {
+        "en": "Background position"
+      },
+      "options": [
+        {
+          "value": "left top",
+          "label": {
+            "en": "Left Top"
+          }
+        },
+        {
+          "value": "left center",
+          "label": {
+            "en": "Left Center"
+          }
+        },
+        {
+          "value": "left bottom",
+          "label": {
+            "en": "Left Bottom"
+          }
+        },
+        {
+          "value": "right top",
+          "label": {
+            "en": "Right Top"
+          }
+        },
+        {
+          "value": "right center",
+          "label": {
+            "en": "Right Center"
+          }
+        },
+        {
+          "value": "right bottom",
+          "label": {
+            "en": "Right Bottom"
+          }
+        },
+        {
+          "value": "center top",
+          "label": {
+            "en": "Center Top"
+          }
+        },
+        {
+          "value": "center center",
+          "label": {
+            "en": "Center Center"
+          }
+        },
+        {
+          "value": "center bottom",
+          "label": {
+            "en": "Center Bottom"
+          }
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "bg_repeat",
+      "label": {
+        "en": "Background repeat"
+      },
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": {
+            "en": "No repeat"
+          }
+        },
+        {
+          "value": "repeat",
+          "label": {
+            "en": "Repeat"
+          }
+        },
+        {
+          "value": "repeat-x",
+          "label": {
+            "en": "Repeat X"
+          }
+        },
+        {
+          "value": "repeat-y",
+          "label": {
+            "en": "Repeat Y"
+          }
+        }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout content"
+      }
+    },
+    {
+      "type": "text",
+      "id": "total",
+      "label": {
+        "en": "Tab total items"
+      },
+      "default": "10",
+      "placeholder": {
+        "en": "E.g: 10"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "5,3,2",
+      "placeholder": {
+        "en": "E.g: 4,3,2"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_spc",
+      "label": {
+        "en": "Spacing between items."
+      },
+      "default": "10px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Slider settings"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "controls",
+      "label": {
+        "en": "Controls"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "dots",
+      "label": {
+        "en": "Dots"
+      },
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Banner"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Do work on \"Style 2\""
+      }
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": {
+        "en": "Image"
+      }
+    },
+    {
+      "type": "text",
+      "id": "banner_heading",
+      "label": {
+        "en": "Heading"
+      },
+      "default" : "Lorem, ipsum dolor."
+    },
+    {
+      "type": "text",
+      "id": "banner_heading_fz",
+      "label": {
+        "en": "Font size"
+      },
+      "info": "E.g: 24px"
+    },
+    {
+      "type": "color",
+      "id": "banner_heading_color",
+      "label": {
+        "en": "Text color"
+      }
+    },
+    {
+      "type": "text",
+      "id": "banner_subheading",
+      "label": {
+        "en": "Subheading"
+      },
+      "default" : "Lorem ipsum dolor sit."
+    },
+    {
+      "type": "text",
+      "id": "banner_subheading_fz",
+      "label": {
+        "en": "Font size"
+      },
+      "info": "E.g: 20px"
+    },
+    {
+      "type": "color",
+      "id": "banner_subheading_color",
+      "label": {
+        "en": "Text color"
+      }
+    },
+    {
+      "type": "text",
+      "id": "banner_btn_label",
+      "label": {
+        "en": "Button label"
+      },
+      "default" : "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "banner_btn_link",
+      "label": {
+        "en": "Button link"
+      }
+    },
+    {
+      "type": "text",
+      "id": "banner_btn_margin",
+      "label": {
+        "en": "Button margin"
+      },
+      "placeholder": "E.g: 10px 0px 0px 0px",
+      "info": "Order: top right bottom left"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "content",
+      "name": {
+        "en": "Collection"
+      },
+      "limit": 5,
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": {
+            "en": "Collection"
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Tab title"
+          },
+          "info": {
+            "en": "Default is collection title"
+          },
+          "default" : "Tab title"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Products Tab"
+      },
+      "category": "Collection",
+      "blocks": [
+        {
+          "type" : "content"
+        },
+        {
+          "type" : "content"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,255 @@
+{%- liquid
+  assign arrayTemplate = 'index,search' | split: ','
+-%}
+{%- unless arrayTemplate contains template.name -%}
+  {%- liquid
+    assign _layout = _pageLayout | default: 'boxed'
+  -%}
+
+  {%- capture section_class -%}
+    {%- render 'bgset' ,class: 'bg-image' ,image: settings.breadcrumb_bg_img -%}
+  {%- endcapture -%}{%- assign section_class = section_class | strip | split: '|' | join: ' ' -%}
+  {%- assign sectionID = '.section-' | append: section.id -%}
+
+  <div id="breadcrumb" class="{{ section_class }}">
+    {%- if _layout == 'boxed' -%}<div class="container">{%- endif -%}
+      <ul class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a itemprop="item" href="{{ routes.root_url }}">
+            <span itemprop="name">{{- 'general.text.home' | t -}}</span>
+            <meta itemprop="position" content="{% increment brcCounter %}"/>
+          </a>
+        </li>
+
+        {%- case template.name -%}
+          {%- when 'product' -%}
+            {%- if product.collections.size > 0 -%}
+              {%- if collection == blank -%}
+                {%- assign collection = product.collections | first -%}
+              {%- endif -%}
+              <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+              <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a href="{{collection.url}}" itemprop="item">
+                  <span itemprop="name">{{collection.title}}</span>
+                  <meta itemprop="position" content="{% increment brcCounter %}"/>
+                </a>
+              </li>
+              <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+              <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+                <a href="#" onclick="return false" itemprop="item">
+                  <span itemprop="name">{{product.title}}</span>
+                  <meta itemprop="position" content="{% increment brcCounter %}"/>
+                </a>
+              </li>
+            {%- endif -%}
+          {% comment %} end {% endcomment %}
+
+          {%- when 'collection' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+              <a href="{{ routes.collections_url }}" itemprop="item">
+                <span itemprop="name">{{- 'collections.general.all_collections' | t -}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{collection.title}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'list-collections' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{- 'collections.general.all_collections' | t -}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+
+
+          {%- when 'article' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+              <a href="{{blog.url}}" itemprop="item">
+                <span itemprop="name">{{blog.title}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{article.title}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'blog' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{blog.title}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'cart' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{ 'cart.general.shopping_cart' | t}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+          {%- when 'account' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{ 'customer.general.account' | t}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {%- when 'addresses' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+              <a href="{{routes.account_url}}" itemprop="item">
+                <span itemprop="name">{{ 'customer.general.account' | t}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{ 'customer.general.addresses' | t}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {% comment %} end {% endcomment %}
+
+          {%- else -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
+              <a href="#" onclick="return false" itemprop="item">
+                <span itemprop="name">{{page_title}}</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+        {%- endcase -%}
+
+        {% comment %} {%- if template contains 'collection' -%}
+          <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="{{ routes.collections_url }}" itemprop="item">
+              <span itemprop="name">{{- 'collections.general.all_collections' | t -}}</span>
+              <meta itemprop="position" content="{% increment brcCounter %}"/>
+            </a>
+          </li>
+        {%- endif -%}
+
+        {%- if template contains 'article' -%}
+          <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="{{routes.root_url}}{{ blog.url | replace_first: '/' }}" itemprop="item">
+              <span itemprop="name">{{- blog.title -}}</span>
+              <meta itemprop="position" content="{% increment brcCounter %}"/>
+            </a>
+          </li>
+        {%- endif -%}
+
+        {%- if template contains 'product' and product.collections.size > 0 -%}
+          {%- for collection in product.collections -%}
+            {%- if collection.handle != 'all' and collection.handle != 'frontpage' and collection.handle != 'all-products' -%}
+              {%- assign collection = collection -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="{{routes.root_url}}{{ collection.url | replace_first: '/' }}" itemprop="item">
+              <span itemprop="name">{{- collection.title -}}</span>
+              <meta itemprop="position" content="{% increment brcCounter %}"/>
+            </a>
+          </li>
+        {%- endif -%}
+
+        {%- if customer and template contains 'customer' -%}
+          {%- unless template contains 'account' -%}
+            <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+              <a href="{{routes.account_url}}" itemprop="item">
+                <span itemprop="name">Account</span>
+                <meta itemprop="position" content="{% increment brcCounter %}"/>
+              </a>
+            </li>
+          {%- endunless -%}
+        {%- endif -%}
+
+        {%- capture currentTags -%}
+          {%- if current_tags -%}
+            {%- for tag in current_tags -%}
+              {%- liquid
+                assign tagURL = tag | link_to_tag: tag | split: 'href="' | last | split: '"' | first
+              -%}
+
+              <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+              <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"{%- if forloop.last %} class="active"{%- endif -%}>
+                <a href="{{ tagURL }}" itemprop="item">
+                  <span itemprop="name">{{- tag -}}</span>
+                  <meta itemprop="position" content="{% increment brcCounter %}"/>
+                </a>
+              </li>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endcapture -%}
+
+        <li class="svg-element-ui">{%- render 'svg', type: 'angle-right' -%}</li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"{% if currentTags == blank %} class="active"{% endif %}>
+          <a href="{{page_url}}" itemprop="item">
+            <span itemprop="name">{{ page_title }}</span>
+            <meta itemprop="position" content="{% increment brcCounter %}"/>
+          </a>
+        </li> {% endcomment %}
+      </ul>
+
+    {%- comment -%}
+      {%- if template contains 'collection' and settings.breadcrumb_bg_img != blank -%}
+        <div class="page-heading">
+          <div class="collection-title">
+            {%- if template contains 'collection' -%}
+              {%- unless template contains 'list' -%}
+                {%- if current_tags -%}
+                  <h1>{{ collection.title }}/{{current_tags | join: '/'}}</h1>
+                  <small>({{ collection.products_count  }})</small>
+                {%- else -%}
+                  <h1>{{ collection.title }}</h1>
+                  <small>({{ collection.all_products_count }})</small>
+                {%- endif -%}
+              {%- else -%}
+                <h1>{{ page_title }}</h1>
+              {%- endunless -%}
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endcomment-%}
+
+    {%- if _layout == 'boxed' -%}</div>{%- endif -%}
+  </div>
+
+  {%- capture sectionCss -%}
+    {{- section_css -}}
+  {%- endcapture -%}
+  {%- assign sectionCss = sectionCss | strip_newlines -%}
+  {%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+
+  {% comment %} compress {% endcomment %}
+{%- endunless -%}

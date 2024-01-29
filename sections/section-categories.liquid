@@ -1,0 +1,688 @@
+{%- liquid
+  assign default_color  = 'rgba(0,0,0,0)'
+  assign items_resp     = section.settings.items_resp | default: '3,2,1'
+  assign enable_menu    = section.settings.enable_menu
+  assign sectionID      = '#section-' | append: section.id
+  assign block_bg_color = section.settings.block_bg_color | default: default_color
+  assign section_style  = section.settings.style
+  assign spacing_items  = section.settings.spacing_items
+  assign subheading     = section.settings.subheading
+
+  assign isBoxed  = section.settings.boxed_layout
+  assign menu_btn = section.settings.menu_btn
+  assign bg_color = section.settings.bg_color | default: default_color | replace: default_color, ''
+  assign heading  = section.settings.heading
+
+  assign show_border_bottom   = section.settings.show_border_bottom
+  assign heading_style_block  = section.blocks | where: 'type', 'heading-style' | first
+  assign collection_blocks    = section.blocks | where: 'type', 'collection'
+  assign show_heading_section = section.settings.show_heading_section
+  assign block_text_center    = section.settings.block_text_center
+-%}
+
+{%- capture section_class -%}
+  home-categories
+  {% if show_border_bottom %} has-border {%- endif %}
+  style-{{section_style}}
+{%- endcapture -%}
+
+{%- unless section.settings.bg_full -%}
+  {%- assign bg_class = ' .section_content-wrapper' -%}
+{%- endunless -%}
+
+<div class="{{section_class}}" id="section-{{section.id}}" data-section-type="featured-collections"data-section-id="{{section.id}}">
+  {%- if isBoxed -%}<div class="container">{%- endif -%}
+    <div class="section_content-wrapper">
+      {%- if show_heading_section and heading != blank or subheading != blank -%}
+        {%- capture heading_css -%}{%- render 'snippet-heading-css' sectionID: sectionID, section: heading_style_block -%}{%- endcapture -%}
+        <div class="section_content-head">
+          {%- render 'snippet-heading' config: section.settings  -%}
+        </div>
+      {%- endif -%}
+
+      <div class="section_content-body">
+        {%- case section_style -%}
+          {%- when '1' -%}
+            {%- liquid
+              assign slider_id   = '#slider-' | append: section.id
+              assign controls_id = '#controls-' | append: section.id
+              assign total_item  = collection_blocks | size
+            -%}
+            <div class="slider-container js-slider-container">
+              <div class="slider-wrapper">
+                <div class="slider-list" id="slider-{{section.id}}">
+                  {%- for block in collection_blocks -%}
+                    {%- if block.type != 'collection' -%}{%- continue -%}{%- endif -%}
+                    {%- liquid
+                      assign _collection     = block.settings.collection
+                      assign collection      = collections[_collection]
+                      assign image           = block.settings.image
+                      assign block_menu      = block.settings.menu
+                      assign block_title     = block.settings.title
+                    -%}
+
+                    <div class="card_section-item slider-item" {{block.shopify_attributes}}>
+                      {%- if _collection == blank -%}
+                        {%- include 'svgset', type: 'empty-category' -%}
+                      {%- else -%}
+                        <div class="card_section-item-inner {% unless enable_menu  %}no-menu{%- endunless -%}">
+                          <div class="card_section-header">
+                            <div class="card_section-figure">
+                              <a href="{{collection.url}}" class="image">
+                                {%- if image != blank -%}
+                                  {%- render 'image-style', image: image, alt: collection.title -%}
+                                {%- else-%}
+                                  {%- render 'image-style' image: collection.featured_image, alt: collection.title -%}
+                                {%- endif -%}
+                              </a>
+                            </div>
+                          </div>
+                          <div class="card_section-body">
+                            <div class="card_section-menu">
+                              <ul class="menu-list-content">
+                                <li class="menu-item">
+                                  <h3 class="title"><a href="{{collection.url}}">{{block_title | default: collection.title}}</a></h3>
+                                </li>
+                                {%- if enable_menu -%}
+                                  {%- for link in linklists[block_menu].links limit: 4 -%}
+                                    <li class="menu-item"><a href="{{link.url}}">{{link.title}}</a></li>
+                                  {%- endfor -%}
+                                {%- endif -%}
+                              </ul>
+                              {%- if enable_menu -%}
+                                <a href="{{collection.url}}" class="btn-show-all">
+                                  <div class="">
+                                    <span>{{menu_btn}}</span>
+                                    <span class="svg_emlement-ui">{%- render 'svg' type: 'angle-right' -%}</span>
+                                  </div>
+                                </a>
+                              {%- endif -%}
+                            </div>
+                          </div>
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  {%- else -%}
+                    {%- assign total_item = 5 -%}
+                    {%- for i in (1..7) -%}
+                      <div class="card_section-item slider-item">
+                        {%- include 'svgset', type: 'empty-category' -%}
+                      </div>
+                    {%- endfor -%}
+                  {%- endfor -%}
+                </div>
+
+                {%- render 'set-tns-config'
+                  slider_id       : slider_id,
+                  controls_id     : controls_id,
+                  loop            : section.settings.loop,
+                  autoplay        : section.settings.autoplay,
+                  autoplay_timeout: section.settings.autoplay_timeout,
+                  dots            : section.settings.dots,
+                  items_resp      : items_resp,
+                  controls        : section.settings.controls,
+                  total_item      : total_item,
+                  padding         : spacing_items,
+                  classID         : sectionID
+                  -%}
+              </div>
+            </div>
+          {% comment %} end {% endcomment %}
+
+          {%- when '2' -%}
+            <div class="{%- render 'grid-class' value: items_resp -%}">
+              {%- for block in collection_blocks -%}
+                {%- liquid
+                  assign _collection     = block.settings.collection
+                  assign collection      = collections[_collection]
+                  assign image           = block.settings.image
+                  assign block_menu      = block.settings.menu
+                  assign block_title     = block.settings.title
+                -%}
+
+                <div class="card_section-item" {{block.shopify_attributes}}>
+                  {%- if _collection == blank -%}
+                    {%- include 'svgset', type: 'empty-category' -%}
+                  {%- else -%}
+                    <div class="card_section-item-inner {% unless enable_menu  %}no-menu{%- endunless -%}">
+                      <div class="card_section-header">
+                        <div class="card_section-figure">
+                          <a href="{{collection.url}}" class="image">
+                            {%- if image != blank -%}
+                              {%- render 'image-style', image: image, alt: collection.title -%}
+                            {%- else-%}
+                              {%- render 'image-style' image: collection.featured_image, alt: collection.title -%}
+                            {%- endif -%}
+                          </a>
+                        </div>
+                      </div>
+                      <div class="card_section-body">
+                        <div class="card_section-menu">
+                          <ul class="menu-list-content">
+                            <li class="menu-item">
+                              <h3 class="title"><a href="{{collection.url}}">{{block_title | default: collection.title}}</a></h3>
+                            </li>
+                            {%- if enable_menu -%}
+                              {%- for link in linklists[block_menu].links limit: 4 -%}
+                                <li class="menu-item"><a href="{{link.url}}">{{link.title}}</a></li>
+                              {%- endfor -%}
+                            {%- endif -%}
+                          </ul>
+                          {%- if enable_menu -%}
+                            <a href="{{collection.url}}" class="btn-show-all">
+                              <div class="">
+                                <span>{{menu_btn}}</span>
+                                <span class="svg_emlement-ui">{%- render 'svg' type: 'angle-right' -%}</span>
+                              </div>
+                            </a>
+                          {%- endif -%}
+                        </div>
+                      </div>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- else -%}
+                {%- for i in (1..5) -%}
+                  <div class="card_section-item">
+                    {%- include 'svgset', type: 'empty-category' -%}
+                  </div>
+                {%- endfor -%}
+
+              {%- endfor -%}
+
+            </div>
+          {% comment %} end {% endcomment %}
+        {%- endcase -%}
+
+      </div>
+    </div>
+  {%- if isBoxed -%}</div>{%- endif -%}
+</div>
+
+{%- capture sectionCss -%}
+  {%- if block_text_center -%}{{sectionID}} .menu-list-content, {{sectionID}} .menu-list-content a{text-align: center;}{{sectionID}} .btn-show-all>div{justify-content: center}{%- endif -%}
+  {{heading_css}}
+  {%- render 'css-responsive' preClassID: sectionID, classID: bg_class
+    value_1: section.settings.section_padding, property_1: 'padding'
+    value_2: section.settings.section_margin, property_2: 'margin'
+    value_3: bg_color, property_3: 'background-color'
+    -%}
+  {%- if block_bg_color != default_color -%} {{sectionID}} .card_section-item-inner{background-color:{{block_bg_color}};} {%- endif -%}
+  {%- render 'css-responsive', classID: sectionID, nextClassID: '.card_section-header', value_1: section.settings.collection_image_max_w, property_1: 'max-width' -%}
+  {%- if section_style == '2' -%} {%- render 'css-responsive', preClassID: sectionID, classID: '.d-grid', value_1: spacing_items, property_1: 'grid-gap' -%} {%- endif -%}
+{%- endcapture -%}
+
+{%- if sectionCss != blank -%}<style>{{sectionCss | strip_newlines}}</style>{%- endif -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("featured-collections") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "featured-collections"]);
+  }else{
+    window.theme.sectionRegister = ["featured-collections"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Categories"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000248061) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Categories' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Categories"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "General settings"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": "Section margin",
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px"
+      },
+      "default": "20px 0px 20px 0px",
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": "Section padding",
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px"
+      },
+      "default": "20px 0px 20px 0px",
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": {
+        "en": "Style"
+      },
+      "options": [
+        {
+          "value": "1",
+          "label": {
+            "en": "Slider"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "Grid"
+          }
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Heading section"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To custom style. Please add block 'Heading Style'"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_section",
+      "label": {
+        "en": "Show"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": {
+        "en": "Heading"
+      },
+      "default": "Lorem ipsum dolor sit."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": {
+        "en": "Subheading"
+      },
+      "default": "Lorem ipsum dolor sit amet consectetur."
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_full",
+      "label": {
+        "en": "Full section background"
+      }
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Block item settings"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "block_text_center",
+      "label" : {
+        "en": "Text center"
+      },
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "block_bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_menu",
+      "label": {
+        "en": "Enable Menu"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "menu_btn",
+      "label": {
+        "en": "Button label"
+      },
+      "default": "Show all"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout content"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "5,3,2",
+      "placeholder": {
+        "en": "E.g: 4,3,2"
+      }
+    },
+    {
+      "type": "text",
+      "id": "spacing_items",
+      "label": {
+        "en": "Spacing between items"
+      },
+      "placeholder": {
+        "en": "E.g: 10px"
+      },
+      "info": {
+        "en": "Order: top right bottom left"
+      },
+      "default": "10px"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Slider settings"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": {
+        "en": "Loop"
+      },
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "controls",
+      "label": {
+        "en": "Controls"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "dots",
+      "label": {
+        "en": "Dots"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": {
+        "en": "Autoplay"
+      },
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_timeout",
+      "label": {
+        "en": "Change slide every(s)"
+      },
+      "step": 0.5,
+      "min": 2,
+      "max": 10,
+      "unit": "s",
+      "default": 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": {
+        "en": "Collection"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Title"
+          },
+          "info": {
+            "en": "If empty,will take title of collection."
+          }
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": {
+            "en": "Collection"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          },
+          "info": {
+            "en": "Use  of image collection if blank"
+          }
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": {
+            "en": "Menu"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading-style",
+      "limit": 1,
+      "name": {
+        "en": "Heading style"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "section_heading_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          },
+          "default": "0 0 30px 0"
+        },
+        {
+          "type": "select",
+          "id": "section_heading_align",
+          "label": {
+            "en": "Alignment"
+          },
+          "options": [
+            {
+              "value": "left",
+              "label": {
+                "en": "Left"
+              }
+            },
+            {
+              "value": "center",
+              "label": {
+                "en": "Center"
+              }
+            },
+            {
+              "value": "right",
+              "label": {
+                "en": "Right"
+              }
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Heading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_heading_cl",
+          "label": {
+            "en": "Text color"
+          },
+          "default": "#103178"
+        },
+        {
+          "type": "text",
+          "id": "section_heading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "40px",
+          "placeholder": {
+            "en": "E.g: 40px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_heading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 600
+        },
+        {
+          "type": "text",
+          "id": "section_heading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "60px",
+          "placeholder": {
+            "en": "E.g: 60px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Subheading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_subheading_cl",
+          "label": {
+            "en": "Text color"
+          },
+          "default": "#5B6C8F"
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "24px",
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_subheading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "35px",
+          "placeholder": {
+            "en": "E.g: 35px"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Categories"
+      },
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,40 @@
+{%- assign newArray = '' -%}
+{%- assign zeroFill = '000000000000' -%}
+{%- assign zeroFillSize = zeroFill | size -%}
+
+{%- for number in arr_number -%}
+
+  {%- assign number_plus = number | strip | plus: 0 -%}
+
+  {%- if type == 1 -%}
+    {%- if number_plus < 0 -%}
+      {%- continue -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- if number_plus >= 0 -%}
+      {%- continue -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- assign number_abs = number_plus | abs -%}
+
+  {%- assign indexCharSize = number_abs | append:'' | size -%}
+  {%- assign toSlice = zeroFillSize | minus:indexCharSize -%}
+  {%- assign tmpZeroFill = zeroFill | slice:0,toSlice -%}
+  {%- assign newOrder = number_abs | default:'0' -%}
+  {%- assign matrix = tmpZeroFill | append:newOrder | append:'.'  | append:forloop.index0 -%}
+
+  {%- if newArray != blank -%}
+    {%- assign tmpIndex = matrix | split:',' -%}
+    {%- assign newArray = newArray | concat:tmpIndex -%}
+  {%- else -%}
+    {%- assign newArray = matrix | split:',' -%}
+  {%- endif -%}
+
+{%- endfor -%}
+
+{%- if type == 1 -%}
+  {{newArray | sort | join: ','}}
+{%- else -%}
+  {{newArray | sort | reverse | join: ','}}
+{%- endif -%}

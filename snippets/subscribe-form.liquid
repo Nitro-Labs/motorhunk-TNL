@@ -1,0 +1,47 @@
+{%- liquid
+  assign frmHolder = 'general.form.email_placeholder' | t
+  assign btnStyle  = btnStyle | default: 1
+  assign _btnLabel = 'contact.form.subscribe' | t
+  assign btnLabel  = btnLabel | default: _btnLabel
+-%}
+
+{%- case type -%}
+  {%- when 'mailchimp' -%}
+    {%- liquid
+      if enable_ajax
+        unless url contains '-json'
+          assign url = url | replace_first: '?', '-json?'
+        endunless
+      endif
+    -%}
+    <form action="{{ url }}" data-ajax="{{enable_ajax}}" data-type="mailchimp" method="post" class="form-subscribe" name="mc-embedded-subscribe-form" target="_blank" rel="noopener">
+      <input class="form-control" type="email" placeholder="{{ frmHolder }}" name="EMAIL" required/>
+      <button type="submit" class="btn btn-{{ btnStyle }}">
+        <span class="btn-text">{%- render 'svg' type: 'paper-plane' -%}</span>
+      </button>
+    </form>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'klaviyo' -%}
+    {%- assign klaviyo_id  = url | split: 'g=' | last -%}
+
+    <form action="{{url}}" data-ajax="{{enable_ajax}}" class="form-subscribe" target="_blank" data-type="klaviyo" novalidate="novalidate"{% if isPopup %} data-ajax-submit="//manage.kmail-lists.com/ajax/subscriptions/subscribe" method="GET"{% else %} method="post"{% endif %}>
+      <input type="hidden" name="g" value="{{klaviyo_id}}">
+      <input type="email" class="form-control" value="" name="email" class="contact_email" placeholder="{{ frmHolder }}" required>
+      <button type="submit" class="btn btn-{{ btnStyle }}" name="subscribe">
+        <span class="btn-text">{%- render 'svg' type: 'paper-plane' -%}</span>
+      </button>
+    </form>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'shopify' -%}
+
+    {% form 'customer', novalidate: 'novalidate',class: 'form-subscribe', data-type: type, id: form_id, data-successful-message: successful_message  %}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <input type="email" name="contact[email]" placeholder="{{ frmHolder }}" aria-label="{{ frmHolder }}" aria-required="true" autocorrect="off" autocapitalize="off" required>
+      <button type="submit" class="btn btn-{{ btnStyle }}" name="subscribe">
+        <span class="btn-text">{%- render 'svg' type: 'paper-plane' -%}</span>
+      </button>
+    {% endform %}
+  {% comment %} end {% endcomment %}
+{%- endcase -%}

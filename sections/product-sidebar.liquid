@@ -1,0 +1,339 @@
+{%- comment -%}
+  **
+  * Sidebar Block type support
+  *
+{%- endcomment-%}
+{%- liquid
+  if template contains 'collection'
+    assign currentObj = collection
+  endif
+-%}
+
+{%- capture section_class -%}
+  {{- -}}sidebar-{{ template | split: '.' | first -}}
+  {{- -}}|sidebar-section
+  {{- -}}|section-{{- section.id -}}
+{%- endcapture -%}{%- assign section_class = section_class | strip | split: '|' | join: ' ' -%}
+{%- assign sectionID = '.section-' | append: section.id -%}
+
+<div id="sidebarDrawer" class="{{section_class}}" data-section-type="product-sidebar" data-section-id="{{section.id}}">
+
+  <div class="section_content-wrapper">
+
+    <a href="#" onclick="return false" id="js_close_sidebar" class="sidebarDrawer-close d-lg-none" data-target="sidebarDrawer">{%- render 'svg', type: 'close' -%}</a>
+
+    <div class="section_content-body">
+
+      {%- if section.blocks.size > 0 -%}
+
+        {%- for block in section.blocks -%}
+
+          {%- capture blockID -%}{{sectionID}} .block-{{block.id}}{%- endcapture -%}
+
+          <section class="featured_block featured_block-{{block.type}} block-{{block.id}} {% if block.type == 'recently-view' -%} d-none {%- endif -%}"{{block.shopify_attributes}}>
+            {%- assign sidebarBlock_exist = true -%}
+            {%- case block.type -%}
+
+              {%- when 'category' -%}
+                {%- liquid
+                  assign menu       = block.settings.category
+                  assign menuList   = linklists[menu]
+                  assign menuTitle  = block.settings.heading | default: menuList.title
+                -%}
+
+                {%- if menu != blank and menuList.links.size > 0 -%}
+                  <div class="menu_list-ui menu-toggle"{{block.shopify_attributes}}>
+                    <div class="sb-title">{{ menuTitle }}</div>
+                    <div class="menu_list-body">
+                      <ul class="menu_list-wrapper">
+                        {%- for link in linklists[menu].links -%}
+
+                          <li class="menu_list-item">
+                            <a href="{{link.url}}" class="dropdown-link">
+                              {{link.title}}
+                              {%- if link.object.all_products_count != blank -%}
+                                <span class="number">{{link.object.all_products_count}}</span>
+                              {%- endif -%}
+                            </a>
+                            {%- if link.links != blank -%}
+                              <span class="js-btn-collapse expand" data-target="sb-collection-{{block.id | append: forloop.index}}"><a href="#" onclick="return false"></a></span>
+                              <ul class="dropdown-menu collapse" id="sb-collection-{{block.id | append: forloop.index}}">
+                                {%- for child_link in link.links -%}
+                                  <li class="menu_list-item">
+                                    <a href="{{child_link.url}}">
+                                      {{child_link.title}}
+                                      {%- if child_link.object.all_products_count != blank -%}
+                                        <span class="number">{{child_link.object.all_products_count}}</span>
+                                      {%- endif -%}
+                                    </a>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  </div>
+
+                {%- else -%}
+                    {%- render 'svgset', type: 'empty-menu' -%}
+                {%- endif -%}
+              {% comment %} end {% endcomment %}
+
+              {%- when 'product-recommend' -%}
+                {%- liquid
+                  assign collection_handle = block.settings.collection
+                  assign collection = collections[collection_handle]
+                  assign limit = block.settings.limit
+                  assign title = block.settings.title
+                -%}
+                <div class="product-recommend">
+                  <div class="product-recommend_title sb-title">{{title}}</div>
+                  <div class="product-recommend_wrapper">
+                    {%- for product in collection.products limit: limit -%}
+                      <div class="product-recommend_item">
+                        <a href="{{product.url}}" class="product_image">
+                          {%- render 'image-style' image: product.featured_image -%}
+                        </a>
+                        <div class="product_info">
+                          <a href="{{product.url}}" class="product_name">{{product.title}}</a>
+                          <div class="product_review">{%- render 'review' type: 'badge' -%}</div>
+                          <div class="product_price">
+                            {%- if product.price_varies -%}
+                              <span class="price-min js-money">{{product.price_min | money}}</span> -
+                              <span class="price-max js-money">{{product.price_max | money}}</span>
+                            {%- else -%}
+                              <span class="js-money">{{product.price | money}}</span>
+                            {%- endif -%}
+
+                          </div>
+                        </div>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {% comment %} end {% endcomment %}
+
+              {%- when 'recently-view' -%}
+                <div class="recently-review js-sb-recently-viewed" data-limit="{{block.settings.limit}}">
+                  <div class="sb-title">{{block.settings.title}}</div>
+                  <div class="recently-review_wrapper" id="product_sb_recently_view"></div>
+                  <div class="d-none" id="product_sb_review_template">
+                    <div class="recently-review_item">
+                      <div class="product_image">
+                        <img src="" class="js-img js-url">
+                      </div>
+                      <div class="product_info">
+                        <a class="product_name js-name js-url"></a>
+                        <div class="product_price">
+                          <div class="price-sale js-price"></div>
+                          <del class="price-compare d-none js-compare-at-price"></del>
+                        </div>
+                        <div class="save-percent js-save-percent d-none"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% comment %} end {% endcomment %}
+            {%- endcase -%}
+          </section>
+
+
+
+          {%- capture block_css -%}
+            {%- render 'css-resp', classID: blockID, css_value: block.settings.margin, css_property: 'margin' -%}
+          {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if section.blocks.size == 0 or sidebarBlock_exist != true -%}
+        <p>{{- 'general.text.no_content' | t -}}</p>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{%- capture sectionCss -%}
+  {%- liquid
+    assign gridLayout = section.settings.grid_layout | append: ',100%,100%'
+    render 'css-resp', classID: '.layout-grid.d-grid', css_value: gridLayout, css_property: 'grid-template-columns'
+    render 'css-resp', classID: '.layout-grid.d-grid', css_value: section.settings.grid_gap, css_property: 'grid-gap'
+    render 'css-resp', classID: sectionID, css_value: section.settings.section_padding
+  -%}
+{%- endcapture -%}
+{%- assign section_css = section_css | prepend: sectionCss -%}
+
+{%- unless template contains 'blog' -%}
+  {%- unless section_css == blank -%}<style>{{section_css}}</style>{%- endunless -%}
+{%- endunless -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("product-sidebar") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "product-sidebar"]);
+  }else{
+    window.theme.sectionRegister = ["product-sidebar"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+
+<a href="#" onclick="return false" class="btn btn-1 btn-show-sidebar" id="js_open_sidebar">{{ 'products.product.show_sidebar' | t}}</a>
+{% schema %}
+  {
+    "name": {
+      "en": "Product Sidebar"
+    },
+    "tag": "aside",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": {
+          "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000247894) before use."
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": {
+          "en": "Created by 'Product sidebar' section"
+        }
+      },
+      {
+        "type": "text",
+        "id": "section_padding",
+        "label": {
+          "en": "Section Padding"
+        },
+        "placeholder": {
+          "en": "E.g: 20px 0px 20px 0px "
+        },
+        "info": {
+          "en": "Order: Top Right Bottom Left"
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "type": "category",
+        "name": {
+          "en": "Category"
+        },
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Category's Heading"
+            },
+            "info": {
+              "en": "Default is Menu title"
+            }
+          },
+          {
+            "type": "link_list",
+            "id": "category",
+            "label": {
+              "en": "Category"
+            }
+          },
+          {
+            "type": "text",
+            "id": "margin",
+            "label": {
+              "en": "Block margin"
+            },
+            "placeholder": {
+              "en": "E.g: 20px 0px 20px 0px "
+            },
+            "info": {
+              "en": "E.g: 20px 0px 20px 0px . Order: Top Right Bottom Left"
+            }
+          }
+        ]
+      },
+      {
+        "type" : "recently-view",
+        "limit" : 1,
+        "name" : {
+          "en": "Recently View"
+        },
+        "settings" : [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Title"
+            }
+          },
+          {
+            "type" : "range",
+            "id": "limit",
+            "label": {
+              "en" : "Limit"
+            },
+            "step": 1,
+            "min" : 1,
+            "max" : 10,
+            "default" : 4
+          },
+          {
+            "type": "text",
+            "id": "margin",
+            "label": {
+              "en": "Block margin"
+            },
+            "placeholder": {
+              "en": "E.g: 20px 0px 20px 0px "
+            },
+            "info": {
+              "en": "E.g: 20px 0px 20px 0px . Order: Top Right Bottom Left"
+            }
+          }
+        ]
+      },
+      {
+        "type" : "product-recommend",
+        "name" : {
+          "en": "Product recommend"
+        },
+        "settings" : [
+          {
+            "type": "text",
+            "id": "title",
+            "label": {
+              "en": "Title"
+            }
+          },
+          {
+            "type": "text",
+            "id": "limit",
+            "label": {
+              "en": "Limit"
+            },
+            "default" : "5"
+          },
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "Collection"
+          },
+          {
+            "type": "text",
+            "id": "margin",
+            "label": {
+              "en": "Block margin"
+            },
+            "placeholder": {
+              "en": "E.g: 20px 0px 20px 0px "
+            },
+            "info": {
+              "en": "E.g: 20px 0px 20px 0px . Order: Top Right Bottom Left"
+            }
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

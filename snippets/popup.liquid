@@ -1,0 +1,138 @@
+{%- comment -%}Cart Notify Popup{%- endcomment-%}
+<template id="template-cart-notify">
+  <div class="modal modal-cart-notify" id="modal_cart_notify">
+    <div class="modal_wrapper">
+
+      <div class="modal_overlay js-modal-close"></div>
+
+      <div class="modal_box">
+
+        <div class="modal_content">
+          <p class="headline"><span class="svg_element-ui">{%- render 'svg' type: 'check' -%}</span>{{ 'section.popup.success' | t}}</p>
+
+          <div class="modal_product">
+            <div class="modal_product_image"><img class="js-image"></div>
+            <div class="modal_product_info">
+              <div class="js-name modal_product_title"></div>
+              <div class="modal_product_qty"><strong>{{ 'section.popup.quantity' | t}}:</strong><span class="js-qty"></span></div>
+              <div class="modal_product_price"><strong>{{ 'section.popup.cart_total' | t}}:</strong><span class="js-item-total-money money"></span></div>
+            </div>
+          </div>
+
+          <div class="modal_action">
+            <div class="js-cart-number modal_number"></div>
+            <div class="modal_subtotal"><strong>{{ 'section.popup.cart_total' | t}}:</strong><span class="js-cart-total-money money" ></span></div>
+            {% comment %} <div class="wrap-progress"><div class="sb-progress"><span class="sb-progress-bar" style="width: 100%">100%</span></div><div class="sb-text">Free shipping for orders over <span class="money">$100.00</span></div></div> {% endcomment %}
+            <div class="modal_button">
+              <div class="modal_continue">
+                <a href="#" onclick="return false" class="btn btn-2 js-modal-close">{{ 'section.popup.continue_shopping' | t}}</a>
+              </div>
+              <div class="modal_checkout">
+                <a class="btn btn-1" href="{{routes.cart_url}}">{{ 'section.popup.checkout' | t}}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-modal-close modal_close" title="{{ 'section.popup.close' | t}}">{%- render 'svg' type: 'close' -%}</div>
+
+      </div>
+
+    </div>
+  </div>
+</template>
+
+{% comment %} Currency and Language Popup {% endcomment %}
+{%- if settings.enable_currencies or settings.enable_languages -%}
+  <div class="modal modal-currency-vs-language" id="modal-currency-vs-language">
+    <div class="modal_wrapper">
+
+      <div class="modal_overlay js-modal-close" onclick="this.closest('.modal').classList.remove('is-open')"></div>
+
+      <div class="modal_box">
+        <div class="modal_header">{{ 'section.announcement_bar.settings' | t}}</div>
+        <div class="modal_content">
+        {%- if settings.enable_currencies -%}
+          {%- if settings.currencies_type == 'shopify'-%}
+            {%- form 'currency' -%}
+              <label for="currency_select">{{ 'section.announcement_bar.currencies' | t}}</label>
+              <div class="select-group">
+                <select  id="currencies-select" name="currency" onchange="this.closest('form').submit()">
+                  {%- for currency in shop.enabled_currencies -%}
+                    <option value="{{currency.iso_code}}" {%- if cart.currency.iso_code == currency.iso_code -%} selected {%- endif -%}>{{currency.iso_code}}</option>
+                  {%- endfor -%}
+                </select>
+                {%- render 'svg' type: 'angle-down' -%}
+              </div>
+            {%- endform -%}
+          {%- else -%}
+            <label for="currency_select">{{ 'section.announcement_bar.currencies' | t}}</label>
+            <div class="select-group">
+              <select  id="currencies-select" name="currency">
+                {%- liquid
+                  assign currencies_list = settings.currencies_list | split: ','
+                -%}
+                {%- for currency in currencies_list -%}
+                  <option value="{{currency | strip}}" {%- if cart.currency.iso_code == currency -%} selected {%- endif -%}>{{currency}}</option>
+                {%- endfor -%}
+              </select>
+              {%- render 'svg' type: 'angle-down' -%}
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if settings.enable_languages -%}
+          <label for="language_select">{{ 'section.announcement_bar.translate' | t}}</label>
+          <div class="select-group">
+            {%- if routes.root_url != '/' -%}
+              {%- assign originUrl = request.path | remove_first: routes.root_url -%}
+            {%- else -%}
+              {%- assign originUrl = request.path -%}
+            {%- endif -%}
+            <select  id="languages-select" name="languages-select" data-origin-url="{{originUrl}}">
+              {%- for locale in shop.enabled_locales -%}
+                <option value="{%- if locale.root_url != '/' -%}{{locale.root_url}}{%- endif -%}" {%- if routes.root_url == locale.root_url -%} selected {%- endif -%}>{{locale.name}}</option>
+              {%- endfor -%}
+            </select>
+            {%- render 'svg' type: 'angle-down' -%}
+          </div>
+        {%- endif -%}
+        </div>
+
+        <div class="js-modal-close modal_close" onclick="this.closest('.modal').classList.remove('is-open')" title="{{ 'section.popup.close' | t}}">{%- render 'svg' type: 'close' -%}</div>
+
+      </div>
+
+    </div>
+  </div>
+{%- endif -%}
+
+{% comment %} Newsletter Popup {% endcomment %}
+{%- if settings.enable_newsletter -%}
+  {%- if request.design_mode -%}
+    {%- section 'section-newsletter' -%}
+  {%- else -%}
+    <div id="lazy-newsletter" data-url="{{routes.root_url}}?section_id=section-newsletter" data-section-id="section-newsletter" data-section-type="newsletter"></div>
+  {%- endif -%}
+{%- endif -%}
+
+
+
+
+{% comment %} Send Message Popup {% endcomment %}
+<div class="modal modal-message" id="modal-message">
+  <div class="modal_overlay js-modal-close"></div>
+
+    <div class="modal_box">
+
+      <div class="modal_content text-center">
+        <p class="js-message"></p>
+      </div>
+
+      <div class="js-modal-close modal_close">{%- render 'svg' type: 'close' -%}</div>
+
+    </div>
+</div>
+<style>.modal-message .modal_box {width: 100%;max-width: 400px;height: auto;}.modal-message .modal_box p {margin: 10px 0;}.modal-message .modal_close {top: 0;}</style>
+
+{% comment %} compress {% endcomment %}

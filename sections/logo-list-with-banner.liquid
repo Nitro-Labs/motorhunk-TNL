@@ -1,0 +1,1063 @@
+{% liquid
+  assign isBoxed         = section.settings.layout_boxed
+  assign default_color   = 'rgba(0,0,0,0)'
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+
+  assign items_resp  = section.settings.items_resp | default: '4,3,2'
+  assign grid_spc    = section.settings.grid_spc
+  assign bg_color    = section.settings.bg_color | default: default_color | replace: default_color, ''
+  assign bg_image    = section.settings.bg_image
+  assign bg_full     = section.settings.bg_full
+  assign bg_repeat   = section.settings.bg_repeat
+  assign bg_position = section.settings.bg_position
+  assign bg_size     = section.settings.bg_size
+  assign sectionID   = '#section-' | append: section.id
+  assign logo_blocks = section.blocks | where: 'type', 'image'
+
+  assign banner_position  = section.settings.banner_position
+  assign banner_image     = section.settings.banner_image
+  assign banner_text_1    = section.settings.banner_text_1
+  assign banner_text_2    = section.settings.banner_text_2
+  assign banner_text_3    = section.settings.banner_text_3
+  assign banner_btn_url   = section.settings.banner_btn_url
+  assign banner_btn_label = section.settings.banner_btn_label
+
+  assign hide_banner_on_mobile  = section.settings.hide_banner_on_mobile
+  assign section_btn_text_color = section.settings.section_btn_text_color | default: default_color
+  assign logo_list_grid_spc     = section.settings.logo_list_grid_spc
+  assign logo_item_bg_color     = section.settings.logo_item_bg_color | default: default_color
+  assign heading_style_block    = section.blocks | where: 'type', 'heading-style'| first
+  assign banner_style_block    = section.blocks | where: 'type', 'banner-style'| first
+  assign show_heading_section   = section.settings.show_heading_section
+%}
+
+{%- if bg_full -%}
+  {%- capture bg_full -%}{%- render 'bgset' image: bg_image -%}{%- endcapture -%}
+  {%- assign bg_class = '.section-wrapper' -%}
+{%- else -%}
+  {%- capture bg_boxed -%}{%- render 'bgset' image: bg_image -%}{%- endcapture -%}
+  {%- assign bg_class = ' .section-body' -%}
+{%- endif -%}
+
+{%- capture banner_content -%}
+  <div class="banner{% if hide_banner_on_mobile %} d-none d-lg-block{% endif %}">
+    <div class="image">
+      {%- if banner_image != blank -%}
+        {%- render 'image-style' image: section.settings.banner_image  -%}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag | replace_first: '<svg', '<svg class="placeholder-svg
+        " style="width:100%;height:100%" '}}
+      {%- endif -%}
+    </div>
+    <div class="textbox overlay-ui">
+      {%- if banner_text_1 != blank -%}
+        <h3 class="text-1">{{banner_text_1}}</h3>
+      {%- endif -%}
+
+      {%- if banner_text_2 != blank -%}
+        <div class="text-2">{{banner_text_2}}</div>
+      {%- endif -%}
+
+      {%- if banner_text_3 -%}
+        <div class="text-3">{{banner_text_3}}</div>
+      {%- endif -%}
+
+      {%- if banner_btn_label != blank -%}
+        <div class="button">
+          <a href="{{banner_btn_url}}" class="btn btn-1">{{banner_btn_label}}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endcapture -%}
+
+
+<div class="logo-list-banner" id="section-{{section.id}}" data-section-id="{{section.id}}" data-section-type="logo-list-menu">
+  <div class="section-wrapper {{bg_full}}">
+    {% if isBoxed  %}<div class="container">{%- endif -%}
+      <div class="section-body {{bg_boxed}}">
+        <div class="d-grid">
+          {%- if banner_position == 'left' -%}
+            {{banner_content}}
+          {%- endif -%}
+
+          <div class="logo-list-content">
+            {%- if show_heading_section and section.settings.heading != blank or section.settings.subheading != blank -%}
+              {%- capture heading_css -%}
+                {%- render 'snippet-heading-css' sectionID: sectionID, section: heading_style_block -%}
+              {%- endcapture -%}
+              {%- assign section_css = section_css | append: heading_css -%}
+              <div class="section_content-head">
+                {%- render 'snippet-heading' config: section.settings -%}
+              </div>
+            {%- endif -%}
+            <div class="section_content-body">
+              <div class="logo-list_content {% render 'grid-class' value: items_resp -%}">
+                {%- for block in logo_blocks -%}
+                  {%- liquid
+                    assign image = block.settings.image
+                    assign svg   = block.settings.svg
+                    assign type  = block.settings.type
+                  -%}
+                  <div class="logo-item">
+                    <a href="{{block.settings.link | default: 'javascript:void(0);'}}" class="{{type}}">
+                      {%- case type -%}
+                        {%- when 'image' -%}
+                          {%- if image != blank -%}
+                            {% render 'image-style' image: block.settings.image, originQuality: true %}
+                          {%- else -%}
+                            {{ 'image' | placeholder_svg_tag | replace: '<svg', '<svg class="placeholder-svg"' }}
+                          {%- endif -%}
+                        {%- when 'svg' -%}
+                          {%- if svg != blank -%}
+                            {{svg}}
+                          {%- else -%}
+                            {{ 'image' | placeholder_svg_tag | replace: '<svg', '<svg class="placeholder-svg"' }}
+                          {%- endif -%}
+                      {%- endcase -%}
+                    </a>
+                  </div>
+                {%- endfor -%}
+
+                <div class="logo-item">
+                  <a href="{{section.settings.logo_list_btn_url}}" class="w-100 h-100 d-flex justify-content-center align-items-center see-all">
+                    {{section.settings.logo_list_btn_svg}}
+                    <span class="d-block">{{section.settings.logo_list_btn_label}}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {%- if banner_position == 'right' -%}
+            {{banner_content}}
+          {%- endif -%}
+        </div>
+      </div>
+
+    {% if isBoxed %}</div>{%- endif -%}
+  </div>
+</div>
+
+{%- capture sectionCss -%}
+  {{-section_css-}}
+  {%- if section_btn_text_color != blank -%}{{sectionID}} .see-all{color:{{section_btn_text_color}};}{%- endif -%}
+  {%- if logo_item_bg_color != default_color -%}{{sectionID}} .logo-item{background-color: {{logo_item_bg_color}};}{%- endif -%}
+
+  {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+    value_1: section_padding , property_1: 'padding'
+    value_2: section_margin , property_2: 'margin'
+    value_3: bg_color , property_3: 'background-color'
+    -%}
+  {%- render 'grid-spacing' preClassID: sectionID, classID: ' .logo-list_content.d-grid', value: logo_list_grid_spc -%}
+  {%- render 'grid-spacing' preClassID: sectionID, classID: ' .section-body >.d-grid', value: grid_spc -%}
+
+  {%- case banner_position -%}
+    {%- when 'left' -%}
+      {%- if hide_banner_on_mobile -%}
+        {%- render 'grid-template-columns' preClassID: sectionID, classID: ' .section-body >.d-grid', value: '25% 75%, 100%, 100%' -%}
+      {%- else -%}
+        {%- render 'grid-template-columns' preClassID: sectionID, classID: ' .section-body >.d-grid', value: '25% 75%,40% 60%, 100%' -%}
+      {%- endif -%}
+    {%- when 'right' -%}
+      {%- if hide_banner_on_mobile -%}
+        {%- render 'grid-template-columns' preClassID: sectionID, classID: ' .section-body >.d-grid', value: '75% 25%, 100%, 100%' -%}
+      {%- else -%}
+        {%- render 'grid-template-columns' preClassID: sectionID, classID: ' .section-body >.d-grid', value: '75% 25%,60% 40%, 100%' -%}
+      {%- endif -%}
+  {%- endcase -%}
+
+  {%- if banner_style_block != blank -%}
+    {%- liquid
+      assign button_bg_color = banner_style_block.settings.button_bg_color | default: default_color
+      assign button_hover_bg_color = banner_style_block.settings.button_hover_bg_color | default: default_color
+      assign button_text_color = banner_style_block.settings.button_text_color | default: default_color
+      assign button_hover_text_color = banner_style_block.settings.button_hover_text_color | default: default_color
+    -%}
+
+    {%- capture banner_button_bg_css -%}
+      {%- if button_bg_color != default_color -%}background-color:{{button_bg_color}};{%- endif -%}
+      {%- if button_text_color != default_color -%}color:{{button_text_color}};{%- endif -%}
+    {%- endcapture -%}
+    {{sectionID}} .banner .btn{ {{-banner_button_bg_css-}} }
+    {%- capture banner_button__hover_bg_css -%}
+      {%- if button_hover_bg_color != default_color -%}background-color:{{button_hover_bg_color}};{%- endif -%}
+      {%- if button_hover_text_color != default_color -%}color:{{button_hover_text_color}};{%- endif -%}
+    {%- endcapture -%}
+    {{sectionID}} .banner .btn:hover{ {{-banner_button__hover_bg_css-}} }
+
+    {%- for i in (1..3) -%}
+      {%- liquid
+        assign text_color = 'text_color_' | append: i
+        assign text_fs = 'text_fs_' | append: i
+        assign text_fw = 'text_fw_' | append: i
+        assign text_mr = 'text_mr_' | append: i
+        assign text_class = '.textbox .text-' | append: i
+      -%}
+      {%- render 'css-responsive' preClassID: sectionID, classID: ' .banner', nextClassID: text_class,
+        value_1: banner_style_block.settings[text_color], property_1: 'color'
+        value_2: banner_style_block.settings[text_fs], property_2: 'font-size'
+        value_3: banner_style_block.settings[text_fw], property_3: 'font-weight'
+        value_4: banner_style_block.settings[text_mr], property_4:  'margin'-%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+{%- assign section_css = section_css | append: sectionCss -%}
+
+<style>{{ section_css }}</style>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Logo List with Banner"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/support/solutions/6000139952) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/support/solutions/6000139952) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Logo List with Banner' section"
+      }
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Logo List with Banner"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "layout_boxed",
+      "label": {
+        "en": "Boxed"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section margin"
+      },
+      "default": "50px 0px 50px 0px",
+      "info": {
+        "en": "Order: top right bottom left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section padding"
+      },
+      "default": "50px 0px 50px 0px",
+      "info": {
+        "en": "Order: top right bottom left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_spc",
+      "label": {
+        "en": "Spacing between logo list and banner"
+      },
+      "default": "10px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      },
+      "info": {
+        "en": "E.g: 10px"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_full",
+      "label": {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background Color"
+      },
+      "default": "#ffffff"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": {
+        "en": "Background image"
+      }
+    },
+    {
+      "type": "select",
+      "id": "bg_size",
+      "label": {
+        "en": "Background size"
+      },
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Auto"
+          }
+        },
+        {
+          "value": "cover",
+          "label": {
+            "en": "Cover"
+          }
+        },
+        {
+          "value": "contain",
+          "label": {
+            "en": "Contain"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": {
+        "en": "Background position"
+      },
+      "options": [
+        {
+          "value": "left top",
+          "label": {
+            "en": "Left Top"
+          }
+        },
+        {
+          "value": "left center",
+          "label": {
+            "en": "Left Center"
+          }
+        },
+        {
+          "value": "left bottom",
+          "label": {
+            "en": "Left Bottom"
+          }
+        },
+        {
+          "value": "right top",
+          "label": {
+            "en": "Right Top"
+          }
+        },
+        {
+          "value": "right center",
+          "label": {
+            "en": "Right Center"
+          }
+        },
+        {
+          "value": "right bottom",
+          "label": {
+            "en": "Right Bottom"
+          }
+        },
+        {
+          "value": "center top",
+          "label": {
+            "en": "Center Top"
+          }
+        },
+        {
+          "value": "center center",
+          "label": {
+            "en": "Center Center"
+          }
+        },
+        {
+          "value": "center bottom",
+          "label": {
+            "en": "Center Bottom"
+          }
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "bg_repeat",
+      "label": {
+        "en": "Background repeat"
+      },
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": {
+            "en": "No repeat"
+          }
+        },
+        {
+          "value": "repeat",
+          "label": {
+            "en": "Repeat"
+          }
+        },
+        {
+          "value": "repeat-x",
+          "label": {
+            "en": "Repeat X"
+          }
+        },
+        {
+          "value": "repeat-y",
+          "label": {
+            "en": "Repeat Y"
+          }
+        }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Heading Section"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To custom style. Please add block '[+ ]Heading Style'."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_section",
+      "label": {
+        "en": "Show"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": {
+        "en": "Heading"
+      },
+      "default" : "Lorem, ipsum dolor."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": {
+        "en": "Subheading"
+      },
+      "default" : "Lorem ipsum dolor sit amet consectetur."
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Logo list settings"
+      }
+    },
+    {
+      "type": "color",
+      "id": "logo_item_bg_color",
+      "label": {
+        "en": "Item background color"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "5,3,2",
+      "placeholder": {
+        "en": "E.g: 2,1"
+      }
+    },
+    {
+      "type": "text",
+      "id": "logo_list_grid_spc",
+      "label": {
+        "en": "Spacing between items"
+      },
+      "default": "10px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      },
+      "info": {
+        "en": "E.g: 10px"
+      }
+    },
+    {
+      "type": "html",
+      "id": "logo_list_btn_svg",
+      "label": {
+        "en": "SVG Button"
+      }
+    },
+    {
+      "type": "text",
+      "id": "logo_list_btn_label",
+      "label": {
+        "en": "Button label"
+      },
+      "default": "See all makers"
+    },
+    {
+      "type": "color",
+      "id": "section_btn_text_color",
+      "label": {
+        "en": "Button label color"
+      }
+    },
+    {
+      "type": "url",
+      "id": "logo_list_btn_url",
+      "label": {
+        "en": "Button link"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Banner settings"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To custom style. Please add block '[+] Banner Style'."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_banner_on_mobile",
+      "label": {
+        "en": "Hide on mobile"
+      }
+    },
+    {
+      "type": "select",
+      "id": "banner_position",
+      "label": {
+        "en": "Position"
+      },
+      "options": [
+        {
+          "value": "left",
+          "label": {
+            "en": "Left"
+          }
+        },
+        {
+          "value": "right",
+          "label": {
+            "en": "Right"
+          }
+        }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": {
+        "en": "Image"
+      }
+    },
+    {
+      "type": "text",
+      "id": "banner_text_1",
+      "label": {
+        "en": "Text 1"
+      },
+      "default": "Lorem ipsum dolor sit."
+    },
+    {
+      "type": "text",
+      "id": "banner_text_2",
+      "label": {
+        "en": "Text 2"
+      },
+      "default": "Lorem ipsum dolor sit amet consectetur."
+    },
+    {
+      "type": "text",
+      "id": "banner_text_3",
+      "label": {
+        "en": "Text 3"
+      },
+      "default": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+    },
+    {
+      "type": "text",
+      "id": "banner_btn_label",
+      "label": {
+        "en": "Button label"
+      },
+      "default": "See All Cars"
+    },
+    {
+      "type": "url",
+      "id": "banner_btn_url",
+      "label": {
+        "en": "Buttton link"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": {
+        "en": "Image"
+      },
+      "settings": [
+        {
+          "type": "select",
+          "id": "type",
+          "label": {
+            "en": "Type"
+          },
+          "options": [
+            {
+              "value": "image",
+              "label": {
+                "en": "Image"
+              }
+            },
+            {
+              "value": "svg",
+              "label": {
+                "en": "SVG"
+              }
+            }
+          ]
+        },
+        {
+          "type": "html",
+          "id": "svg",
+          "label": {
+            "en": "SVG"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": {
+            "en": "Link"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading-style",
+      "limit" : 1,
+      "name": {
+        "en": "[+] Heading Style"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "section_heading_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          },
+          "default": "0 0 30px 0"
+        },
+        {
+          "type": "select",
+          "id": "section_heading_align",
+          "label": {
+            "en": "Alignment"
+          },
+          "options": [
+            {
+              "value": "left",
+              "label": {
+                "en": "Left"
+              }
+            },
+            {
+              "value": "center",
+              "label": {
+                "en": "Center"
+              }
+            },
+            {
+              "value": "right",
+              "label": {
+                "en": "Right"
+              }
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Heading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_heading_cl",
+          "label": {
+            "en": "Text color"
+          },
+          "default": "#103178"
+        },
+        {
+          "type": "text",
+          "id": "section_heading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "40px",
+          "placeholder": {
+            "en": "E.g: 40px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_heading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 600
+        },
+        {
+          "type": "text",
+          "id": "section_heading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "60px",
+          "placeholder": {
+            "en": "E.g: 60px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Subheading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_subheading_cl",
+          "label": {
+            "en": "Text color"
+          },
+          "default": "#5B6C8F"
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "24px",
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_subheading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "35px",
+          "placeholder": {
+            "en": "E.g: 35px"
+          }
+        }
+      ]
+    },
+    {
+      "type" : "banner-style",
+      "limit" : 1,
+      "name" : {
+        "en": "[+] Banner Style"
+      },
+      "settings" : [
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 1"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_color_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "Eg: 20px"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_1",
+          "label": {
+            "en" : "Font weihgt"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 600
+        },
+        {
+          "type": "text",
+          "id": "text_mr_1",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder" : {
+            "en": "Eg: 5px 0px 5px 0px"
+          },
+          "info": {
+            "en": "Order: top left bottom left. Unit: px or rem."
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 2"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_color_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_2",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "Eg: 20px"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_2",
+          "label": {
+            "en" : "Font weihgt"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 600
+        },
+        {
+          "type": "text",
+          "id": "text_mr_2",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder" : {
+            "en": "Eg: 5px 0px 5px 0px"
+          },
+          "info": {
+            "en": "Order: top left bottom left. Unit: px or rem."
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 3"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_color_3",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_3",
+          "label": {
+            "en": "Font size"
+          },
+          "info": {
+            "en": "Eg: 20px"
+          }
+        },
+        {
+          "type" : "range",
+          "id": "text_fw_3",
+          "label": {
+            "en" : "Font weihgt"
+          },
+          "step": 100,
+          "min" : 100,
+          "max" : 900,
+          "default" : 600
+        },
+        {
+          "type": "text",
+          "id": "text_mr_3",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder" : {
+            "en": "Eg: 5px 0px 5px 0px"
+          },
+          "info": {
+            "en": "Order: top left bottom left. Unit: px or rem."
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Button"
+          }
+        },
+        {
+          "type": "color",
+          "id": "button_bg_color",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "button_hover_bg_color",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "button_hover_text_color",
+          "label": {
+            "en": "Hover: Text color"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Logo List with Banner"
+      },
+      "category": "Banner",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="{{ shop.locale }}">
+<head>
+  <meta name="google-site-verification" content="uvEH_370x7j15GJm7j5Qbi5RpqZKB8xBqkCGzjpZ7DU" />
+  <link rel="preconnect dns-prefetch" href="https://cdn.shopify.com">
+  <link rel="preconnect dns-prefetch" href="{{ shop.url }}">
+  <link rel="preconnect dns-prefetch" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="shortcut icon" type="image/x-icon" href="{{ 'favicon.png' | asset_url }}">
+  <link rel="canonical" href="{{canonical_url}}">
+  {%- render 'css-preload' -%}
+  <meta charset="utf-8">
+  <meta name="viewport" content="viewport-fit=cover, width=device-width,initial-scale=1, user-scalable=0"/>
+  <meta name="google" content="notranslate">
+  <meta name='HandheldFriendly' content='True'>
+  <meta name='MobileOptimized' content='360'>
+  <meta http-equiv="cleartype" content="on">
+  <meta name="theme-color" content="{{ settings.main_color }}">
+  <title>{{ page_title }}{%- if current_tags -%}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}</title>
+
+  {% comment %}
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}{% if current_tags %} {{ 'general.meta.tagged_html' | t: tags: meta_tags | escape }}.{% endif %}{% if current_page != 1 %} {{ 'general.meta.page' | t: page_number: current_page }}.{% endif %}" />
+    {%- endif -%}
+  {% endcomment %}
+  {%- assign default_meta_desctription = 'general.meta.description' | t: shop_name: shop.name -%}
+  <meta name="description" content="{{page_description | default: default_meta_desctription}}">
+  {%- render 'fb-open-graph' -%}
+  {%- render 'theme-font' -%}
+  {%- include 'style-resources' -%}
+  {%- render 'js-preload' -%}
+  {%- include 'js-resources' -%}
+
+  {{content_for_header }}
+{% capture boostersnippet %}{% include "booster-apps-common" %}{% endcapture %}{% unless boostersnippet contains "Liquid error" %}{{ boostersnippet }}{% endunless %}
+
+</head>
+
+{%- capture body_class -%}
+  {%- if template.name == 'product' -%}
+    {%- if template.suffix != blank -%}
+      {{--}}|template-{{ template | replace: '.', '-' | replace: '/', '-' -}}
+    {%- else -%}
+      {{--}}|template-product-{{settings.product_page}}
+    {%- endif -%}
+  {%- else -%}
+    {{--}}|template-{{ template | replace: '.', '-' | replace: '/', '-' -}}
+  {%- endif -%}
+
+  {%- assign layout = settings.theme_layout | downcase -%}
+  {%- if layout == 'rtl' -%}|theme-rtl{%- endif -%}
+
+  {%- if settings.enable_left_column -%}|has-left-column {%- endif -%}
+  {{--}}|page-layout-{{settings.page_layout-}}
+{%- endcapture -%}
+
+<body class="{{body_class | strip | strip_newlines | split: '|' | join: ' '}}" data-template="{{template.name}}" data-suffix="{{template.suffix}}">
+
+  {%- include 'svg-template' -%}
+  {%- include 'header-group' -%}
+
+  <main id="main-content">
+    {%- include 'breadcrumb', pageLayout: settings.page_layout -%}
+    
+    {%- capture mainContent -%}{{content_for_layout}}{%- endcapture -%}
+    {%- render 'layout', content_for_layout: mainContent -%}
+  </main>
+
+  {%- include 'footer-group' -%}
+
+  {%- if settings.enable_mobilebar -%}
+    {%- if request.design_mode -%}
+      {%- section 'mobile-bar' -%}
+    {%- else -%}
+      <div class="lazy-mobile-bar d-lg-none lazyload" id="mobile_bar_lazy" data-type="mobile-bar" data-include="{{routes.root_url}}?section_id=mobile-bar"></div>
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- render 'drawer-search' -%}
+
+  {%- if settings.cart_type != 'page' and template.name != 'cart' -%}
+    {%- render 'cart-drawer' -%}
+  {%- endif -%}
+
+  <div id="back-to-top"><a href="#" onclick="return false"class="btn"><span class="svg-element-ui">{%- render 'svg', type: 'angle-up' -%}</span></a></div>
+  {%- render 'popup'  -%}
+
+	</body>
+</html>

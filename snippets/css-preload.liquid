@@ -1,0 +1,27 @@
+<link href="{{'main_style.min.css' | asset_url}}" rel="preload" as="style">
+<link href="{{'header-content.min.css' | asset_url}}" rel="preload" as="style">
+<link href="{{'footer-content.min.css' | asset_url}}" rel="preload" as="style">
+{%- case template.name -%}
+  {%- when 'index' -%}
+    <link href="{{'home-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'collection' -%}
+    <link href="{{'collection-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'product' -%}
+    <link href="{{'product-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'blog' -%}
+    <link href="{{'blog-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'cart' -%}
+    <link href="{{'cart-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'page' -%}
+    <link href="{{'about-contact-page.min.css' | asset_url}}" rel="preload" as="style">
+  {%- when 'article' -%}
+    <link href="{{'blog-page.min.css' | asset_url}}" rel="preload" as="style">
+{%- endcase -%}
+{%- if template contains 'customer' -%}
+  <link href="{{'account-page.min.css' | asset_url}}" rel="preload" as="style">
+{%- endif -%}
+
+{%- assign layout = settings.theme_layout| downcase -%}
+{% if layout == 'rtl' %}
+  <link href="{{'rtl_theme.min.css' | asset_url}}" rel="preload" as="style">
+{% endif %}

@@ -1,0 +1,59 @@
+{%- liquid
+  if settings.page_layout == 'boxed'
+   assign is_boxed = true
+  endif
+
+  assign type = template.suffix
+-%}
+
+{%- capture blog_sidebar -%}
+  {%- if settings.blog_enable_sidebar -%}
+    {%- assign col_9 = 'col-lg-9' -%}
+    <div class="col-3">{%- section 'blog-sidebar' -%}</div>
+  {%- endif -%}
+{%- endcapture -%}
+
+<div class="page page-blog">
+  <div class="page_wrapper">
+
+  {%- if is_boxed -%} <div class="container"> {%- endif -%}
+    <h1 class="blog-title">{{blog.title}}</h1>
+    <div class="row">
+
+      {%- case type -%}
+        {%- when 'no-sidebar' -%}
+          <div class="col-12">{{content_for_layout}}</div>
+
+          <script>
+            document.addEvent('common.js loaded', () => {
+              let openDrawerButton = document.querySelector('.js-drawer-open');
+              let drawerContainer = document.getElementById('sidebarDrawer');
+              if(!!openDrawerButton){
+                openDrawerButton.addEvent('click', () => {
+                  drawerContainer.addClass('is-open');
+                  AT.disableScroll();
+                });
+                drawerContainer.querySelectorAll('.js-drawer-close').addEvents('click', () => {
+                  drawerContainer.removeClass('is-open');
+                  AT.enableScroll();
+                })
+              }
+            })
+          </script>
+
+
+        {%- when 'left-sidebar' -%}
+          {{blog_sidebar}}
+          <div class="col-12 {{col_9}}">{{content_for_layout}}</div>
+
+        {%- else -%}
+          <div class="col-12 {{col_9}}">{{content_for_layout}}</div>
+          {{blog_sidebar}}
+
+      {%- endcase -%}
+
+    </div>
+
+  {%- if is_boxed -%} </div> {%- endif -%}
+  </div>
+</div>

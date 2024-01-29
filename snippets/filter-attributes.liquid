@@ -1,0 +1,120 @@
+{%- liquid
+  assign direction     = block.settings.direction
+  assign filter_prefix = block.settings.filter_prefix | strip
+  assign filter_style_color = block.settings.filter_style_color
+  assign filter = collection.filters | where: 'label', filter_prefix | first
+-%}
+{%- if filter == blank -%}{%- break -%}{%- endif -%}
+
+
+{%- capture filter_group -%}
+  {%- case filter.type -%}
+    {%-
+    #####################
+    #
+    # Price Range
+    #
+    #####################
+    -%}
+    {%- when 'price_range' -%}
+      {%- liquid
+        assign priceMin = block.settings.price_min
+        assign priceMax = block.settings.price_max
+      -%}
+
+      {%- capture filterId -%}{{ filter.label | escapce | append: block.id }}{%- endcapture -%}
+      <div class="price-range">
+        <price-range class="facets__price js-filter-update-content" data-id="priceRange">
+
+          <div class="field">
+            <label class="field__label" for="Filter-{{ filterId }}-GTE">{{ 'collections.general.from' | t }}</label>
+            <span class="field-currency">{{ cart.currency.symbol }}</span>
+            <input class="field__input"
+              name="{{ filter.min_value.param_name }}"
+              id="Filter-{{ filterId }}-GTE"
+              type="number"
+              form="mainFilterForm"
+              placeholder="{{priceMin}}"
+              min="{{priceMin}}"
+              max="{{ priceMax }}"
+              {%- if filter.min_value.value -%}value="{{ filter.min_value.value | money_without_currency | remove: ',' | times: 1 | round: 0 }}"{% endif %}
+            >
+          </div>
+
+
+          <div class="field">
+            <label class="field__label" for="Filter-{{ filterId }}-LTE">{{ 'collections.general.to' | t }}</label>
+            <span class="field-currency">{{ cart.currency.symbol }}</span>
+            <input class="field__input"
+              name="{{ filter.max_value.param_name }}"
+              id="Filter-{{ filterId }}-LTE"
+              type="number"
+              form="mainFilterForm"
+              min="{{priceMin}}"
+              max="{{ priceMax }}"
+              placeholder="{{ priceMax }}"
+              {%- if filter.max_value.value -%}value="{{ filter.max_value.value | money_without_currency | remove: ',' | times: 1 | round: 0 }}"{% endif %}
+            >
+          </div>
+        </price-range>
+          
+        <div class="button-group">
+          <button class="btn btn-1 btn-submit" type="submit" form="mainFilterForm">{{- 'collections.general.submit' | t -}}</button>
+        </div>
+      </div>
+
+
+
+    {%-
+    #####################
+    #
+    # Filter attributes
+    #
+    #####################
+    -%}
+    {%- else -%}
+      {%- for t in filter.values -%}
+        {%- assign tag = t.value -%}
+
+        {%- capture tag_link_class -%}tags-link {% if t.active %}active{%- endif -%}
+          {%- if filter_style_color and direction == 'row' %} filterColor-{{ tag | handle }} custom-color" data-custom-color="{{ tag | remove: filter_prefix | downcase }}{% endif -%}
+        {%- endcapture -%}
+
+        {%- assign filterID = filter.label | handle | append: forloop.index0 -%}
+
+        <li class="{{tag_link_class | strip | strip_newlines}}" data-tag-value="{{ tag | handle }}">
+
+          {%- capture filterLink -%}{%- if t.active -%}{{t.url_to_remove}}{%- else -%}{{t.url_to_add}}{%- endif -%}{%- endcapture -%}
+
+            <a href="{{filterLink}}" class="js-filter-link" data-filter-id="{{filterID | md5}}" data-active="{{t.active}}">{{t.label}}</a>
+        </li>
+      {%- endfor -%}
+  {%- endcase -%}
+{%- endcapture -%}
+
+<div class="filter-group direction-{{direction}} {% if filter_style_color %}filter-color" data-prefix="color{% endif %}">
+  <p class="sb-title">
+    <span>{{ block.settings.title}}</span>
+
+    {%- unless filter.type == 'price_range' -%}
+      <a href="{{ filter.url_to_remove }}" class="js-filter-link filter-clear {% if filter.active_values.size < 1 -%} d-none {%- endif -%}" data-filter-id="{{filter.label | append: 'remove' | md5}}">
+        <span>{{- 'collections.general.clear' | t -}}</span>
+        <span class="is-loading">
+          {%- render 'svg' type: 'is-loading' -%}
+        </span>
+      </a>
+    {%- endunless -%}
+  </p>
+
+  {%- unless filter.type == 'price_range' -%}
+    <ul class="tags-list">
+      {{filter_group}}
+    </ul>
+    {%- else -%}
+      {{filter_group}}
+  {%- endunless -%}
+</div>
+
+
+<!--split-->
+{%- render 'css-resp', classID: blockID, nextClassID: ' .tags-list', css_value: block.settings.block_max_height, css_property: 'max-height' -%}

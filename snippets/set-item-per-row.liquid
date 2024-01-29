@@ -1,0 +1,220 @@
+{%- case type -%}
+  {%- when 'slider' -%}
+    {%- liquid
+        assign _items_resp      = section.settings.items_resp | default: '5,3,2'| strip | split: ","
+        assign _padding         = section.settings.grid_spc | default: "10" | split: ','
+        assign dots             = section.settings.dots
+        assign controls         = section.settings.controls
+        assign autoplay         = section.settings.autoplay
+        assign autoplay_timeout = section.settings.autoplay_timeout
+        assign loop             = section.settings.loop
+
+    -%}
+    {%- comment -%}  1200  992  768  576  375  0{%- endcomment-%}
+    {%- case _items_resp.size -%}
+      {%- when 1  -%}
+        {%- assign items_xl = _items_resp[0] | abs  -%}{%- assign items_lg = _items_resp[0] | abs  -%}{%- assign items_md = _items_resp[0] | abs  -%}{%- assign items_sm = _items_resp[0] | abs  -%}{%- assign items_ex_sm = _items_resp[0] | abs  -%}{%- assign items = _items_resp[0] | abs  -%}
+      {%- when 2  -%}
+        {% liquid
+          assign items_xl    = _items_resp[0] | abs
+          assign items_lg    = _items_resp[0] | abs
+          assign items_md    = _items_resp[0] | abs
+          assign items_sm    = _items_resp[1] | abs
+          assign items_ex_sm = _items_resp[1] | abs
+          assign items       = _items_resp[1] | abs
+        %}
+      {%- when 3  -%}
+        {% liquid
+          assign items_xl    = _items_resp[0] | abs
+          assign items_lg    = _items_resp[0] | abs
+          assign items_md    = _items_resp[1] | abs
+          assign items_sm    = _items_resp[2] | abs
+          assign items_ex_sm = _items_resp[2] | abs
+          assign items       = _items_resp[2] | abs
+        %}
+      {%- when 4  -%}
+        {% liquid
+          assign items_xl    = _items_resp[0] | abs
+          assign items_lg    = _items_resp[1] | abs
+          assign items_md    = _items_resp[2] | abs
+          assign items_sm    = _items_resp[3] | abs
+          assign items_ex_sm = _items_resp[3] | abs
+          assign items       = _items_resp[3] | abs
+        %}
+      {%- when 5  -%}
+        {% liquid
+          assign items_xl    = _items_resp[0] | abs
+          assign items_lg    = _items_resp[1] | abs
+          assign items_md    = _items_resp[2] | abs
+          assign items_sm    = _items_resp[3] | abs
+          assign items_ex_sm = _items_resp[4] | abs
+          assign items       = _items_resp[4] | abs
+        %}
+      {%- else    -%}
+        {% liquid
+          assign items_xl    = _items_resp[0] | abs
+          assign items_lg    = _items_resp[1] | abs
+          assign items_md    = _items_resp[2] | abs
+          assign items_sm    = _items_resp[3] | abs
+          assign items_ex_sm = _items_resp[4] | abs
+          assign items       = _items_resp[5] | abs
+        %}
+
+    {%- endcase -%}
+
+    {%- case _padding.size -%}
+      {%- when 1  -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[0] | abs
+          assign spacing_md    = _padding[0] | abs
+          assign spacing_sm    = _padding[0] | abs
+          assign spacing_ex_sm = _padding[0] | abs
+          assign spacing       = _padding[0] | abs
+        %}
+      {%- when 2  -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[0] | abs
+          assign spacing_md    = _padding[0] | abs
+          assign spacing_sm    = _padding[1] | abs
+          assign spacing_ex_sm = _padding[1] | abs
+          assign spacing       = _padding[1] | abs
+        %}
+      {%- when 3  -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[0] | abs
+          assign spacing_md    = _padding[1] | abs
+          assign spacing_sm    = _padding[2] | abs
+          assign spacing_ex_sm = _padding[2] | abs
+          assign spacing       = _padding[2] | abs
+        %}
+      {%- when 4  -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[1] | abs
+          assign spacing_md    = _padding[2] | abs
+          assign spacing_sm    = _padding[3] | abs
+          assign spacing_ex_sm = _padding[3] | abs
+          assign spacing       = _padding[3] | abs
+        %}
+      {%- when 5  -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[1] | abs
+          assign spacing_md    = _padding[2] | abs
+          assign spacing_sm    = _padding[3] | abs
+          assign spacing_ex_sm = _padding[4] | abs
+          assign spacing       = _padding[4] | abs
+        %}
+
+      {%- else    -%}
+        {% liquid
+          assign spacing_xl    = _padding[0] | abs
+          assign spacing_lg    = _padding[1] | abs
+          assign spacing_md    = _padding[2] | abs
+          assign spacing_sm    = _padding[3] | abs
+          assign spacing_ex_sm = _padding[4] | abs
+          assign spacing       = _padding[5] | abs
+        %}
+    {%- endcase -%}
+
+    {%- comment -%}
+      **
+      * Slider Navigation
+      *
+    {%- endcomment-%}
+
+    {%- if controls -%}
+      <div class="js-tns-controls slider-controls">
+        <a href="#" onclick="return false" class="js-prev-button slider-prev-button">
+          {% render 'svg' type: 'angle-left' %}
+        </a>
+        <a href="#" onclick="return false" class="js-next-button slider-next-button">
+          {% render 'svg' type: 'angle-right' %}
+        </a>
+      </div>
+    {%- endif -%}
+
+      {%- comment -%}
+      **
+      * Slider Config
+      *
+    {%- endcomment-%}
+    <script type="application/json" id="{% if configID %}{{configID}}{% else %}tns-config-{{section.id}}{%- endif -%}" >
+      {
+        "itemClass" : "{{item_class}}",
+        "mouseDrag" : true,
+        "swipeAnlge" : 30,
+        "navPosition": "bottom",
+        "controls" : {{controls | default: false}},
+        "autoplay" : {{autoplay | default: false}},
+        {% if autoplay_timeout != 0 and autoplay_timeout != blank %}"autoplayTimeout": {{autoplay_timeout}},{%- endif -%}
+        "loop" : {{loop | default: false}},
+        "nav" : {{dots | default: false}},
+        "autoplayButtonOutput" : false,
+        {%- unless slideshow -%}
+          "responsive" : {
+            "0": {
+              "items": {{items}},
+              "gutter":{{spacing}}
+            },
+            "375": {
+              "items": {{items_ex_sm}},
+              "gutter":{{spacing_ex_sm}}
+            },
+            "576": {
+              "items": {{items_sm}},
+              "gutter":{{spacing_sm}}
+            },
+            "768": {
+              "items": {{items_md}},
+              "gutter":{{spacing_md}}
+            },
+            "992": {
+              "items": {{items_lg}},
+              "gutter":{{spacing_lg}}
+            },
+            "1200": {
+              "items": {{items_xl}},
+              "gutter":{{spacing_xl}}
+            }
+          },
+        {% endunless %}
+        "slideBy" : "page"
+      }
+    </script>
+
+
+
+  {%- else -%}
+    {%- assign _item_resp = value | strip | split: ',' -%}
+    {%- if _item_resp.size > 1 -%}
+      {%- case _item_resp.size -%}
+        {%- when 2 -%}{%- assign ii = 1 -%}{%- assign arClass = 'col-md-, col-' -%}
+        {%- when 3 -%}{%- assign ii = 2 -%}{%- assign arClass = 'col-lg-, col-md-, col-' -%}
+        {%- when 4 -%}{%- assign ii = 3 -%}{%- assign arClass = 'col-lg-, col-md-, col-sm-, col-' -%}
+        {%- when 5 -%}{%- assign ii = 4 -%}{%- assign arClass = 'col-xl-, col-lg-, col-md-, col-sm-, col-' -%}
+        {%- else -%}  {%- assign ii = 5 -%}{%- assign arClass = 'col-xl-, col-lg-, col-md-, col-sm-, col-xxs-, col-' -%}
+      {%- endcase -%}
+
+      {%- assign items_resp  = '' -%}
+      {%- assign arrClass    = arClass | split: ',' -%}
+      {%- for i in (0..ii) -%}
+        {%- capture _out -%}{%- render 'set-width', number: _item_resp[i] -%}{%- endcapture -%}
+        {%- assign _classItem = _out | prepend: arrClass[i] -%}
+        {%- if _out == '5' -%}{%- assign _classItem = _classItem | append: 'th' -%}{%- endif -%}
+        {%- if _out == '7' -%}{%- assign _classItem = _classItem | append: 'th' -%}{%- endif -%}
+        {%- assign items_resp = items_resp | append: _classItem -%}
+      {%- endfor -%}
+      {%- capture output -%}{{- items_resp -}}{%- endcapture -%}
+
+    {%- else -%}
+      {%- capture _out -%}{%- render 'set-width', number: _item_resp[0] -%}{%- endcapture -%}
+      {%- assign _class_xs = _out | strip | prepend: 'col-' -%}
+      {%- if _out == '5' -%}{%- assign _class_xs = _class_xs | append: 'th' -%}{%- endif -%}
+      {%- capture output -%}{{- _class_xs -}}{%- endcapture -%}
+    {%- endif -%}
+    {{- output -}}
+{%- endcase -%}

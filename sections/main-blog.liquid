@@ -1,0 +1,122 @@
+{%- liquid
+  assign items_resp    = section.settings.items_resp
+  assign grid_spc      = section.settings.grid_spc
+  assign limit         = section.settings.limit
+  assign sb_bg         = section.settings.sb_bg | default: 'rgba(0,0,0,0)'
+  assign sectionID     = "#section-" | append: section.id
+  assign show_excerpt  = section.settings.show_excerpt
+  assign excerpt_limit = section.settings.excerpt_limit
+-%}
+
+{%- if blog.articles_count > 0  -%}
+
+  <div class="blog-list" id="section-{{section.id}}">
+    {%- paginate blog.articles by limit -%}
+      <div class="{%- render 'grid-class' value: items_resp -%}">
+        {%- for article in blog.articles -%}
+          <div class="blog-item">
+            <article class="featured_blog__item">
+              <header>
+                <figure class="featured_blog__item-image">
+                  <a href="{{ article.url }}">
+                    {%- render 'image-style', image: article.image -%}
+                  </a>
+                </figure>
+              </header>
+
+              <footer>
+                <h3 class="featured_blog__item-title">
+                  <a href="{{ article.url }}">{{ article.title }}</a>
+                </h3>
+                <div class="featured_blog__item-author">
+                  {{- 'blogs.articles.author' | t: author: article.author -}}
+                  {%- assign published_at = article.published_at | date: "%B %d, %Y" -%}
+                  <span class="featured_blog__item-publish"> {{ 'blogs.articles.published_at' | t: date: published_at }}</span>
+                </div>
+                {%- if show_excerpt -%}
+                  <div class="featured_blog__item-excerpt">{{ article.excerpt_or_content | truncatewords: excerpt_limit}}</div>
+                {%- endif -%}
+                <div class="featured_blog__item-button">
+                  <a href="{{article.url}}" class="btn btn-2">{{ 'general.article.read_more' | t}}</a>
+                </div>
+              </footer>
+            </article>
+          </div>
+        {%- endfor -%}
+      </div>
+      {%- include 'pagination' -%}
+    {%- endpaginate -%}
+  </div>
+
+  <a href="#" onclick="return false" class="js-drawer-open btn btn-1 btn-more d-lg-none" data-target="sidebarDrawer">{{ 'blogs.sidebar.show_more' | t}}</a>
+  {%- style -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: '.d-grid', value_1: '25px', property_1: 'grid-gap'  -%}
+  {%- endstyle -%}
+{%- else -%}
+  <p class="no-article">{{ 'blogs.articles.no_article' | t}}</p>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": {
+    "en": "Blog page"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000247937) before use."
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "3,1",
+      "placeholder": {
+        "en": "E.g: 4,3,2"
+      }
+    },
+    {
+      "type" : "range",
+      "id": "limit",
+      "label": {
+        "en" : "Limit the number of article"
+      },
+      "step": 1,
+      "min" : 1,
+      "max" : 50,
+      "default" : 10
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Excerpt"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "show_excerpt",
+      "label" : {
+        "en": "Show excerpt"
+      },
+      "default": false
+    },
+    {
+      "type" : "range",
+      "id": "excerpt_limit",
+      "label": {
+        "en" : "Limit the number of words"
+      },
+      "step": 1,
+      "min" : 1,
+      "max" : 100,
+      "default" : 50
+    }
+  ],
+  "blocks" : []
+}
+{% endschema %}

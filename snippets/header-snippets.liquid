@@ -1,0 +1,854 @@
+{%- case type -%}
+	{%- when 'menu' -%}
+		<ul class="menu-list">
+			{%- for link in linklists[menu].links -%}
+				<li class="menu-item {% if link.links != blank %}dropdown-submenu {%- endif -%}">
+					<a href="{{link.url}}">
+						<span class="title">{{link.title | replace: '(new)' | replace: '(hot)' | replace: '(sale)'}}</span>
+						{%- render 'header-snippets' type: 'label', title: link.title -%}
+					</a>
+					{%- if link.links != blank -%}
+						<span class="svg_element-ui">
+							{%- render 'svg' type: 'angle-right' -%}
+						</span>
+						<div class="dropdown-menu child-menu">
+							<ul class="menu-list">
+								{%- for child_link in link.links -%}
+									<li class="menu-item {% if child_link.links != blank %}dropdown-submenu{%- endif -%}">
+										<a href="{{child_link.url}}">{{child_link.title}}</a>
+										{%- if child_link.links != blank -%}
+											<span class="svg_element-ui">
+												{%- render 'svg' type: 'angle-right' -%}
+											</span>
+											<div class="dropdown-menu grandchild-menu">
+												<ul class="menu-list">
+													{%- for grandchild_link in child_link.links -%}
+														<li class="menu-item">
+															<a href="{{grandchild_link.url}}">{{grandchild_link.title}}</a>
+														</li>
+													{%- endfor -%}
+												</ul>
+											</div>
+										{%- endif -%}
+									</li>
+								{%- endfor -%}
+							</ul>
+						</div>
+					{%- endif -%}
+				</li>
+			{%- endfor -%}
+		</ul>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'desktop-1' -%}
+		<div class="header-desktop d-none d-lg-block">
+			<div class="header-content_top">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="wrapper">
+
+						{%- include 'header-snippets' type: 'logo', device: 'desktop' -%}
+
+						{%- include 'header-snippets' type: 'form-search' -%}
+
+						{%- if helpline != blank -%}
+							{%- include 'header-snippets' type: 'helpline'  -%}
+						{%- endif -%}
+
+						{%- include 'header-snippets' type: 'icons' -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+
+			<div class="header-content_bottom">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="header-nav">
+						{%- if vertical_menu != blank -%}
+							{%- include 'header-snippets' type: 'second-nav' -%}
+						{%- endif -%}
+
+						{%- include 'header-snippets' type: 'main-nav' -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'desktop-2' -%}
+		<div class="header-desktop d-none d-lg-block">
+			<div class="header-content_top">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="wrapper">
+
+						{%- include 'header-snippets' type: 'logo', device: 'desktop' -%}
+
+						<div class="header-nav">
+							{%- include 'header-snippets' type: 'main-nav' -%}
+						</div>
+
+						<div class="header-right">
+							<a href="#" onclick="return false" class="icon-search js-open-search-drawer">{%- render 'svg' type: 'search' -%}</a>
+							{%- include 'header-snippets' type: 'icons' -%}
+						</div>
+
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'desktop-3' -%}
+		<div class="header-desktop d-none d-lg-block">
+			<div class="header-content_top">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="wrapper">
+
+						{%- include 'header-snippets' type: 'logo', device: 'desktop' -%}
+
+						{%- include 'header-snippets' type: 'form-search' -%}
+
+						{%- if account -%}
+							{%- include 'header-snippets' type: 'account'  -%}
+						{%- endif -%}
+
+						{%- include 'header-snippets' type: 'icons' -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+
+			<div class="header-content_bottom">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="header-nav">
+						{%- if vertical_menu != blank -%}
+							{%- include 'header-snippets' type: 'second-nav' -%}
+						{%- endif -%}
+
+						{%- include 'header-snippets' type: 'main-nav' -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'desktop-4' -%}
+		<div class="header-desktop d-none d-lg-block">
+			<div class="header-content_top">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="wrapper">
+
+						{%- include 'header-snippets' type: 'logo', device: 'desktop' -%}
+
+						{%- include 'header-snippets' type: 'form-search', submit_button_style: '2' -%}
+
+						{%- if helpline != blank -%}
+							{%- include 'header-snippets' type: 'helpline'  -%}
+						{%- endif -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+
+			<div class="header-content_bottom">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="header-nav">
+
+						{%- include 'header-snippets' type: 'main-nav' -%}
+
+						{%- include 'header-snippets' type: 'icons' -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'desktop-5' -%}
+		<div class="header-desktop d-none d-lg-block">
+			<div class="header-content_top">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="wrapper">
+
+						{%- include 'header-snippets' type: 'logo', device: 'desktop' -%}
+
+						{%- include 'header-snippets' type: 'main-nav' -%}
+
+						{%- include 'header-snippets' type: 'icons' -%}
+
+						{% comment %} {%- include 'header-snippets' type: 'icon' -%} {% endcomment %}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+
+			<div class="header-content_bottom">
+				{%- if is_boxed -%}<div class="container">{%- endif -%}
+					<div class="header-nav">
+						{%- if vertical_menu != blank -%}
+							{%- include 'header-snippets' type: 'second-nav' -%}
+						{%- endif -%}
+
+						{%- include 'header-snippets' type: 'form-search', submit_button_style: '2' -%}
+
+						{%- if helpline != blank -%}
+							{%- include 'header-snippets' type: 'helpline', hideLabel: true  -%}
+						{%- endif -%}
+					</div>
+				{%- if is_boxed -%}</div>{%- endif -%}
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'mobile' -%}
+		<div class="header-mobile d-lg-none" id="header-mobile-container">
+			<div class="header-content_top">
+				<div class="container d-flex justify-content-between align-items-center">
+					{%- if linklists[horizontal_menu].links.size > 0 -%}
+						<a href="#" onclick="return false" class="header-hamburger js-main-drawer-open-button">{%- render 'svg' type: 'hamburger' -%}</a>
+					{%- endif -%}
+
+					{%- include 'header-snippets' type: 'logo', device: 'mobile' -%}
+
+					<div class="header-cart">
+						{%- if settings.cart_type == 'page' -%}
+							<a href="{{routes.cart_url}}" class="cart-icon">
+								{% render 'svg' type: 'cart' %}
+								<span class="number js-cart-items-count">{{cart.item_count}}</span>
+							</a>
+						{%- else -%}
+							<a href="#" onclick="document.dispatchEvent(new CustomEvent('open-cart-drawer'));return false" class=" cart-icon">
+								{% render 'svg' type: 'cart' %}
+								<span class="number js-cart-items-count">{{cart.item_count}}</span>
+							</a>
+						{%- endif -%}
+					</div>
+				</div>
+			</div>
+
+			{%- if vertical_menu != blank -%}
+				<div class="header-content_bottom">
+					<div class="container">
+						<div class="header-nav">
+							<div class="vertical-nav js-sub-drawer-open-button">
+								<div class="wrapper">
+									{% render 'svg' type: 'hamburger' %}
+									<span>{{ 'general.header.departments' | t | upcase}}</span>
+									{% render 'svg' type: 'angle-down' %}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			{%- endif -%}
+
+			<div class="header-mobile_drawer">
+				<div class="drawer drawer-left header-mobile__item header-mobile__horizontal" id="mobile-drawer-main">
+					<template id="main-mobile-drawer-lazy">
+						<ul class="menu-list">
+							<li class="menu-item title">
+								<a href="#" onclick="return false"> {{ 'general.header.menu' | t}}</a>
+								<span class="js-btn-close btn-close svg_element-ui">
+									{%- render 'svg' type: 'close' -%}
+								</span>
+							</li>
+							{%- for link in linklists[horizontal_menu].links -%}
+								{%- liquid
+									assign title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip
+								-%}
+								{%- capture targetID -%}main-menu-child-{{title | append: 'main' | md5}}{%- endcapture -%}
+								<li class="menu-item {% if link.links != blank -%} dropdown-submenu {%- endif -%}" data-nav="{{title}}">
+									<a href="{{link.url}}" class="menu-item_title">
+										<span class="title">{{title}}</span>
+										{%- render 'header-snippets' type: 'label', title: link.title -%}
+									</a>
+									<span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+										{%- render 'svg' type: 'angle-right' -%}
+									</span>
+									<div class="dropdown-menu child-menu js-mobi-menu-lazy"
+										data-target-id="{{title | append: 'main' | md5}}"
+										data-lazy-resource="menu-sublinks"
+										{% comment %} data-mega="{{title}}" {% endcomment %}
+										id="{{targetID}}">
+										{%- render 'svg' type: 'is-loading' -%}
+									</div>
+								</li>
+							{%- endfor -%}
+						</ul>
+					</template>
+				</div>
+
+				{%- if vertical_menu != blank -%}
+					<div class="drawer drawer-left header-mobile__item header-mobile__vertical" id="mobile-drawer-sub">
+						<template id="sub-mobile-drawer-lazy">
+							<ul class="menu-list">
+								<li class="menu-item title">
+									<a href="#" onclick="return false"> {{ 'general.header.departments' | t | upcase}}</a>
+									<span class="js-btn-close btn-close svg_element-ui">
+										{%- render 'svg' type: 'close' -%}
+									</span>
+								</li>
+								{%- for link in linklists[vertical_menu].links -%}
+									{%- liquid
+										assign title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip
+									-%}
+									{%- capture targetID -%}sub-menu-child-{{title | append: 'sub' | md5 }}{%- endcapture -%}
+									<li class="menu-item {% if link.links != blank -%} dropdown-submenu {%- endif -%}" data-nav="{{title}}">
+										<a href="{{link.url}}" class="menu-item_title">
+											<span class="title">{{title}}</span>
+											{%- render 'header-snippets' type: 'label', title: link.title -%}
+										</a>
+										<span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+											{%- render 'svg' type: 'angle-right' -%}
+										</span>
+										<div class="dropdown-menu child-menu js-mobi-menu-lazy"
+											data-target-id="{{title | append: 'sub' | md5}}"
+											data-lazy-resource="menu-sublinks"
+											id="{{targetID}}">
+											{%- render 'svg' type: 'is-loading' -%}
+										</div>
+									</li>
+								{%- endfor -%}
+							</ul>
+						</template>
+					</div>
+				{%- endif -%}
+			</div>
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'label' -%}
+		{%- if title contains '(new)' -%}
+			<span class="label label_ui-new">{{ 'general.header.new_label' | t}}</span>
+		{%- elsif title contains '(hot)' -%}
+			<span class="label label_ui-hot">{{ 'general.header.hot_label' | t}}</span>
+		{%- elsif title contains '(sale)' -%}
+			<span class="label label_ui-sale">{{ 'general.header.sale_label' | t}}</span>
+		{%- endif -%}
+	{% comment %} end {% endcomment %}
+
+	{%- when 'logo' -%}
+		<div class="header-logo">
+			{%- liquid
+				if device == 'desktop'
+					assign width = section.settings.logo_max_width | split: ',' | first | remove: 'px' | abs
+				else
+					assign width = section.settings.logo_max_width | split: ',' | last | remove: 'px' | abs
+				endif
+				assign logo_max_width    = width | append: 'x'
+				assign logo_max_width_2x = width | times: 2 | append: 'x'
+				assign logo_img          = section.settings.logo_img | img_url: logo_max_width
+				assign logo_img_2x       = section.settings.logo_img | img_url: logo_max_width_2x
+			-%}
+			{%- capture header_logo -%}
+				{%- case logo_type -%}
+
+					{%- when 'image' -%}
+						{%- if section.settings.logo_img != blank -%}
+							<span class="image__style" style="display: block;position: relative;padding-top: {{1 | divided_by: section.settings.logo_img.aspect_ratio | times: 100 | append: '%'}}">
+								<img
+									src="{{section.settings.logo_img | img_url: 'small'}}"
+									class="lazyload w-100 h-100 overlay-ui"
+									width="{{section.settings.logo_img.width}}"
+									height="{{section.settings.logo_img.height}}"
+									data-srcset="{{logo_img}} 1x,{{logo_img_2x}} 2x"
+									alt="{{shop.name}} Logo">
+							</span>
+						{%- else -%}
+							<h4>{{shop.name}}</h4>
+						{%- endif -%}
+					{%- when 'svg' -%}
+						{%- if section.settings.logo_svg != blank -%}
+							{{section.settings.logo_svg | replace: '<svg' , '<svg class="svg-logo"'}}
+						{%- else -%}
+							<h4>{{shop.name}}</h4>
+						{%- endif -%}
+				{%- endcase -%}
+			{%- endcapture -%}
+			<a href="{{routes.root_url}}" class="d-block">
+				{{header_logo}}
+			</a>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'form-search' -%}
+		<div class="header-search js-header-search">
+			<form action="/search" class="form-search">
+				<input type="hidden" value="{{settings.search_type}}" name="type">
+				<input type="hidden" value="{{settings.search_unavailable_result}}" name="options[unavailable_products]">
+				<input type="hidden" value="last" name="options[prefix]">
+				<input type="text" name="q" placeholder="{{ 'section.header.search_placeholder' | t}}" autocomplete="off">
+				<button type="submit" class="btn btn-{{submit_button_style | default: 1}}" test="{{submit_button_style}}">
+					<span>{{ 'section.header.search' | t}}</span>
+					{%- render 'svg' type: 'is-loading' -%}
+				</button>
+			</form>
+			<div class="search-results">
+				<div class="search-results_wrapper">
+					<div class="results">
+						<a href="#" onclick="return false" class="btn-view-all">{{ 'general.search.view_all' | t}} <span class="js-results-count"></span></a>
+					</div>
+					<div class="no-result">{{ 'general.search.no_results' | t}}</div>
+				</div>
+			</div>
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'cart-1' -%}
+		<div class="header-cart style-1 js-cart-icon-container" data-items="{{cart.item_count}}">
+			{%- case settings.cart_type -%}
+				{%- when 'page' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span>{{ 'section.header.shopping_cart' | t}}</span>
+						<span class="js-money js-cart-icon-total-money">{{cart.total_price | money}}</span>
+					</div>
+				{% comment %} end {% endcomment %}
+
+				{%- when 'dropdown' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span>{{ 'section.header.shopping_cart' | t}}</span>
+						<span class="js-money js-cart-icon-total-money">{{cart.total_price | money}}</span>
+					</div>
+
+					{%- if template.name != 'cart' -%}
+						<div class="header-cart_dropdown">
+							<div class="header-cart_wrapper">
+								<div class="lazy-dropdown-cart js-cart-dropdown">
+									{%- render 'svg' type: 'is-loading' -%}
+								</div>
+								<div class="cart-empty">
+									{{ 'cart.general.empty' | t}}
+								</div>
+							</div>
+						</div>
+					{%- endif -%}
+
+				{% comment %} end {% endcomment %}
+
+				{%- when 'drawer' -%}
+					<a href="#" onclick="document.dispatchEvent(new CustomEvent('open-cart-drawer'));return false" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span>{{ 'section.header.shopping_cart' | t}}</span>
+						<span class="js-money js-cart-icon-total-money">{{cart.total_price | money}}</span>
+					</div>
+				{% comment %} end {% endcomment %}
+			{%- endcase -%}
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'cart-2' -%}
+		<div class="header-cart style-2 js-cart-icon-container" data-items="{{cart.item_count}}">
+			{%- case settings.cart_type -%}
+				{%- when 'page' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="cart-label">{{ 'section.header.shopping_cart' | t}}</span>
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+				{% comment %} end {% endcomment %}
+
+				{%- when 'dropdown' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<div class="cart-label">{{ 'section.header.shopping_cart' | t}}</div>
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+
+					{%- if template.name != 'cart' -%}
+						<div class="header-cart_dropdown">
+							<div class="header-cart_wrapper">
+								<div class="lazy-dropdown-cart js-cart-dropdown">
+									{%- render 'svg' type: 'is-loading' -%}
+								</div>
+								<div class="cart-empty">
+									{{ 'cart.general.empty' | t}}
+								</div>
+							</div>
+						</div>
+					{%- endif -%}
+				{% comment %} end {% endcomment %}
+
+				{%- when 'drawer' -%}
+					<a href="#" onclick="document.dispatchEvent(new CustomEvent('open-cart-drawer'));return false" class=" cart-icon" >
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+						<span class="cart-label">{{ 'section.header.shopping_cart' | t}}</span>
+					</a>
+				{% comment %} end {% endcomment %}
+			{%- endcase -%}
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'cart-3' -%}
+		<div class="header-cart style-3 js-cart-icon-container" data-items="{{cart.item_count}}">
+			{%- case settings.cart_type -%}
+				{%- when 'page' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span class="js-money js-cart-icon-total-money">{{cart.total_price | money}}</span>
+					</div>
+				{% comment %} end {% endcomment %}
+
+				{%- when 'dropdown' -%}
+					<a href="{{routes.cart_url}}" class="cart-icon">
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span class="js-money js-cart-icon-total-money" style="font-weight: 600;">{{cart.total_price | money}}</span>
+					</div>
+
+					{%- if template.name != 'cart' -%}
+						<div class="header-cart_dropdown">
+							<div class="header-cart_wrapper">
+								<div class="lazy-dropdown-cart js-cart-dropdown">
+									{%- render 'svg' type: 'is-loading' -%}
+								</div>
+								<div class="cart-empty">
+									{{ 'cart.general.empty' | t}}
+								</div>
+							</div>
+						</div>
+					{%- endif -%}
+				{% comment %} end {% endcomment %}
+
+				{%- when 'drawer' -%}
+					<a href="#" onclick="document.dispatchEvent(new CustomEvent('open-cart-drawer'));return false" class="cart-icon" >
+						{% render 'svg' type: 'cart' %}
+						<span class="number js-cart-items-count">{{cart.item_count}}</span>
+					</a>
+					<div class="cart-label">
+						<span class="js-money js-cart-icon-total-money">{{cart.total_price | money}}</span>
+					</div>
+				{% comment %} end {% endcomment %}
+			{%- endcase -%}
+
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'main-nav' -%}
+		<div class="horizontal-nav">
+			<ul class="menu-list main-menu" id="header_main_menu">
+				{%- for link in linklists[horizontal_menu].links -%}
+					{%- assign title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip -%}
+					{%- capture menu_item_class -%}
+						{%- if link.links != blank %}desk-lazy-menu dropdown-submenu {%- endif %}
+						{%- if link.active -%} link-active {%- endif -%}
+					{%- endcapture -%}
+					<li class="menu-item {{menu_item_class}}" data-nav="{{title}}">
+						<a href="{{link.url}}">
+							<span class="title">{{title}}</span>
+							{%- render 'header-snippets' type: 'label', title: link.title -%}
+						</a>
+						<span class="svg_element-ui">
+							{%- render 'svg' type: 'angle-down' -%}
+						</span>
+
+						<div class="dropdown-menu child-menu js-lazy-menu"
+							data-lazy-resource="menu-sublinks"
+							data-target-id="{{title | md5}}">
+							{%- render 'svg' type: 'is-loading' -%}
+						</div>
+					</li>
+				{%- endfor -%}
+			</ul>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'second-nav' -%}
+		<div class="vertical-nav desk-lazy-menu {% if vertical_active and template.name == 'index' -%} active {%- endif -%}" id="header-second-nav">
+			<div class="wrapper">
+				{% render 'svg' type: 'hamburger' %}
+				<span>{{ 'general.header.departments' | t | upcase}}</span>
+				{% render 'svg' type: 'angle-down' %}
+			</div>
+			<div class="dropdown-menu">
+				<ul class="menu-list">
+					{%- for link in linklists[vertical_menu].links -%}
+						{%- assign title = link.title | replace: '(new)' | replace: '(hot)' | replace: '(sale)' | strip -%}
+						<li class="menu-item desk-lazy-menu {% if link.links != blank %}dropdown-submenu {%- endif -%}" data-nav="{{title}}">
+							<a href="{{link.url}}">
+								<span class="title">{{title}}</span>
+								{%- render 'header-snippets' type: 'label', title: link.title -%}
+							</a>
+							<span class="svg_element-ui">
+								{%- render 'svg' type: 'angle-right' -%}
+							</span>
+							<div class="dropdown-menu child-menu js-lazy-menu" data-lazy-resource="menu-sublinks" data-target-id="{{title | append: 'submenu' | md5}}"></div>
+						</li>
+					{%- endfor -%}
+				</ul>
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'helpline' -%}
+		<div class="header-helpline d-flex">
+			<div class="helpline-icon">
+				{% render 'svg' type: 'phone' %}
+			</div>
+			<div class="helpline-info">
+				{%- unless hideLabel -%}<span>{{ 'section.header.helpline' | t}}:</span>{%- endunless -%}
+				<a href="tel: {{helpline}}" style="color: inherit;">{{ helpline }}</a>
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'account' -%}
+		<div class="header-account">
+			<div class="left">{%- render 'svg' type: 'user' -%}</div>
+			<div class="right">
+				{%- if customer -%}
+					<p>{{ 'general.text.hello' | t}} {% if customer -%}{{customer.name}}{%- endif -%}</p>
+				{%- else -%}
+					<p>{{ 'general.text.hello' | t}} {% if customer -%}{{customer.name}}{%- endif -%}</p>
+					<div class="account">
+						<a href="{{routes.account_login_url}}">{{ 'section.header.sign_in' | t}}</a>
+						<a href="{{routes.account_register_url}}">{{ 'section.header.register' | t}}</a>
+					</div>
+				{%- endif -%}
+			</div>
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'wishlist' -%}
+		<div class="position-relative header-wishlist">
+			{%- render 'wishlist_default_button' type: 'show' -%}
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'compare' -%}
+		{%- render 'compare_default_button' type: 'show' -%}
+	{% comment %} end {% endcomment %}
+
+	{%- when 'icons' -%}
+		<div class="header-icons">
+			{%- if section.settings.enable_wishlist -%}
+				{%- render 'header-snippets' type: 'wishlist' -%}
+			{%- endif -%}
+
+			{%- if section.settings.enable_compare -%}
+				{%- render 'header-snippets' type: 'compare' -%}
+			{%- endif -%}
+			{%- case settings.header_style -%}
+				{%- when '2' -%}
+					{%- render 'header-snippets' type: 'cart-2' -%}
+				{%- when '4' -%}
+					{%- render 'header-snippets' type: 'cart-3' -%}
+				{%- else -%}
+					{%- render 'header-snippets' type: 'cart-1' -%}
+			{%- endcase -%}
+		</div>
+	{% comment %} end {% endcomment %}
+
+	{%- when 'sublinks-template' -%}
+		<template id="header-menu-sublinks">
+			<div id="desktop">
+				{%- for link in linklists[horizontal_menu].links -%}
+					{%- if link.links == blank -%} {%- continue -%} {%- endif -%}
+					{%- assign id = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip | md5 -%}
+					<div data-id="{{id}}">
+						<ul class="menu-list">
+							{%- for child_link in link.links -%}
+								{%- assign child_title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+								<li class="menu-item {% if child_link.links != blank %}dropdown-submenu{%- endif -%}">
+									<a href="{{child_link.url}}">
+										<span class="title">{{child_title}}</span>
+										{%- render 'header-snippets' type: 'label' title: child_link.title -%}
+									</a>
+									{%- if child_link.links != blank -%}
+										<span class="svg_element-ui">
+											{%- render 'svg' type: 'angle-right' -%}
+										</span>
+										<div class="dropdown-menu grandchild-menu">
+											<ul class="menu-list">
+												{%- for grandchild_link in child_link.links -%}
+													{%- assign grandchild_title = grandchild_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+													<li class="menu-item">
+														<a href="{{grandchild_link.url}}">
+															<span class="title">{{grandchild_title}}</span>
+															{%- render 'header-snippets' type: 'label', title: grandchild_link.title -%}
+														</a>
+													</li>
+												{%- endfor -%}
+											</ul>
+										</div>
+									{%- endif -%}
+								</li>
+							{%- endfor -%}
+						</ul>
+					</div>
+				{%- endfor -%}
+
+				{%- for link in linklists[vertical_menu].links -%}
+					{%- if link.links == blank -%} {%- continue -%} {%- endif -%}
+					{%- assign id = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip | append: 'submenu' | md5 -%}
+					<div data-id="{{id}}">
+						<ul class="menu-list">
+							{%- for child_link in link.links -%}
+								{%- assign child_title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+								<li class="menu-item {% if child_link.links != blank %}dropdown-submenu{%- endif -%}">
+									<a href="{{child_link.url}}">
+										<span class="title">{{child_title}}</span>
+										{%- render 'header-snippets' type: 'label' title: child_link.title -%}
+									</a>
+									{%- if child_link.links != blank -%}
+										<span class="svg_element-ui">
+											{%- render 'svg' type: 'angle-right' -%}
+										</span>
+										<div class="dropdown-menu grandchild-menu">
+											<ul class="menu-list">
+												{%- for grandchild_link in child_link.links -%}
+													{%- assign grandchild_title = grandchild_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+													<li class="menu-item">
+														<a href="{{grandchild_link.url}}">
+															<span class="title">{{grandchild_title}}</span>
+															{%- render 'header-snippets' type: 'label', title: grandchild_link.title -%}
+														</a>
+													</li>
+												{%- endfor -%}
+											</ul>
+										</div>
+									{%- endif -%}
+								</li>
+							{%- endfor -%}
+						</ul>
+					</div>
+				{%- endfor -%}
+			</div>
+
+			<div id="mobile">
+				{%- for link in linklists[horizontal_menu].links -%}
+					{%- liquid
+						assign link_title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip | append: 'main'
+						assign link_md5   = link_title | md5
+					-%}
+					{%- if link.links != blank -%}
+						{%- capture targetID -%}main-menu-child-{{link_title | md5}}{%- endcapture -%}
+						<div data-id="{{link_md5}}">
+							<ul class="menu-list">
+								<li class="menu-item title">
+									<span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+										{%- render 'svg' type: 'angle-left' -%}
+									</span>
+									<a href="#" onclick="return false"> {{ link_title }}</a>
+									<span class="js-btn-close btn-close svg_element-ui">
+										{%- render 'svg' type: 'close' -%}
+									</span>
+								</li>
+								{%- for child_link in link.links -%}
+									{%- assign child_title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+									{%- capture targetID -%}main-menu-grandchild-{{child_link.title | md5}}{%- endcapture -%}
+									<li class="menu-item {% if child_link.links != blank -%} dropdown-submenu {%- endif -%}">
+										<a href="{{child_link.url}}" class="menu-item_title">
+											<span class="title">{{child_title}}</span>
+											{%- render 'header-snippets' type: 'label', title: child_link.title -%}
+										</a>
+										{%- if child_link.links != blank -%}
+											<span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+												{%- render 'svg' type: 'angle-right' -%}
+											</span>
+											<div class="dropdown-menu grandchild-menu" id="{{targetID}}">
+												<ul class="menu-list">
+													<li class="menu-item title">
+														<span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+															{%- render 'svg' type: 'angle-left' -%}
+														</span>
+														<a href="#" onclick="return false"> {{ child_title }}</a>
+														<span class="js-btn-close btn-close svg_element-ui">
+															{%- render 'svg' type: 'close' -%}
+														</span>
+													</li>
+													{%- for grandchild_link in child_link.links -%}
+														<li class="menu-item">
+															<a href="{{grandchild_link.url}}" class="menu-item_title">
+																<span class="title">{{grandchild_link.title}}</span>
+																{%- render 'header-snippets' type: 'label', title: grandchild_link.title -%}
+															</a>
+														</li>
+													{%- endfor -%}
+												</ul>
+											</div>
+										{%- endif -%}
+									</li>
+								{%- endfor -%}
+							</ul>
+						</div>
+					{%- endif -%}
+				{%- endfor -%}
+
+				{%- for link in linklists[vertical_menu].links -%}
+					{%- liquid
+						assign link_title = link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' | strip
+						assign link_md5   = link_title | append: 'sub' | md5
+					-%}
+					{%- if link.links != blank -%}
+						{%- capture targetID -%}sub-menu-child-{{link_md5}}{%- endcapture -%}
+						<div data-id="{{link_md5}}">
+							<ul class="menu-list">
+								<li class="menu-item title">
+									<span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+										{%- render 'svg' type: 'angle-left' -%}
+									</span>
+									<a href="#" onclick="return false"> {{ link_title }}</a>
+									<span class="js-btn-close btn-close svg_element-ui">
+										{%- render 'svg' type: 'close' -%}
+									</span>
+								</li>
+								{%- for child_link in link.links -%}
+									{%- assign child_title = child_link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)' -%}
+									{%- capture targetID -%}sub-menu-grandchild-{{child_link.title | md5}}{%- endcapture -%}
+									<li class="menu-item {% if child_link.links != blank -%} dropdown-submenu {%- endif -%}">
+										<a href="{{child_link.url}}" class="menu-item_title">
+											<span class="title">{{child_title}}</span>
+											{%- render 'header-snippets' type: 'label', title: child_link.title -%}
+										</a>
+										{%- if child_link.links != blank -%}
+											<span class="js-toggle-menu svg_element-ui" data-role="next" data-target="{{targetID}}">
+												{%- render 'svg' type: 'angle-right' -%}
+											</span>
+											<div class="dropdown-menu grandchild-menu" id="{{targetID}}">
+												<ul class="menu-list">
+													<li class="menu-item title">
+														<span class="js-toggle-menu svg_element-ui btn-back" data-role="previous" data-target="{{targetID}}">
+															{%- render 'svg' type: 'angle-left' -%}
+														</span>
+														<a href="#" onclick="return false"> {{ child_title }}</a>
+														<span class="js-btn-close btn-close svg_element-ui">
+															{%- render 'svg' type: 'close' -%}
+														</span>
+													</li>
+													{%- for grandchild_link in child_link.links -%}
+														<li class="menu-item">
+															<a href="{{grandchild_link.url}}" class="menu-item_title">
+																<span class="title">{{grandchild_link.title}}</span>
+																{%- render 'header-snippets' type: 'label', title: grandchild_link.title -%}
+															</a>
+														</li>
+													{%- endfor -%}
+												</ul>
+											</div>
+										{%- endif -%}
+									</li>
+								{%- endfor -%}
+							</ul>
+						</div>
+					{%- endif -%}
+				{%- endfor -%}
+			</div>
+		</template>
+	{% comment %} end {% endcomment %}
+{%- endcase -%}

@@ -1,0 +1,838 @@
+{% liquid
+  assign default_color   = 'rgba(0,0,0,0)'
+	assign isBoxed  = section.settings.boxed_layout
+	assign bg_full  = section.settings.bg_full
+	assign bg_color = section.settings.bg_color | default: default_color
+	assign bg_image = section.settings.bg_image
+	assign bg_size  = section.settings.bg_size
+
+	assign bg_repeat = section.settings.bg_repeat
+	assign sectionID = '#section-' | append: section.id
+	assign slider_id = '#slider-' | append: section.id
+
+	assign bg_position = section.settings.bg_position
+	assign controls_id = '#controls-' | append: section.id
+
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+%}
+
+{%- if bg_full -%}
+  {%- capture bg_wide -%}{%- render 'bgset' image: bg_image -%}{%- endcapture-%}
+{%- else -%}
+  {%- assign bg_class = ' .section-wrapper' -%}
+  {%- capture bg_boxed -%}{%- render 'bgset' image: bg_image -%}{%- endcapture-%}
+{%- endif -%}
+
+{%- capture bgset -%}{% render 'bgset' image: bg_image %}{%- endcapture -%}
+
+<div class="slideshow-v2 {{bg_wide}}" id="section-{{section.id}}" data-section-type="slideshow-v2" data-section-id="{{section.id}}">
+  {% if isBoxed %} <div class="container">{%- endif -%}
+
+    <div class="section-wrapper {{bg_boxed}}">
+      <div class="slider-container">
+        <div class="slider-wrapper">
+          <div class="slider-list" id="slider-{{section.id}}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == "slide" -%}
+                {%- liquid
+                  assign block_count = block_count | plus: 1
+                  assign image_width = block.settings.image_width
+                  assign block_id    = '.block-'| append: block.id
+                -%}
+                {%- if block.settings.order_reverse -%}
+                  {%- assign image_order = 'order-1 order-md-2' -%}
+                  {%- assign content_order = 'order-2 order-md-1' -%}
+                {%- else -%}
+                  {%- assign image_order = 'order-1 order-md-1' -%}
+                  {%- assign content_order = 'order-2 order-md-2' -%}
+                {%- endif -%}
+
+                <div class="col-12 slideshow-item slider-item block-{{block.id}}" {{block.shopify_attributes}}>
+                  <div class="row">
+                    <div class="col-12 col-md-6 {{content_order}} slideshow-text">
+                      <div class="slideshow-text__wrapper">
+                        <div class="heading">
+                          <div class="text-1">
+                            <span>{{block.settings.text_1}}</span>
+                          </div>
+                          <div class="text-2">
+                            <span>{{block.settings.text_2}}</span>
+                          </div>
+                        </div>
+                        {%- if block.settings.enable_countdown -%}
+                          <div class="text-3">
+                            {%- render 'countdown' date: block.settings.countdown -%}
+                          </div>
+                        {%- endif -%}
+                        {%- if block.settings.btn_txt != blank -%}
+                          <div class="slideshow-button">
+                            {%- if block.settings.btn_url != blank -%}
+                              <a href="{{block.settings.btn_url}}" class="btn btn-1 btn-slide">{{block.settings.btn_txt}}</a>
+                            {%- else -%}
+                              <button class="btn btn-1 btn-slide">{{block.settings.btn_txt}}</button>
+                            {%- endif -%}
+                          </div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 {{image_order}} slideshow-image">
+                      <div class="image">
+                        {%- if block.settings.image != blank -%}
+                          {%- render 'image-style' image: block.settings.image -%}
+                        {%- else -%}
+                          {{ 'image' | placeholder_svg_tag | replace: '<svg' , '<svg class="placeholder-svg"'}}
+                        {%- endif -%}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {%- capture classID -%}{{sectionID}} .block-{{block.id}} .image {%- endcapture-%}
+
+                {%- capture block_css -%}
+                  {%- render 'css-responsive' preClassID: classID, value_1: image_width, property_1: 'max-width' -%}
+
+                  {%- for block in section.blocks offset: forloop.index -%}
+                    {%- if block.type == 'slide' -%} {%- break -%} {%- endif -%}
+                    {%- render 'snippet-style-slideshow-v2' block: block, block_id: block_id, sectionID: sectionID -%}
+                  {%- endfor -%}
+                {%- endcapture -%}
+
+                {%- assign section_css = section_css | append: block_css -%}
+              {%- else -%}
+
+                {% if block_count > 0 %}{%- continue -%}{%- endif -%}
+
+                {%- capture block_css -%}
+                  {%- render 'snippet-style-slideshow-v2' block: block, sectionID: sectionID -%}
+                {%- endcapture -%}
+                {%- assign section_css = section_css | append: block_css -%}
+
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          {%- render 'set-tns-config'
+            slider_id       : slider_id,
+            controls_id     : controls_id,
+            slideshow       : true,
+            controls        : section.settings.controls,
+            dots            : section.settings.dots,
+            autoplay        : section.settings.autoplay,
+            autoplay_timeout: section.settings.autoplay_timeout,
+            -%}
+        </div>
+      </div>
+    </div>
+  {% if isBoxed %} </div>{%- endif -%}
+</div>
+
+{%- capture sectionCss -%}
+  {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+    value_1: section_padding, property_1: 'padding'
+    value_2: section_margin,  property_2: 'margin' -%}
+
+  {%- capture bg_css -%}
+    {%- if bg_color != default_color -%}background-color:{{bg_color}};{%- endif -%}
+    {%- if bg_image != blank -%}background-repeat:{{bg_repeat}};background-size:{{bg_size}};background-position:{{bg_position}};{%- endif -%}
+  {%- endcapture -%}
+
+  {%- if bg_css != blank -%}
+    {{sectionID}} {{bg_class}}{ {{-bg_css-}} };
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- style -%}{{section_css}}{{sectionCss}}{%- endstyle -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes("slideshow-v2") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "slideshow-v2"]);
+  }else{
+    window.theme.sectionRegister = ["slideshow-v2"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Slideshow with Countdown"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Plese see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000248062) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Slideshow with Countdown' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Slideshow with Countdown"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "LAYOUT"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section margin"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "bg_full",
+      "label" : {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": {
+        "en": "Background image"
+      }
+    },
+    {
+      "type": "select",
+      "id": "bg_repeat",
+      "label": {
+        "en": "Backgound repeat"
+      },
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": {
+            "en": "No repeat"
+          }
+        },
+        {
+          "value": "repeat",
+          "label": {
+            "en": "Repeat"
+          }
+        },
+        {
+          "value": "repeat-y",
+          "label": {
+            "en": "Repeat y"
+          }
+        },
+        {
+          "value": "repeat-x",
+          "label": {
+            "en": "Repeat x"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_size",
+      "label": {
+        "en": "Background size"
+      },
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Auto"
+          }
+        },
+        {
+          "value": "cover",
+          "label": {
+            "en": "Cover"
+          }
+        },
+        {
+          "value": "contain",
+          "label": {
+            "en": "Contain"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": {
+        "en": "Background position"
+      },
+      "options": [
+        {
+          "value": "left top",
+          "label": {
+            "en": "Left Top"
+          }
+        },
+        {
+          "value": "left center",
+          "label": {
+            "en": "Left Center"
+          }
+        },
+        {
+          "value": "left bottom",
+          "label": {
+            "en": "Left Bottom"
+          }
+        },
+        {
+          "value": "right top",
+          "label": {
+            "en": "Right Top"
+          }
+        },
+        {
+          "value": "right center",
+          "label": {
+            "en": "Right Center"
+          }
+        },
+        {
+          "value": "right bottom",
+          "label": {
+            "en": "Right Bottom"
+          }
+        },
+        {
+          "value": "center top",
+          "label": {
+            "en": "Center Top"
+          }
+        },
+        {
+          "value": "center center",
+          "label": {
+            "en": "Center Center"
+          }
+        },
+        {
+          "value": "center bottom",
+          "label": {
+            "en": "Center Bottom"
+          }
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Slideshow settings"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "loop",
+      "label" : {
+        "en": "Loop"
+      },
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "dots",
+      "label": {
+        "en": "Dots"
+      },
+      "default" : true
+    },
+    {
+      "type": "checkbox",
+      "id": "controls",
+      "label": {
+        "en": "Controls"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": {
+        "en": "Autoplay"
+      }
+    },
+    {
+      "type" : "range",
+      "id": "autoplay_timeout",
+      "label": {
+        "en" : "Change slide every (s)"
+      },
+      "step": 0.5,
+      "min" : 2,
+      "max" : 10,
+      "unit" : "s",
+      "default" : 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": {
+        "en": "Slide item"
+      },
+      "limit": 6,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block title"
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "order_reverse",
+          "label": {
+            "en": "Order reverse"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "image_width",
+          "label": {
+            "en": "Max width"
+          },
+          "placeholder" : {
+            "en": "Eg: 75% or 200px"
+          },
+          "default" : "75%"
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Paragraph & Button"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "text_1",
+          "label": {
+            "en": "Text 1"
+          },
+          "default" : "Lorem ipsum dolor sit"
+        },
+        {
+          "type": "textarea",
+          "id": "text_2",
+          "label": {
+            "en": "Text 2"
+          },
+          "default" : "Lorem ipsum dolor sit amet consectetur adipisicing"
+        },
+        {
+          "type": "text",
+          "id": "btn_txt",
+          "label": {
+            "en": "Button label"
+          },
+          "default" : "Show Now"
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": {
+            "en": "Button URL"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Countdown"
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_countdown",
+          "label": {
+            "en": "Enable countdown"
+          },
+          "default" : true
+        },
+        {
+          "type": "text",
+          "id": "countdown",
+          "label": {
+            "en": "Date"
+          },
+          "info": {
+            "en": "Date format: DD/MM/YYYY"
+          },
+          "default" : "9/9/2021"
+        }
+      ]
+    },
+    {
+      "type": "style_paragraph",
+      "name": {
+        "en": "[+] Paragraph"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block label"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 1 settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_cl_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "text_fw_1",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "text_1_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_lh_1",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 21px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 2 settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_2",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_cl_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "text_fw_2",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "text_2_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_lh_2",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 21px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Countdown style"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_fs_3",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "text_cl_3",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "text_fw_3",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "text_3_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "text_lh_3",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 21px"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_button",
+      "name": {
+        "en": "[+] Button"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block label"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_cl",
+          "label": {
+            "en": "Text Color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_bg_cl",
+          "label": {
+            "en": "Background Color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_border_cl",
+          "label": {
+            "en": "Border Color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_cl",
+          "label": {
+            "en": "Hover: Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_bg_cl",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_border_cl",
+          "label": {
+            "en": "Hover: Border color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "btn_padding",
+          "label": {
+            "en": "Padding"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_radius",
+          "label": {
+            "en": "Button rounded corners"
+          },
+          "placeholder": {
+            "en": "E.g: 8px 8px 8px 8px"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Slideshow with Countdown"
+      },
+      "category": "Slideshow",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

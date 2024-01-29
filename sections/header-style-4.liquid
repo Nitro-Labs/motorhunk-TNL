@@ -1,0 +1,200 @@
+{%- liquid
+  if section.settings.boxed_layout
+    assign is_boxed = true
+  endif
+  assign logo_type       = section.settings.logo_type
+  assign helpline        = section.settings.helpline
+  assign vertical_menu   = section.settings.vertical_menu
+  assign horizontal_menu = section.settings.horizontal_menu | default: 'main-menu'
+-%}
+<div class="header-container {%if section.settings.uppercase -%} uppercase {%- endif -%}" data-section-type="header" data-section-id="{{section.id}}">
+  <div class="header-style-4">
+    <div class="header-content">
+      <template id="header-desktop-template">
+        {%- include 'header-snippets' type: 'desktop-4' -%}
+      </template>
+      {%- include 'header-snippets' type: 'mobile' -%}
+      {% comment %} <template id="header-mobile-template"></template> {% endcomment %}
+    </div>
+    {%- include 'header-snippets' type: 'sublinks-template' -%}
+  </div>
+</div>
+<style>
+  {%- render 'css-responsive' preClassID: '.header-container', classID: ' .header-logo',
+    value_1: section.settings.logo_max_width, property_1: 'width' -%}
+</style>
+
+{% comment %} compress {% endcomment %}
+
+{% schema %}
+{
+  "name": {
+    "en": "Header"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000246596) before use."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type" : "checkbox",
+      "id" : "uppercase",
+      "label" : {
+        "en": "Uppercase navigation"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Logo"
+      }
+    },
+    {
+      "type": "select",
+      "id": "logo_type",
+      "label": {
+        "en": "Logo type"
+      },
+      "options": [
+        {
+          "value": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "value": "svg",
+          "label": {
+            "en": "SVG"
+          }
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "text",
+      "id": "logo_max_width",
+      "label": {
+        "en": "Max width (Unit: 'px')"
+      },
+      "info": {
+        "en": "Order: Desktop, tablet, mobile"
+      },
+      "default" : "200px,200px,200px"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_img",
+      "label": {
+        "en": "Logo"
+      }
+    },
+    {
+      "type": "textarea",
+      "id": "logo_svg",
+      "label": {
+        "en": "Logo SVG"
+      },
+      "info": {
+        "en": "Please enter SVG code."
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Menu settings"
+      }
+    },
+    {
+      "type": "link_list",
+      "id": "horizontal_menu",
+      "label": {
+        "en": "Horizontal menu"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Helpline"
+      }
+    },
+    {
+      "type": "text",
+      "id": "helpline",
+      "label": {
+        "en": "Helpline"
+      },
+      "default": "(+800) 123 456 7890"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "New label"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To use. When add a link, please add (new) in last. E.g: Shop (new)"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Wishlist"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "enable_wishlist",
+      "label" : {
+        "en": "Show wishlist"
+      },
+      "default": true
+    },
+    {
+      "type" : "checkbox",
+      "id" : "enable_compare",
+      "label" : {
+        "en": "Show compare"
+      },
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Hot label"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To use. When add a link, please add (hot) in last. E.g: Shop (hot)"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Sale label"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "To use. When add a link, please add (sale) in last. E.g: Shop (sale)"
+      }
+    }
+  ]
+}
+{% endschema %}

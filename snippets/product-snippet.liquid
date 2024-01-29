@@ -1,0 +1,524 @@
+{%- case type -%}
+  {%- when 'sku' -%}
+    <span class="product_sku {%- if selected_variant.sku == blank -%} d-none {%- endif -%}">{{ 'products.product.sku' | t}}: <span class="js-product-sku">{{selected_variant.sku}}</span></span>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'main-media' -%}
+    {%- liquid
+      assign slider_id = '#slider-product-main-media'
+    -%}
+    <div class="product-media_main js-slider-main">
+      <div class="slider-wrapper">
+        <div class="media-main slider-list" id="slider-product-main-media">
+          {%- for media in product.media -%}
+            <div class="media-item media-item--{{media.media_type}} slider-item {% if forloop.first -%} no-lazy {%- endif -%}"
+              data-position="{{image.position}}"
+              {%- if media.media_type == 'image' -%} data-img-url="{{media | img_url: 'master'}}" {%- endif -%}>
+
+              {%- case media.media_type -%}
+                {%- when 'image' -%}
+                  {%- render 'image-style' image: media -%}
+                {% comment %} end {% endcomment %}
+
+                {%- when 'video' -%}
+                  <div style="position: relative; padding-top: 100%;">
+                    {{ media | media_tag: image_size: "2048x", autoplay: true, loop: loop, controls: true, autoplay: true, class: "overlay-ui w-100" }}
+                  </div>
+                {% comment %} end {% endcomment %}
+                {%- when 'model' -%}
+                  <div style="position: relative; padding-top: 100%;">
+                    {{ media | model_viewer_tag: image_size: "1024x", class: "overlay-ui w-100 h-100" }}
+                  </div>
+                {% comment %} end {% endcomment %}
+                {%- when 'external_video' -%}
+                  <div style="position: relative; padding-top: 100%;">
+                    {%- capture videoContent -%}{{ media | external_video_tag: class: "overlay-ui w-100 h-100 lazyload" }}{%- endcapture -%}{{videoContent | replace: 'src=', 'data-src='}}
+                  </div>
+                {% comment %} end {% endcomment %}
+              {%- endcase -%}
+
+            </div>
+          {%- endfor -%}
+        </div>
+        {%- if product.media.size > 1 -%}
+          {%- render 'set-tns-config'
+            slider_id  : slider_id,
+            total_item: product.media.size,
+            items_resp: '1',
+            padding: '5',
+            navAsThumbnails: true,
+            navContainer: '#slider-product-thumbnails-media',
+            dots: true,
+            customDots: true
+          -%}
+        {%- endif -%}
+      </div>
+    </div>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'thumbnails-media' -%}
+    {%- if product.media.size > 1 -%}
+      {%- liquid
+        assign slider_id = '#slider-product-thumbnails-media'
+        assign controls_id = '#cotnrols-product-thumbnails-media'
+      -%}
+      <div class="product-media_thumbnails js-slider-thumbnails">
+        <div class="slider-wrapper">
+          <div class="media-thumbnails" id="slider-product-thumbnails-media">
+            {%- for media in product.media -%}
+              <div class="media-item media-item--{{media.media_type}}">
+                {%- case media.media_type -%}
+                  {%- when 'image' -%}
+                    {%- render 'image-style' image: media -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'video' -%}
+                    {%- render 'image-style' image: media.preview_image -%}
+                    {%- render 'svg' type: 'icon-play' -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'external_video' -%}
+                    {%- render 'image-style' image: media.preview_image -%}
+                    {%- render 'svg' type: 'icon-play' -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'model' -%}
+                    {%- render 'image-style' image: media.preview_image -%}
+                    {%- render 'svg' type: 'icon-model' -%}
+                  {% comment %} end {% endcomment %}
+                {%- endcase -%}
+              </div>
+            {%- endfor -%}
+          </div>
+          {%- render 'set-tns-config'
+            slider_id  : slider_id,
+            controls_id: controls_id,
+            controls   : true,
+            total_item : product.media.size,
+            items_resp: '5,4',
+            padding: '10'
+          -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'label' -%}
+    {%- liquid
+      assign compare_at_price =  selected_variant.compare_at_price
+      assign price = selected_variant.price
+      assign productLabel =  product.tags | downcase
+    -%}
+    {%- capture check_label -%}
+      {{-compare_at_price-}}
+      {{-price-}}
+    {%- endcapture -%}
+
+    {%- if check_label != blank -%}
+      <div class="label_ui-group">
+        {%- if compare_at_price != blank and compare_at_price> price-%}
+          <span class="label_ui label_ui-sale">{{ 'products.label.sale' | t}}</span>
+        {%- endif -%}
+
+        {%- if productLabel contains 'label new' -%}
+          <span class="label_ui label_ui-new">{{ 'products.label.new' | t}}</span>
+        {%- endif -%}
+
+        {%- if productLabel contains 'label hot' -%}
+          <span class="label_ui label_ui-hot">{{ 'products.label.hot' | t}}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'quantity' -%}
+    <div class="product-quantity js-input-quantity-container">
+      <a href="#" onclick="return false" class="js-qty-minus btn-minus">{%- render 'svg' type: 'minus' -%}</a>
+      <input type="number" name="quantity" min="1" value="1" id="product_form_input">
+      <a href="#" onclick="return false" class="js-qty-plus btn-plus">{%- render 'svg' type: 'plus' -%}</a>
+    </div>
+  {% comment %} end {% endcomment %}
+
+  {%- when 'swatch' -%}
+    {%- if product.variants.size > 1 -%}
+      {%- liquid
+        assign first_variant = product.variants | first
+        assign selected_variant = product.selected_or_first_available_variant | default: first_variant
+      -%}
+      <div class="swatch-form js-swatch-form" data-status="{{section.settings.status_when_variant_sold_out}}">
+        <div class="swatch-list">
+          {%- liquid
+            assign options_have_image_style = settings.variant_options_image | downcase
+            assign options_have_color_style  = settings.variant_options_color | downcase
+            assign options_have_button_style = settings.variant_options_button | downcase
+          -%}
+          {%- for option in product.options_with_values -%}
+            {%- liquid
+              assign option_position = 'option' | append: option.position
+              assign option_name  = option.name | downcase | strip
+              assign option_style = 'select'
+            -%}
+            {%- if options_have_button_style contains option_name -%}
+              {%- assign option_style = 'button' -%}
+            {%- endif -%}
+
+            {%- if options_have_color_style contains option_name -%}
+              {%- assign option_style = 'color' -%}
+            {%- endif -%}
+
+            {%- if options_have_image_style contains option_name -%}
+              {%- assign option_style = 'image' -%}
+            {%- endif -%}
+
+            <div class="swatch-item js-swatch-item style-{{option_style}}" data-style="{{option_style}}" data-position="{{option.position}}">
+              <div class="swatch-title">{{option.name}}</div>
+              <div class="select-wrapper">
+                {%- case option_style -%}
+                  {%- when 'image' -%}
+                    {%- for value in option.values -%}
+                      {%- assign variantImage = product.variants | where: option_position, value | first -%}
+
+                      <div class="input-group">
+                        <input type="radio"
+                        name="{{option_position}}"
+                        value="{{value | escape }}"
+                        id="option-{{ option.name | append: value | md5 }}"
+                        {%- if selected_variant[option_position] == value -%} checked {%- endif %}
+                        class="js-option-item"
+                        data-single-option-selector
+                        data-option-position="{{option.position}}">
+                        <label for="option-{{ option.name | append: value | md5 }}" title="{{value}}">
+                          {%- render 'image-style' image: variantImage.image -%}
+                        </label>
+                      </div>
+                    {%- endfor -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'select' -%}
+                    <select class="single-option-selector swatch-select js-option-item" name="{{option_position}}" data-option-position="{{option.position}}">
+                      {%- for value in option.values -%}
+                        <option value="{{value | escape }}" {%- if selected_variant[option_position] == value -%} selected {%- endif -%}>{{value}}</option>
+                      {%- endfor -%}
+                    </select>
+                    <span class="svg_element-ui">{%- render 'svg' type: 'angle-down' -%}</span>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'button' -%}
+                    {%- for value in option.values -%}
+
+                      <div class="input-group">
+                        <input type="radio"
+                        name="{{option_position}}"
+                        value="{{value | escape}}"
+                        id="option-{{ option.name | append: value | md5 }}"
+                        class="js-option-item"
+                        {%- if selected_variant[option_position] == value -%} checked {%- endif %}
+                        data-single-option-selector
+                        data-option-position="{{option.position}}">
+                        <label for="option-{{ option.name | append: value | md5 }}">{{value}}</label>
+                      </div>
+                    {%- endfor -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'color' -%}
+                    {%- for value in option.values -%}
+                      <div class="input-group custom-color" data-custom-color="{{value | downcase}}">
+                        <input type="radio"
+                        name="{{option_position}}"
+                        value="{{value | escape}}"
+                        id="option-{{ option.name | append: value | md5 }}"
+                        {%- if selected_variant[option_position] == value -%} checked {%- endif %}
+                        class="js-option-item"
+                        data-single-option-selector
+                        data-option-position="{{option.position}}">
+                        <label for="option-{{ option.name | append: value | md5 }}" title="{{value}}">{{value}}</label>
+                      </div>
+                    {%- endfor -%}
+                  {% comment %} end {% endcomment %}
+                {%- endcase -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'form' -%}
+    {%- form 'product', product, class: 'js-form-add-to-card', novalidate: 'novalidate' -%}
+      <div class="product_swatch">
+        {%- render 'product-snippet' type: 'swatch', product: product -%}
+      </div>
+
+      {%- if product.available -%}
+        <div class="form-group">
+          {%- render 'product-snippet' type: 'quantity' -%}
+          <button type="submit" class="btn btn-1 btn-add-to-cart"><span class="btn-label">{{ 'products.product.add_to_cart' | t}}</span><span class="is-loading">{%- render 'svg' type: 'is-loading' -%}</span></button>
+        </div>
+        {%- if dynamic_checkout -%}
+          <div class="form-group dynamic-checkout">
+            {{ form | payment_button }}
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        {%- if template.suffix == 'pre-order' -%}
+          <a href="#" onclick="return false" class="btn btn-1 btn-pre-order" id="btn_pre_order">{{ 'products.product.pre_order' | t}}</a>
+        {%- else -%}
+          <h3 class="product-sold-out">{{ 'products.product.sold_out' | t}}</h3>
+        {%- endif -%}
+      {%- endif -%}
+
+      <select name="id" id="selected_variant" class="d-none no-js">
+        {%- for variant in product.variants -%}
+          {%- capture inventory_quantity -%}
+            {%- if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny' -%}
+              data-inventory-quantity="{{variant.inventory_quantity}}"
+            {%- endif -%}
+          {%- endcapture -%}
+          {%- capture disabled -%}{%- unless variant.available -%}disabled{%- endunless -%}{%- endcapture -%}
+          <option value="{{variant.id}}" {{inventory_quantity}} {{disabled}}>{{variant.title}}</option>
+        {%- endfor -%}
+      </select>
+    {%- endform -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'tab' -%}
+    {%- if multi_tab -%}
+      {%- assign firstActive = true -%}
+      <div class="product-description">
+        <div class="tab-panel js-tab-panel">
+          <div class="product_tab-contorls">
+            <ul class="tab-contorls js-tab-controls">
+              {%- liquid
+                assign description_parts = product.description | split: '<h5'
+              -%}
+              {%- if description_parts.first.size > 0 -%}
+                <li class="js-tab-control tab-contorls_item active" data-target="#product_description_tab_1">{{ 'products.product.description' | t }}</li>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endif -%}
+
+              {%- for part in description_parts -%}
+                {%- if part contains "</h5>" -%}
+                  {%- liquid
+                    assign remove  = part | split: ">" | first | append: ">"
+                    assign t_title = part | split: "</h5>" | first | strip_html | remove: remove
+                    if t_title == blank
+                      continue
+                    endif
+                  -%}
+                  <li class="js-tab-control tab-contorls_item {% if firstActive %} active{% endif %}" data-target="#product_description_tab_{{forloop.index}}">{{t_title}}</li>
+                  {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- for block in static_pages -%}
+                {%- liquid
+                  assign page_handle = block.settings.page
+                  assign page  = pages[page_handle]
+                  assign title = block.settings.page_title | strip | default: page.title
+                -%}
+                <li class="js-tab-control tab-controls_item {% if firstActive -%} active {%- endif -%}" data-target="#product_description_static_tab_{{forloop.index}}">{{title}}</li>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endfor -%}
+
+              {%- if settings.review_app != 'none' -%}
+                <li class="js-tab-control tab-controls_item {% if firstActive -%} acive {%- endif -%}" data-target="#product_description_tab_review">{{ 'products.product.review' | t}}</li>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endif -%}
+
+              {%- liquid
+                assign tab_controls_metafield = ""
+                assign tab_contents_metafield = ""
+              -%}
+              {%- for block in metafield_tabs -%}
+                {%- liquid
+                  assign title              = block.settings.title
+                  assign namespace          = block.settings.namespace
+                  assign key                = block.settings.key
+                  assign visible_all        = block.settings.visible_all
+                  assign metafield          = shop.metafields[namespace][key]
+                  assign vendor_visible     = block.settings.vendor_visible  | split: ','
+                  assign collection_visible = block.settings.collection_visible | split: ','
+                  assign product_visible    = block.settings.product_visible | split: ','
+                  assign template_visible   = block.settings.template_visible | split: ','
+                -%}
+                {%- if visible_all -%}
+                  {%- assign visible = true -%}
+                {%- endif -%}
+
+                {%- unless visible -%}
+                  {%- if vendor_visible contains product.vendor -%}
+                    {%- assign visible = true -%}
+                  {%- endif -%}
+                {%- endunless -%}
+
+                {%- unless visible -%}
+                  {%- for collection in product.collections -%}
+                    {%- if collection_visible contains collection.title -%}
+                      {%- assign visible = true -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endunless -%}
+
+                {%- unless visible -%}
+                  {%- for p_title in product_visible -%}
+                    {%- liquid
+                      assign a = p_title | downcase
+                      assign b  = product.title | downcase
+                      if a == b
+                        assign visible = true
+                      endif
+                    -%}
+                  {%- endfor -%}
+                {%- endunless -%}
+
+                {%- unless visible -%}
+                  {%- if template.suffix == template_visible -%}
+                    {%- assign visible = true -%}
+                  {%- endif -%}
+                {%- endunless -%}
+
+                {%- if metafield != blank and visible -%}
+                  {%- capture tab_control -%}
+                    <li class="js-tab-control tab-contorls_item {% if firstActive -%} active {%- endif -%}" data-target="#product_metafield_tab_{{forloop.index}}">{{title}}</li>
+                    {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+                  {%- endcapture -%}
+                  {%- assign tab_controls_metafield = tab_controls_metafield | append: tab_control -%}
+
+                  {%- capture tab_content -%}
+                    <div class="js-tab-content tab-contents_item {% if firstActive -%} active {%- endif -%}" id="product_metafield_tab_{{ forloop.index }}">
+                      {{metafield}}
+                    </div>
+                    {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+                  {%- endcapture -%}
+                  {%- assign tab_contents_metafield = tab_contents_metafield | append: tab_content -%}
+                {%- endif -%}
+
+              {%- endfor -%}
+
+              {{tab_controls_metafield}}
+
+            </ul>
+          </div>
+          <div class="product_tab-contents">
+            <div class="tab-contents js-tab-contents">
+              {%- liquid
+                assign firstActive = true
+                assign description_parts = product.description | split: "<h5"
+              -%}
+
+              {%- if description_parts.first.size > 0 -%}
+                <div class="js-tab-content tab-contents_item active" id="product_description_tab_1">
+                  {{ product.description | split: '<h5>' | first }}
+                </div>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endif -%}
+
+              {%- for part in description_parts -%}
+                {%- if part contains "</h5>" -%}
+                  {%- liquid
+                    assign fp = part | split: "</h5>" | last
+                    assign p  = part | split: "</h5>" | last | strip_html | replace: "&nbsp;", "" | replace: " ", "" | strip_newlines
+                  -%}
+
+                  {%- if p != "" or fp contains "<img " or fp contains "<iframe " -%}
+                    <div class="js-tab-content tab-contents_item {% if firstActive %} active{% endif %}" id="product_description_tab_{{ forloop.index }}">
+                      {{ part | split: "</h5>" | last }}
+                    </div>
+                    {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+
+              {%- for block in static_pages -%}
+                {%- liquid
+                  assign page_handle = block.settings.page
+                  assign page =  pages[page_handle]
+                  assign title = block.settings.page_title | strip | default: page.title
+                -%}
+                <div class="js-tab-content tab-contents_item {% if firstActive -%} active {%- endif -%}" id="product_description_static_tab_{{forloop.index}}">
+                  {{page.content}}
+                </div>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endfor -%}
+
+              {%- if settings.review_app != 'none' -%}
+                <div class="js-tab-content tab-contents_item {% if firstActive -%} active {%- endif -%}" id="product_description_tab_review">
+                  {%- render 'review'  -%}
+                </div>
+                {%- if firstActive -%}{%- assign firstActive = false -%}{%- endif -%}
+              {%- endif -%}
+
+              {{tab_contents_metafield}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    {%- else -%}
+      <div class="product-description">
+        <div class="tab-pane">
+          {{product.description}}
+
+          {%- for block in static_pages -%}
+            {%- liquid
+              assign page_object =  pages[block.settings.page]
+              assign title = block.settings.page_title | default: page_object.title
+            -%}
+          {%- endfor -%}
+          <div class="static-page">
+            <div class="content">{{page_object.content}}</div>
+          </div>
+          <div class="product-review">
+            {%- render 'review' product: product -%}
+          </div>
+        </div>
+
+      </div>
+    {%- endif -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'wishlist-compare' -%}
+    {%- if settings.wishlist_app != 'none' and settings.enable_product_wishlist or settings.enable_product_compare-%}
+      <div class="product_wishlist-compare">
+        {%- if settings.enable_product_wishlist -%}
+          {%- if settings.use_icons_from_arn_app -%}
+            {%- render 'arn_wl_cp_buttons', type: 'wl_add_btn', product_handle: product.handle -%}
+          {%- else -%}
+            <div class="product_wishlist {{ shop.metafields.arena.wl_cp_settings.wishlist_settings.wishlist_add_class }} {{ shop.metafields.arena.wl_cp_settings.wishlist_settings.add_class_icon.icon_id }} {% if shop.metafields.arena.wl_cp_settings.wishlist_settings.wishlist_enable == false %}disabled{% endif %}" data-arn-action="add" data-handle="{{product.handle}}">
+              {%- render 'svg', type: 'heart' -%}
+              {%- render 'svg' type: 'card-loading' -%}
+              <span class="add-wishlist">{{ 'products.product.add_to_wishlist' | t}}</span>
+              <span class="added-wishlist">{{ 'products.product.added_to_wishlist' | t}}</span>
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if settings.enable_product_compare -%}
+          {%- if settings.use_icons_from_arn_app -%}
+            {%- render 'arn_wl_cp_buttons', type: 'cp_add_btn', product_handle: product.handle -%}
+          {%- else -%}
+            <div class="product_compare {{ shop.metafields.arena.wl_cp_settings.compare_settings.compare_add_class }} {{ shop.metafields.arena.wl_cp_settings.compare_settings.add_class_icon.icon_id }} {% if shop.metafields.arena.wl_cp_settings.compare_settings.compare_enable == false %}disabled{% endif %}" data-arn-action="add" data-handle="{{product.handle}}">
+              {%- render 'svg', type: 'compare' -%}
+              {%- render 'svg' type: 'card-loading' -%}
+              <span class="add-compare">{{ 'products.product.add_to_compare' | t}}</span>
+              <span class="added-compare">{{ 'products.product.added_to_compare' | t}}</span>
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  {% comment %} end {% endcomment %}
+
+  {%- when 'categories' -%}
+    <div class="product_categories">
+      <span>{{ 'products.product.categories' | t}}:
+      {%- for collection in product.collections -%}
+        <a href="{{collection.url}}"> {{collection.title}}</a>{%- unless forloop.last -%} , {%- endunless -%}
+      {%- endfor -%}
+      </span>
+    </div>
+  {% comment %} end {% endcomment %}
+{%- endcase -%}

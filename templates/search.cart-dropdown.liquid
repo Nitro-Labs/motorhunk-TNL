@@ -1,0 +1,47 @@
+{%layout none%}
+
+<h3 class="title">{{ 'cart.dropdown.title' | t}}</h3>
+<div class="form_wrapper">
+  <ul class="cart-list js-cart-list">
+    <li class="js-cart-item cart-item template d-none">
+      <a class="image js-url">
+        <img class="js-img" alt="{{line_item.product.title}}">
+      </a>
+      <div class="info">
+        <a class="name js-url js-name">{{line_item.product.title}} <span class="option js-options"></span></a>
+        <div class="quantity"><span class="js-quantity"></span> x <span class="momey js-price js-money"></span></div>
+      </div>
+      <a href="#" onclick="return false" class="js-btn-remove btn-remove">{%- render 'svg' type: 'close' -%}{%- render 'svg' type: 'card-loading' -%}</a>
+    </li>
+    {%- for line_item in cart.items -%}
+      <li class="js-cart-item cart-item" data-key="{{line_item.key}}">
+        <a href="{{line_item.url}}" class="image">
+          <img src="{{line_item.image | img_url: '400px'}}" alt="{{line_item.product.title}}">
+        </a>
+        <div class="info">
+          <a href="{{line_item.url}}" class="name">{{line_item.product.title}} <span class="option">{{line_item.options_with_values | map: 'value' |  join: '/'}}</span></a>
+          <div class="quantity"><span class="js-quantity">{{line_item.quantity}}</span> x <span class="momey js-money">{{line_item.final_price | money}}</span></div>
+        </div>
+        <a href="#" onclick="return false" class="js-btn-remove btn-remove" >{%- render 'svg' type: 'close' -%}{%- render 'svg' type: 'card-loading' -%}</a>
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+<div class="action">
+  <div class="subtotal">
+    <span>{{ 'cart.dropdown.subtotal' | t}}</span>
+    <span class="money js-cart-total-money js-money">{{cart.total_price | money }}</span>
+  </div>
+  <form action="/cart" method="post" novalidate>
+    {%- if settings.enable_terms_condition -%}
+      <div class="input-group">
+        <input type="checkbox" required id="required-input">
+        <label for="required-input">{{ 'cart.general.terms_and_conditions' | t}}</label>
+      </div>
+    {%- endif -%}
+    <div class="action_buttons">
+      <a href="{{routes.cart_url}}" class="btn btn-1">{{ 'cart.dropdown.view_cart' | t}}</a>
+      <button type="submit" name="checkout" class="btn btn-2">{{ 'cart.dropdown.checkout' | t}}</button>
+    </div>
+  </form>
+</div>

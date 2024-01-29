@@ -1,0 +1,44 @@
+{%- if settings.disable_search_ajax -%}
+  <div id="mobile-search">
+    <form action="/search" class="form-search d-none">
+      <input type="text" name="q" autocomplete="off">
+    </form>
+  </div>
+{%- else -%}
+  <template id="drawer-search-template">
+    <div class="drawer drawer-right drawer-search js-search-container" id="drawer_search">
+      <div class="drawer_overlay js-drawer-close"></div>
+
+      <div class="drawer-wrapper">
+        <div class="drawer__header">
+          {{ 'section.mobile_bar.search_drawer_header' | t}}
+          <a href="#" onclick="return false" class="btn-close js-drawer-close">
+            {%- render 'svg' type: 'close' -%}
+          </a>
+        </div>
+        <form action="/search" class="form-search">
+          <input type="hidden" value="{{settings.search_type}}" name="type">
+          <input type="hidden" value="{{settings.search_unavailable_result}}" name="options[unavailable_products]">
+          <input type="hidden" value="last" name="options[prefix]">
+
+          <input type="text" class="js-search-input" name="q" placeholder="{{ 'section.header.search_placeholder' | t}}" autocomplete="off">
+          <button type="submit" class="js-search-btn btn btn-1">
+            {%- render 'svg' type: 'search' -%}
+            {%- render 'svg' type: 'is-loading' -%}
+          </button>
+        </form>
+        <div class="search-results">
+          <div class="search-results_wrapper">
+            <div class="results">
+              <a href="#" onclick="return false" class="btn-view-all">{{ 'general.search.view_all' | t}}</a>
+            </div>
+            <div class="no-result">{{ 'general.search.no_results' | t}}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </template>
+{%- endif -%}
+
+{% comment %} compress {% endcomment %}

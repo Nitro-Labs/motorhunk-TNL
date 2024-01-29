@@ -1,0 +1,30 @@
+{%- if value != blank -%}
+  {%- liquid
+    assign value = value | split: ','
+    assign size = value | size
+  -%}
+  {%- capture selector -%}{{preClassID}} {{classID}} {{nextClassID}}{%- endcapture-%}
+
+  {%- case size -%}
+    {%- when 1 -%}
+      {{-selector}}{grid-gap: {{value[0]}};}
+    {%- when 2 -%}
+      {{selector}}{grid-gap: {{value[1]}};}
+      @media screen and (min-width: 992px){ {{selector}}{grid-gap: {{value[0]}};}}
+    {%- when 3 -%}
+      {{selector}}{grid-gap: {{value[2]}};}
+      @media screen and (min-width: 768px){ {{selector}}{grid-gap: {{value[1]}};}}
+      @media screen and (min-width: 992px){ {{selector}}{grid-gap: {{value[0]}};}}
+    {%- when 4 -%}
+      {{selector}}{grid-gap: {{value[3]}};}
+      @media screen and (min-width: 576px){ {{selector}}{grid-gap: {{value[2]}};}}
+      @media screen and (min-width: 768px){ {{selector}}{grid-gap: {{value[1]}};}}
+      @media screen and (min-width: 992px){ {{selector}}{grid-gap: {{value[0]}};}}
+    {%- when 5 -%}
+      {{selector}}{grid-gap: {{value[4]}};}
+      @media screen and (min-width: 576px){ {{selector}}{grid-gap: {{value[3]}};}}
+      @media screen and (min-width: 768px){ {{selector}}{grid-gap: {{value[2]}};}}
+      @media screen and (min-width: 992px){ {{selector}}{grid-gap: {{value[1]}};}}
+      @media screen and (min-width: 1200px){ {{selector}}{grid-gap: {{value[0]}};}}
+  {%- endcase -%}
+{%- endif -%}

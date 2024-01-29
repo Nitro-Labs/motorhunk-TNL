@@ -1,0 +1,9 @@
+{%- if config.heading != blank or config.subheading != blank -%}
+  <div class="section_title-wrapper">
+    <div class="section_title-inner">
+      {%- if config.heading != blank -%} <h2 class="section_title-text-1">{{config.heading}}</h2> {%- endif -%}
+      {%- if config.subheading != blank -%} <div class="section_title-text-2">{{config.subheading}}</div> {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+

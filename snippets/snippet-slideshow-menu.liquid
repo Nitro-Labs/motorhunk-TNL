@@ -1,0 +1,307 @@
+{%- liquid
+  assign default_color   = 'rgba(0,0,0,0)'
+  assign section_padding = section.settings.section_padding
+  assign section_margin  = section.settings.section_margin
+  assign default_link = '#" onclick="return false'
+  assign isBoxed      = section.settings.boxed_layout
+  assign slide_height = section.settings.slide_height
+  assign enable_menu  = section.settings.enable_menu
+  assign section_menu = section.settings.section_menu
+  assign bg_full     = section.settings.bg_full
+  assign bg_color    = section.settings.bg_color | default: default_color | replace: default_color, ''
+  assign sectionID   = '#section-' | append: section.id
+  assign slider_id   = '#slider-'| append: section.id
+  assign dots_id     = '#dots-' | append: section.id
+  assign controls_id = '#controls-' | append: section.id
+  assign total_item  = section.blocks | where: 'type', 'slide' | size
+-%}
+
+{%- if bg_full -%}
+  {%- assign bg_class = '' -%}
+{%- else -%}
+  {%- assign bg_class = ' .section-content' -%}
+{%- endif -%}
+
+{%- capture section_class -%}
+	{{- -}}|home-slideshow
+	{{- -}}|home-slideshow-menu
+{%- endcapture -%}{%- assign section_class = section_class | strip | split: '|' | join: ' ' -%}
+
+{%- unless slide_height == blank -%}{%- assign disablePadding = true -%}{%- endunless -%}
+
+<div class="{{section_class}}" id="section-{{section.id}}" data-section-type="slideshow-menu" data-section-id="{{section.id}}">
+  {%- if isBoxed -%}<div class="container">{%- endif -%}
+    <div class="section-content">
+      <div class="row">
+        {%- if enable_menu != blank -%}
+          <div class="col-12 col-lg-3">
+            <div class="section-content__menu h-100">
+              <ul class="menu-list">
+                {%- for link in linklists[section_menu].links -%}
+                  <li class="menu-item">
+                    <a href="{{link.url}}" class="menu-item__title">
+                      {{link.title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'}}
+                      {%- render 'header-snippets' type: 'label', title: link.title -%}
+                    </a>
+                    {%- if link.links != blank -%}
+                      <a href="#" onclick="return false" class="js-btn-collapse collapse" data-target="child_menu_{{section.id}}_{{forloop.index}}">{%- render 'svg' type: 'angle-right' -%}</a>
+                      <div class="dropdown-menu child-menu" id="child_menu_{{section.id}}_{{forloop.index}}">
+                        <ul class="menu-list">
+                          {%- for child_link in link.links -%}
+                            <li class="menu-item">
+                              <a href="{{child_link.url}}">{{child_link.title}}</a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    {%- endif -%}
+                  </li>
+                  {%- else -%}
+                    <li class="menu-item">
+                      <a href="{{link.url}}" class="menu-item__title">
+                        {%- assign title = 'Lorem, ipsum dolor.(new)' -%}
+                        {{ title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'}}
+                        {%- render 'header-snippets' type: 'label', title: title -%}
+                      </a>
+                      <a href="#" onclick="return false" class="js-btn-collapse collapse active" data-target="child_menu_{{section.id}}_1">{%- render 'svg' type: 'angle-right' -%}</a>
+                      <div class="dropdown-menu child-menu is-open" id="child_menu_{{section.id}}_1">
+                        <ul class="menu-list">
+                          {%- for i in (1..3) -%}
+                            <li class="menu-item">
+                              <a href="{{child_link.url}}">Lorem, ipsum dolor.</a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    </li>
+                    <li class="menu-item">
+                      <a href="{{link.url}}" class="menu-item__title">
+                        {%- assign title = 'Lorem, ipsum dolor.(hot)' -%}
+                        {{ title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'}}
+                        {%- render 'header-snippets' type: 'label', title: title -%}
+                      </a>
+                      <a href="#" onclick="return false" class="js-btn-collapse collapse" data-target="child_menu_{{section.id}}_2">{%- render 'svg' type: 'angle-right' -%}</a>
+                      <div class="dropdown-menu child-menu" id="child_menu_{{section.id}}_2">
+                        <ul class="menu-list">
+                          {%- for i in (1..3) -%}
+                            <li class="menu-item">
+                              <a href="{{child_link.url}}">Lorem, ipsum dolor.</a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    </li>
+                    <li class="menu-item">
+                      <a href="{{link.url}}" class="menu-item__title">
+                        {%- assign title = 'Lorem, ipsum dolor.(sale)' -%}
+                        {{ title | remove: '(new)' | remove: '(hot)' | remove: '(sale)'}}
+                        {%- render 'header-snippets' type: 'label', title: title -%}
+                      </a>
+                      <a href="#" onclick="return false" class="js-btn-collapse collapse" data-target="child_menu_{{section.id}}_3">{%- render 'svg' type: 'angle-right' -%}</a>
+                      <div class="dropdown-menu child-menu" id="child_menu_{{section.id}}_3">
+                        <ul class="menu-list">
+                          {%- for i in (1..3) -%}
+                            <li class="menu-item">
+                              <a href="{{child_link.url}}">Lorem, ipsum dolor.</a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div class="col-12 {% if enable_menu != blank  %}col-lg-9{%- endif -%}">
+          <div class="section-content__slide">
+            <div class="slider-container js-slider-container">
+              <div class="slider-wrapper">
+                <div class="slider-list slideshow-wrapper" id="slider-{{section.id}}">
+                  {%- for block in section.blocks -%}
+                    {%- case block.type -%}
+                      {%- when 'slide' -%}
+                        {%- comment -%}
+                          **
+                          * Slide Item
+                          *
+                        {%- endcomment-%}
+                        {%- liquid
+                          assign slide_item_count = slide_item_count | plus: 1
+                          assign slide_image      = block.settings.image
+                          assign slide_image_URL  = block.settings.btn_url | default: default_link
+                          assign _text_1          = block.settings.text_1
+                          assign _text_2          = block.settings.text_2
+                          assign _text_3          = block.settings.text_3
+                          assign _text_4          = block.settings.text_4
+                          assign _btn_txt         = block.settings.btn_txt
+                          assign _btn_url         = block.settings.btn_url | default: default_link
+
+                          capture slide_content_check
+                            echo _text_1 | strip_newlines
+                            echo _text_2 | strip_newlines
+                            echo _btn_txt | strip_newlines
+                          endcapture
+                        -%}
+                        {%- capture product_label -%}++{{ all_products[_product_to_sell].tags | join: '++' | downcase }}++{%- endcapture -%}
+                        {%- capture blockID -%}.slide-{{block.id}}{%- endcapture -%}
+
+                        <div class="slide-item slider-item col-12 slide-{{block.id}}" data-index="{% increment slide_index %}"{{block.shopify_attributes}}>
+                          <div class="slide-banner">
+                            <a href="{{slide_image_URL}}">
+                              {%- unless slide_image == blank -%}
+                                {%- render 'image-style', image: slide_image, disablePadding: disablePadding -%}
+                                {%- capture block_css -%}
+                                  {%- render 'css-resp', classID: blockID, nextClassID: ' .slide-banner img', css_value: block.settings.image_position, css_property: 'object-position' -%}
+                                {%- endcapture -%}
+                                {%- assign section_css = section_css | append: block_css -%}
+                              {%- else -%}
+                                {%- render 'svgset', type: 'lifestyle' -%}
+                              {%- endunless -%}
+                            </a>
+                          </div>
+
+                          {%- comment -%}
+                            **
+                            * Slide Content
+                            *
+                          {%- endcomment-%}
+                          {%- unless slide_content_check == blank -%}
+                            <div class="slide-content-wrapper">
+                              <a href="{{slide_image_URL}}" class="overlay-ui w-100 h-100" style="z-index: 1000;"></a>
+                              <div class="slide-content-inner overlay-ui">
+                                {%- if _show_product_label -%}
+                                  {%- if product_label contains '++label new++' -%}
+                                    <div class="slide-content-item content-product_label">
+                                      <span class="label_ui label_ui-new">{{- 'products.label.new' | t -}}</span>
+                                    </div>
+                                  {%- endif -%}
+                                  {%- if product_label contains '++label hot++' -%}
+                                    <div class="slide-content-item content-product_label">
+                                      <span class="label_ui label_ui-hot">{{- 'products.label.hot' | t -}}</span>
+                                    </div>
+                                  {%- endif -%}
+                                {%- endif -%}
+
+                                {%- comment -%}
+                                  **
+                                  * Heading Image (Section single banner)
+                                  *
+                                {%- endcomment-%}
+                                {%- unless _content_image == blank -%}
+                                  <div class="slide-content-item content-image">
+                                    {%- render 'image-style', image: _content_image, setWidth: false -%}
+                                  </div>
+                                {%- endunless -%}
+
+                                {%- comment -%}
+                                  **
+                                  * Text content
+                                  *
+                                {%- endcomment-%}
+                                {%- unless _text_1 == blank -%}<div class="slide-content-item content-text-1">{{_text_1}}</div>{%- endunless -%}
+                                {%- unless _text_2 == blank -%}<div class="slide-content-item content-text-2">{{_text_2}}</div>{%- endunless -%}
+                                {%- unless _text_3 == blank -%}<div class="slide-content-item content-text-3">{{_text_3}}</div>{%- endunless -%}
+                                {%- unless _text_4 == blank -%}<div class="slide-content-item content-text-4">{{_text_4}}</div>{%- endunless -%}
+
+                                {%- comment -%}
+                                  **
+                                  * Slide Button content
+                                  *
+                                {%- endcomment-%}
+                                {%- unless _btn_txt == blank -%}
+                                  <div class="slide-content-item content-button">
+                                    <a href="{{_btn_url}}" class="btn btn-slide btn-1">{{_btn_txt}}</a>
+                                  </div>
+                                {%- endunless -%}
+                              </div>
+                            </div>
+
+                          {%- endunless -%}
+                        </div>
+
+                        {%- comment -%}
+                          **
+                          * Slide CSS
+                          *
+                        {%- endcomment-%}
+
+                        {%- unless slide_content_check == blank -%}
+                            {%- for block in section.blocks offset: forloop.index -%}
+                              {%- if block.type == 'slide' -%}{%- break -%}{%- endif -%}
+                              {%- assign  blockType = block.type | remove: 'style_' -%}
+                              {%- capture block_css -%}
+                                {%- render 'snippet-slideshow-items', block: block, type: blockType, sectionID: sectionID, blockID: blockID -%}
+                              {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                            {%- endfor -%}
+                        {%- endunless -%}
+
+                      {%- else -%}
+
+                        {%- comment -%}
+                          **
+                          * Slide Item General Style
+                          *
+                        {%- endcomment-%}
+                          {%- if slide_item_count > 0 -%}{%- continue -%}{%- endif -%}
+                          {%- assign  blockType = block.type | remove: 'style_' -%}
+                          {%- capture block_css -%}
+                            {%- render 'snippet-slideshow-items', block: block, type: blockType, sectionID: sectionID, blockID: '' -%}
+                          {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                    {%- endcase -%}
+                  {%- endfor -%}
+                </div>
+                {%- if total_item > 1 -%}
+                  {%- render 'set-tns-config'
+                    slider_id       : slider_id,
+                    controls_id     : controls_id,
+                    dots_id         : dots_id,
+                    loop            : section.settings.loop,
+                    controls        : section.settings.controls,
+                    dots            : section.settings.dots,
+                    autoplay        : section.settings.autoplay,
+                    customDots      : true
+                    autoplay_timeout: section.settings.autoplay_timeout,
+                    slideshow       : true,
+                    total_item      : total_item -%}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  {%- if isBoxed -%}</div>{%- endif -%}
+</div>
+
+
+{%- comment -%}
+  **
+  * Section Style sheet
+  *
+{%- endcomment-%}
+{%- capture sectionCss -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+      value_1: bg_color, property_1: 'background-color'
+      value_2: section_margin, property_2: 'margin'
+      value_3: section_padding, property_3:  'padding'-%}
+
+    {%- render 'css-responsive' preClassID: sectionID, classID: '.image__style', value_1: slide_height, property_1: 'padding-top'  -%}
+    {{- section_css -}}
+    {%- if slide_height != blank -%}{{- sectionID }} .image__style img{object-fit: cover;}{%- endif -%}
+{%- endcapture -%}
+{%- assign sectionCss = sectionCss | strip_newlines -%}
+{%- unless sectionCss == blank -%}<style>{{sectionCss}}</style>{%- endunless -%}
+
+<script>
+  window.theme = window.theme || {};
+  if(!!window.theme.sectionRegister){
+    !window.theme.sectionRegister.includes('slideshow-menu') && (window.theme.sectionRegister = [...window.theme.sectionRegister, "slideshow-menu"]);
+  }else{
+    window.theme.sectionRegister = ["slideshow-menu"];
+  }
+</script>
+
+{% comment %} compress {% endcomment %}

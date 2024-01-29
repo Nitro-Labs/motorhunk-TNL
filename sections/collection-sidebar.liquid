@@ -1,0 +1,997 @@
+{%- liquid
+  assign sectionID = '.section-' | append: section.id
+  assign default_color = 'rgba(0,0,0,0)'
+  assign blocks_accepted = 'category,banner,filter_group,filter_group_attributes' | split: ','
+  assign filterType = section.settings.filter_type
+-%}
+
+{%- capture section_class -%}sidebar{{ template | split: '.' | first | camelize }} sidebar-section section-{{- section.id -}}{%- endcapture -%}
+
+
+{%- capture sidebar_content -%}
+  {%- for block in section.blocks -%}
+    {%- liquid
+      unless blocks_accepted contains block.type
+        continue
+      endunless
+      assign blockID = '#block-' | append: block.id
+    -%}
+
+    {%- capture block_content -%}
+      {%- case block.type -%}
+
+        {%- when 'category' -%}
+          {%- liquid
+            assign menu       = block.settings.category
+            assign menuList   = linklists[menu]
+            assign menuTitle  = block.settings.heading | default: menuList.title
+          -%}
+
+          {%- if menu != blank and menuList.links.size > 0 -%}
+            <div class="menu_list-ui menu-toggle"{{block.shopify_attributes}}>
+              <div class="menu_list-header">
+                <p class="sb-title">{{ menuTitle }}</p>
+              </div>
+              <div class="menu_list-body">
+                <ul class="menu_list-wrapper">
+                  {%- for link in linklists[menu].links -%}
+                    <li class="menu_list-item">
+                      <a href="{{link.url}}" class="dropdown-link">
+                        {{link.title}}
+                        {%- if link.object.all_products_count != blank -%}
+                          <span class="number">[{{link.object.all_products_count}}]</span>
+                        {%- endif -%}
+                      </a>
+                      {%- if link.links != blank -%}
+                        <span class="js-btn-collapse expand" data-target="sb-collection-{{block.id | append: forloop.index}}"><a href="#" onclick="return false"></a></span>
+                        <ul class="dropdown-menu collapse" id="sb-collection-{{block.id | append: forloop.index}}">
+                          {%- for child_link in link.links -%}
+
+                            <li class="menu_list-item">
+                              <a href="{{child_link.url}}">
+                                {{child_link.title}}
+                                {%- if child_link.object.all_products_count != blank -%}
+                                  <span class="number">[{{child_link.object.all_products_count}}]</span>
+                                {%- endif -%}
+                              </a>
+                              {%- if child_link.links != blank -%}
+                                <span class="js-btn-collapse expand" data-target="sb-collection-{{block.id | append: forloop.index }}"></span>
+                                <ul class="dropdown-menu collapse" id="sb-collection-{{block.id | append: forloop.index}}-{{child_link.title | handle}}">
+                                  {%- for grandchild_link in child_link.links -%}
+
+                                    <li class="menu_list-item">
+                                      <a href="{{grandchild_link.url}}">
+                                        {{grandchild_link.title}}
+                                        {%- if grandchild_link.object.all_products_count != blank -%}
+                                          <span class="number">[{{grandchild_link.object.all_products_count}}]</span>
+                                        {%- endif -%}
+                                      </a>
+                                    </li>
+                                  {%- endfor -%}
+                                </ul>
+                              {%- endif -%}
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </div>
+
+          {%- else -%}
+              {%- render 'svgset', type: 'empty-menu' -%}
+          {%- endif -%}
+        {% comment %} end {% endcomment %}
+
+        {%- when 'banner' -%}
+          {%- liquid
+            assign banner  = block.settings.banner
+            assign text_1  = block.settings.text_1
+            assign text_2  = block.settings.text_2
+            assign btn_url = block.settings.btn_url | default: 'javascript:void(0);'
+            assign btn_label = block.settings.btn_label
+          -%}
+
+          {%- unless banner == blank -%}
+
+            {%- render 'image-style', image: banner -%}
+
+            {%- unless text_1 == blank and text_2 == blank and btn_label == blank -%}
+              <div class="featured_block-content overlay-ui">
+                <div class="featured_block-content-inner">
+
+                  {%- unless text_1 == blank -%}<div class="block_content-text block_content-text-1">{{ text_1 }}</div>{%- endunless -%}
+                  {%- unless text_2 == blank -%}<div class="block_content-text block_content-text-2">{{ text_2 }}</div>{%- endunless -%}
+
+                  {%- unless btn_label == blank -%}
+                    <div class="block_content-button">
+                      <a href="{{ btn_url | default: 'javascript:void(0);' }}" class="btn btn-content btn-{{block.settings.btn_style}}">{{ btn_label }}</a>
+                    </div>
+                  {%- endunless -%}
+                </div>
+              </div>
+
+              {%- for block in section.blocks offset: forloop.index -%}
+                {%- unless 'style_button,style_content' contains block.type -%}{%- continue -%}{%- endunless -%}
+
+                {%- case block.type -%}
+                  {%- when 'style_button' -%}
+                    {%- liquid
+                      assign btn_fs = block.settings.btn_fs
+                      assign btn_fw = block.settings.btn_fw
+                      assign btn_padding = block.settings.btn_padding
+                      assign btn_margin = block.settings.btn_margin
+                      assign btn_cl = block.settings.btn_cl | default: default_color
+                      assign btn_bg_cl = block.settings.btn_bg_cl | default: default_color
+                      assign btn_hover_cl = block.settings.btn_hover_cl | default: default_color
+                      assign btn_hover_bg_cl = block.settings.btn_hover_bg_cl | default: default_color
+                      assign btn_border_width = block.settings.btn_border_width
+                      assign btn_border_cl = block.settings.btn_border_cl | default: default_color
+                      assign btn_hover_border_cl = block.settings.btn_hover_border_cl | default: default_color
+                      assign btn_radius = block.settings.btn_radius
+                      assign block_class = blockID | append:  ' .block_content-button .btn'
+                    -%}
+
+                    {%- capture banner_css -%}
+                      {{block_class}} {
+                        font-weight: {{btn_fw}};
+                        {%- if btn_cl != default_color -%} color: {{btn_cl}}; {%- endif -%}
+                        {%- if btn_bg_cl != default_color -%} background-color:{{btn_bg_cl}};{%- endif -%}
+                        {%- if btn_border_cl != default_color -%} border: {{btn_border_width}}px solid {{btn_border_cl}}; {%- endif -%}
+                      }
+                      {{block_class}}:hover {
+                        {%- if btn_hover_cl != default_color -%} color: {{btn_hover_cl}}; {%- endif -%}
+                        {%- if btn_hover_bg_cl != default_color -%} background-color:{{btn_hover_bg_cl}};{%- endif -%}
+                        {%- if btn_hover_border_cl != default_color -%} border: {{btn_border_width}}px solid {{btn_hover_border_cl}}; {%- endif -%}
+                      }
+                      {%- render 'css-responsive' preClassID: block_class,
+                        value_1: btn_fs, property_1: 'font-size'
+                        value_2: btn_padding, property_2: 'padding'
+                        value_3: btn_margin, property_3: 'margin'
+                        value_4: btn_radius, property_4: 'border-radius' -%}
+                    {%- endcapture -%}
+
+                    {%- assign section_css = sectioc_css | append: banner_css -%}
+                  {% comment %} end {% endcomment %}
+
+                  {%- when 'style_content' -%}
+                    {%- for i in (1..2) -%}
+                      {%- liquid
+                        assign content_fs = 'content_fs_' | append: i
+                        assign content_cl = 'content_cl_' | append: i
+                        assign content_fw = 'content_fw_' | append: i
+                        assign content_lh = 'content_lh_' | append: i
+                        assign content_margin = 'content_margin_' | append: i
+                        assign block_class = blockID | append: ' .block_content-text-' | append: i
+                      -%}
+
+                      {%- capture banner_content_css -%}
+                        {{block_class}}{
+                          {%- if block.settings[content_cl]  != default_color-%}color: {{block.settings[content_cl]}};{%- endif -%}
+                          font-weight: {{block.settings[content_fw]}};
+                        }
+                        {%- render 'css-responsive' preClassID: block_class,
+                          value_1: block.settings[content_fs], property_1: 'font-size'
+                          value_2: block.settings[content_lh], property_2: 'line-height'
+                          value_3: block.settings[content_margin], property_3: 'margin' -%}
+                      {%- endcapture -%}
+
+                      {%- assign section_css = section_css | append: banner_content_css -%}
+                    {%- endfor -%}
+                {%- endcase -%}
+              {%- endfor -%}
+            {%- endunless -%}
+
+          {%- else -%}
+            {%- render 'svgset' -%}
+          {%- endunless -%}
+        {% comment %} end {% endcomment %}
+
+        {%- when 'filter_group' -%}
+
+          {%- if filterType != 'tag' -%}{%- continue -%}{%- endif -%}
+            
+            
+          {%- liquid
+            assign direction     = block.settings.direction
+            assign filter_tags   = block.settings.filter_tags | strip_newlines | replace: ' ,', ',' | replace: ', ', ',' | split: ','
+            assign filter_prefix = block.settings.filter_prefix | strip
+            assign filter_style_color = block.settings.filter_style_color
+            assign tags_active = ''
+
+            if filter_tags contains '+ALL'
+              assign filter_tags = collection.all_tags
+            endif
+          -%}
+
+          {%- if filter_prefix != blank -%}
+            {%- assign filter_tags = ''-%}
+
+            {%- for tag in collection.all_tags -%}
+              {%- assign check_prefix = tag | split: filter_prefix | first -%}
+              {%- if check_prefix == blank -%}
+                {%- assign prefix_invalid = true -%}
+              {%- else -%}
+                {%- assign prefix_invalid = false -%}
+              {%- endif -%}
+              {%- if tag contains filter_prefix and prefix_invalid -%}
+                {%- assign filter_tags = filter_tags | append: ',' | append: tag -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- assign filter_tags = filter_tags | remove_first: ',' | split: ',' -%}
+
+          {%- endif -%}
+
+          {%- capture filter_group_sort -%}{%- render 'filter-group-sort' sort_type: block.settings.sort_label, prefix: filter_prefix, tags: filter_tags -%}              {%- endcapture -%}
+          {%- assign filter_tags = filter_group_sort | strip | strip_newlines | split: ',' | uniq -%}
+
+          {%- capture filter_group -%}
+            {%- for t in filter_tags -%}
+              {%- capture tag -%}{{ t | strip }}{%- endcapture -%}
+              {%- unless collection.all_tags contains tag -%}
+                {%- continue -%}
+              {%- endunless -%}
+
+              {%- capture tag_link_class -%}
+                tags-link {% if current_tags contains tag %}active{%- assign tags_active = tags_active | append: ',' | append: tag -%}{%- endif -%}
+                {%- if filter_style_color and direction == 'row' %} filterColor-{{ tag | handle }} custom-color" data-custom-color="{{ tag | remove: filter_prefix | downcase }}{% endif -%}
+              {%- endcapture -%}
+
+              <li class="{{tag_link_class | strip | strip_newlines}}" data-tag-value="{{ tag | handle }}">
+                {%- assign tag_remove_prefix = tag | remove: filter_prefix -%}
+                {%- assign tag_title = 'title="[+-+]" title=' | replace: '[+-+]', tag_remove_prefix -%}
+                {%- unless current_tags contains tag -%}
+                  {{ tag_remove_prefix | link_to_add_tag: tag | replace: 'title=', tag_title }}
+                {%- else -%}
+                  {{ tag_remove_prefix | link_to_remove_tag: tag }}
+                {%- endunless -%}
+              </li>
+            {%- endfor -%}
+          {%- endcapture -%}
+
+          {%- if filter_group == blank -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          <div class="filter-group direction-{{direction}} {% if filter_style_color %}filter-color" data-prefix="color{% endif %}">
+            <p class="sb-title">
+              <span>{{ block.settings.title}}</span>
+
+              {%- liquid
+                assign new_tags = ""
+                for tag in current_tags
+                  assign tag_handle = tag | handle
+                  unless tags_active contains tag
+                    assign new_tags = new_tags | append: '+' | append: tag_handle
+                  endunless
+                endfor
+                assign new_tags = new_tags | remove_first: '+'
+              -%}
+              <a href="{{ collection.url | append: '/' | append: new_tags }}" class="filter-clear {% if tags_active.size < 1 -%} d-none {%- endif -%}">
+                <span>{{- 'collections.general.clear' | t -}}</span>
+                <span class="is-loading">
+                  {%- render 'svg' type: 'is-loading' -%}
+                </span>
+              </a>
+            </p>
+
+            <ul class="tags-list">
+              {{filter_group}}
+            </ul>
+          </div>
+
+          {%- capture block_css -%}
+            {%- render 'css-resp', classID: blockID, nextClassID: ' .tags-list', css_value: block.settings.block_max_height, css_property: 'max-height' -%}
+          {%- endcapture -%}
+          {%- assign section_css = section_css | append: block_css -%}
+        {% comment %} end {% endcomment %}
+
+        {%- when 'filter_group_attributes' -%}
+          {%- if filterType != 'attribute' -%}{%- continue -%}{%- endif -%}
+
+          {%- capture blockContent -%}{%- render 'filter-attributes', block: block -%}{%- endcapture -%}
+          {%- assign blockContent = blockContent | split: '<!--split-->' -%}
+
+          {{blockContent[0]}}
+
+          {%- capture block_css -%}
+            {{blockContent[1]}}
+          {%- endcapture -%}
+          {%- assign section_css = section_css | append: block_css -%}
+          {%- assign hasFilterAttr = true -%}
+      {%- endcase -%}
+    {%- endcapture -%}
+
+    {%- if block_content != blank -%}
+
+      {%- capture blockType -%}{%- if block.type == 'filter_group_attributes' -%}filter_group{%- else -%}{{ block.type }}{%- endif -%}{%- endcapture -%}
+      <section class="featured_block featured_block-{{blockType}}" {%- if block.settings.enable_multiple_values -%} data-multiple="{{block.settings.enable_multiple_values}}" {%- endif -%} id="block-{{block.id}}" {{block.shopify_attributes}}>
+        {{block_content}}
+      </section>
+    {%- endif -%}
+
+    {%- capture block_css -%}
+      {%- render 'css-responsive' classID: blockID, value_1: block.settings.margin, property_1: 'margin',value_2: block.settings.align, property_2: 'text-align' -%}
+    {%- endcapture -%}
+    {%- assign section_css = section_css | append: block_css -%}
+  {%- endfor -%}
+{%- endcapture-%}
+
+
+{%- if sidebar_content != blank -%}
+  <div id="sidebarDrawer" class="{{section_class}}" data-section-type="collection-sidebar" data-section-id="{{section.id}}" data-filter-type="{{filterType}}">
+    <div class="section_content-overlay js-toggle-sb" data-role="close"></div>
+
+    <div class="section_content-wrapper">
+        {%- capture d_lg_none -%}
+          {%- if template.suffix != blank -%}{%- if template.suffix == 'sidebar'-%}d-lg-none{%- endif -%}
+          {%- else -%}{%- if settings.collection_page == 'left-sidebar' -%}d-lg-none{%- endif -%}
+          {%- endif -%}
+        {%- endcapture -%}
+        <a href="#" onclick="return false" class="js-toggle-sb sidebarDrawer-close {{d_lg_none}}" data-target="sidebarDrawer" data-role="close">{%- render 'svg', type: 'close' -%}</a>
+
+      <div class="section_content-body">
+        {%- if hasFilterAttr -%}
+          <form action="{{collection.url}}" id="mainFilterForm" class="js-filter-form js-filter-update-content" data-id="form">
+            {%- for filter in collection.filters -%}
+              {%- for item in filter.active_values -%}
+                <input type="hidden" name="{{item.param_name}}" value="{{item.value}}">
+              {%- endfor -%}
+            {%- endfor -%}
+            {%- if collection.default_sort_by != collection.sort_by -%}
+              <input type="hidden" name="sort_by" value="{{collection.sort_by}}">
+            {%- endif -%}
+          </form>
+        {%- endif -%}
+
+        {{sidebar_content}}
+
+      </div>
+    </div>
+  </div>
+
+  {%- capture sectionCss -%}
+    {%- liquid
+      assign gridLayout = section.settings.grid_layout | append: ',100%,100%'
+      render 'css-resp', classID: '.layout-grid.d-grid', css_value: gridLayout, css_property: 'grid-template-columns'
+      render 'css-resp', classID: '.layout-grid.d-grid', css_value: section.settings.grid_gap, css_property: 'grid-gap'
+      render 'css-resp', classID: sectionID, css_value: section.settings.section_padding, css_property: 'padding'
+    -%}
+  {%- endcapture -%}
+  {%- assign section_css = section_css | prepend: sectionCss -%}
+
+  {%- if section_css != blank -%}<style>{{section_css | strip | strip_newlines | remove: '  '}}</style>{%- endif -%}
+{%- else -%}
+  <style>
+    @media (min-width: 992px){
+      .layout-grid.d-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .js-toggle-sb{
+      display: none!important;
+    }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": {
+    "en": "Collection Sidebar"
+  },
+  "tag": "aside",
+  "class": "custom-static-sidebar",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Collection sidebar' section"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/support/solutions/articles/6000251182-modify-the-collection-sidebar) before use."
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Sidebar settings"
+      }
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section Padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type":"radio",
+      "id":"filter_type",
+      "label":"Filter by",
+      "options":[
+        {
+          "value":"tag",
+          "label": "Tags"
+        },
+        {
+          "value":"attribute",
+          "label": "Attributes"
+        }
+      ],
+      "default": "tag"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "filter_group",
+      "name": {
+        "en": "Filter group (Tags)"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Heading"
+          },
+          "default": "Filter by"
+        },
+        {
+          "type" : "checkbox",
+          "id" : "enable_multiple_values",
+          "label" : "Enable select multiple values in the filter group",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "sort_label",
+          "label" : {
+            "en" : "Sort label by:"
+          },
+          "options": [
+           {
+              "value": "alphabet-a-z",
+              "label": "Alphabet A-Z"
+           },
+           {
+             "value": "alphabet-z-a",
+             "label": "Alphabet Z-A"
+           },
+           {
+             "value": "number-high-low",
+             "label": "Number high to low"
+           },
+           {
+             "value": "number-low-high",
+             "label": "Number low to high"
+           }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "filter_prefix",
+          "label": {
+            "en": "Tag prefix"
+          },
+          "info": {
+            "en" : "Automatically show tags containing entered prefix"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "filter_tags",
+          "label": {
+            "en": "The tags manually"
+          },
+          "placeholder": {
+            "en": "Eg: Blue, Red, Yellow, ..."
+          }
+        },
+        {
+          "type" : "checkbox",
+          "id" : "filter_style_color",
+          "label" : "Style color",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "direction",
+          "label": {
+            "en": "Direction"
+          },
+          "options": [
+            {
+              "value": "column",
+              "label": {
+                "en": "Columns"
+              }
+            },
+            {
+              "value": "row",
+              "label": {
+                "en": "Rows"
+              }
+            }
+          ],
+          "default": "column"
+        },
+        {
+          "type": "text",
+          "id": "block_max_height",
+          "label": {
+            "en": "Max height"
+          },
+          "placeholder": {
+            "en": "E.g: 160px"
+          },
+          "default" : "200px"
+        },
+        {
+          "type": "text",
+          "id": "margin",
+          "label": {
+            "en": "Block margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        }
+      ]
+    },
+    {
+      "type": "filter_group_attributes",
+      "name":  "Filter group (Attributes)" ,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label":  "Heading" ,
+          "default": "Filter by"
+        },
+        {
+          "type": "text",
+          "id": "filter_prefix",
+          "label":  "Attribute name"
+        },
+        {
+          "type" : "checkbox",
+          "id" : "filter_style_color",
+          "label" : "Style color",
+          "default": false
+        },
+        {
+           "type":"header",
+           "content":"Price range filter",
+           "info": "When your attribute name is Price"
+        },
+        {
+          "type":"number",
+          "id":"price_min",
+          "label":"Price Min",
+          "default": 0
+        },
+        {
+          "type":"number",
+          "id":"price_max",
+          "label":"Price Max",
+          "default": 9999
+        },
+        {
+           "type":"header",
+           "content":"Block styles"
+        },
+        {
+          "type": "select",
+          "id": "direction",
+          "label":  "Direction" ,
+          "options": [
+            {
+              "value": "column",
+              "label":  "Columns"
+            },
+            {
+              "value": "row",
+              "label":  "Rows"
+            }
+          ],
+          "default": "column"
+        },
+        {
+          "type": "text",
+          "id": "block_max_height",
+          "label":  "Max height" ,
+          "default" : "200px"
+        },
+        {
+          "type": "text",
+          "id": "margin",
+          "label":  "Block margin" ,
+          "info":  "Order: Top Right Bottom Left"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "name": {
+        "en": "Category"
+      },
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "category",
+          "label": {
+            "en": "Category"
+          }
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": {
+            "en": "Category's Heading"
+          },
+          "info": {
+            "en": "Default is Menu title"
+          }
+        },
+        {
+          "type": "text",
+          "id": "margin",
+          "label": {
+            "en": "Block margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        }
+      ]
+    },
+    {
+      "type": "banner",
+      "name": {
+        "en": "Banner"
+      },
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "To custom style. Please add block '[+] Button' or '[+] Heading & Subheading' below this section."
+        },
+        {
+          "type": "image_picker",
+          "id": "banner",
+          "label": {
+            "en": "Banner image"
+          }
+        },
+        {
+          "type": "text",
+          "id": "margin",
+          "label": {
+            "en": "Block margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Banner content"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "text_1",
+          "label": {
+            "en": "Heading"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "text_2",
+          "label": {
+            "en": "Subheading"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_label",
+          "label": {
+            "en": "Button label"
+          }
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": {
+            "en": "Button URL"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_style",
+          "label": {
+            "en": "Button style"
+          },
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "text",
+          "id": "align",
+          "label": {
+            "en": "Alignment"
+          },
+          "placeholder": {
+            "en": "E.g: center or right"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_content",
+      "name": {
+        "en": "[+] Heading & Subheading"
+      },
+      "settings": [
+        {
+          "type": "header",
+          "content": {
+            "en": "Heading settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_1",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 0,
+          "max": 900,
+          "step": 100,
+          "default": 500
+        },
+        {
+          "type": "text",
+          "id": "content_margin_1",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_1",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Suheading settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_2",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_2",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 0,
+          "max": 900,
+          "step": 100,
+          "default": 500
+        },
+        {
+          "type": "text",
+          "id": "content_margin_2",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_2",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_button",
+      "name": {
+        "en": "[+] Button"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "btn_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 18px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 0,
+          "max": 900,
+          "step": 100,
+          "default": 500
+        },
+        {
+          "type": "text",
+          "id": "btn_padding",
+          "label": {
+            "en": "Padding"
+          },
+          "placeholder": {
+            "en": "E.g: 13px 50px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 13px 50px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_cl",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_bg_cl",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_cl",
+          "label": {
+            "en": "Hover: Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_bg_cl",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_border_width",
+          "label": {
+            "en": "Border width"
+          },
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 1,
+          "unit": "px"
+        },
+        {
+          "type": "color",
+          "id": "btn_border_cl",
+          "label": {
+            "en": "Border color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_border_cl",
+          "label": {
+            "en": "Hover: Border color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_radius",
+          "label": {
+            "en": "Rounded corners"
+          },
+          "placeholder": {
+            "en": "E.g: 42px"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

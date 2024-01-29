@@ -1,0 +1,9 @@
+{% layout none %}
+{%- liquid
+  assign q = search.terms
+  assign product = all_products[q]
+-%}
+
+{%- if product != blank -%}
+  {%- render 'product-item' product: product -%}
+{%- endif -%}

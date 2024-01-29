@@ -1,0 +1,436 @@
+{%- liquid
+  if settings.page_layout or section.settings.boxed_layout
+    assign isBoxed = true
+  endif
+  assign default_color       = 'rgba(0,0,0,0)'
+  assign sectionID           = '#section-' | append: section.id
+  assign resource            = 'collection'
+  assign limit               = section.settings.limit
+  assign items_resp          = section.settings.items_resp
+  assign items_spacing       = section.settings.items_spacing
+  assign slider_id           = '#slider-' | append: section.id
+  assign controls_id         = '#controls-' | append: section.id
+  assign section_padding     = section.settings.section_padding
+  assign bg_full             = section.settings.bg_full
+  assign bg_color            = section.settings.bg_color | default: default_color
+  assign heading_style_block = section.blocks | where: 'type', 'heading_style' | first
+-%}
+
+{%- if bg_full -%}
+  {%- assign bg_class = '' -%}
+{%- else -%}
+  {%- assign bg_class = ' .section_content-wrapper' -%}
+{%- endif -%}
+
+{%- capture product_list -%}
+  {%- case resource -%}
+    {%- when 'collection' -%}
+      {%- liquid
+        if collection == blank
+          assign collection = product.collections | first
+        endif
+        assign size = collection.products | size
+        assign limit = section.settings.limit
+        if limit == 0
+          assign limit = size
+          assign total_item = size
+        elsif size < limit
+          assign total_item = size
+        elsif size > limit
+          assign total_item = limit
+        endif
+      -%}
+      {%- for p in collection.products limit: limit -%}
+        {%- if product != p -%}
+          <div class="slider-item">
+            {%- render 'product-item' product: p -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- comment -%} end {%- endcomment -%}
+  {%- endcase -%}
+{%- endcapture -%}
+
+{%- if product_list != blank -%}
+
+  <div class="related-product" id="section-{{section.id}}" data-section-type="related-product" data-section-id="{{section.id}}">
+    {%- if isBoxed -%} <div class="container"> {%- endif -%}
+      <div class="section_content-wrapper" style="position: relative;">
+
+        {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+          {%- capture snippet_heading_css -%}{%- render 'snippet-heading-css' section: heading_style_block, sectionID: sectionID -%}{%- endcapture -%}
+
+          <div class="section_content-head">
+            {%- render 'snippet-heading' config: section.settings -%}
+          </div>
+        {%- endif -%}
+
+        <div class="section_content-body">
+          <div class="slider-container js-slider-container">
+            <div class="slider-wrapper">
+              <div class="slider-list" id="slider-{{section.id}}">
+                {{product_list}}
+              </div>
+              {%- render 'set-tns-config'
+                slider_id       : slider_id,
+                controls_id     : controls_id,
+                controls        : section.settings.controls,
+                dots            : section.settings.dots,
+                loop            : section.settings.loop,
+                autoplay        : section.settings.autoplay,
+                autoplay_timeout: section.settings.autoplay_timeout,
+                padding         : items_spacing,
+                items_resp      : items_resp,
+                total_item      : total_item,
+                classID         : sectionID
+              -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    {%- if isBoxed -%} </div> {%- endif -%}
+  </div>
+
+  {%- capture sectionCss -%}
+    {{snippet_heading_css}}
+    {%- render 'css-responsive' preClassID: sectionID, value_1: section_padding, property_1: 'padding' -%}
+    {%- if bg_color != default_color -%} {{sectionID}} {{bg_class}}{background-color: {{bg_color}};} {%- endif -%}
+  {%- endcapture -%}
+
+  {%- unless sectionCss == blank -%}<style>{{sectionCss | strip_newlines}}</style>{%- endunless -%}
+
+  {% comment %} compress {% endcomment %}
+  <script>
+    window.theme = window.theme || {};
+    if(!!window.theme.sectionRegister){
+      !window.theme.sectionRegister.includes("related-product") && (window.theme.sectionRegister = [...window.theme.sectionRegister, "related-product"]);
+    }else{
+      window.theme.sectionRegister = ["related-product"];
+    }
+  </script>
+{%- endif -%}
+
+
+
+{% schema %}
+{
+  "name": {
+    "en": "Products recommendation"
+  },
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000247874) before use."
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": "Section Padding",
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px "
+      },
+      "info": {
+        "en": "Order: Top Right Bottom Left"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_full",
+      "label": {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": {
+        "en": "Limit"
+      },
+      "step": 1,
+      "min": 0,
+      "max": 50,
+      "default": 10,
+      "info": {
+        "en": "0 is unlimited"
+      }
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Slider settings"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "5,3,2",
+      "placeholder": {
+        "en": "E.g: 4,3,2"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_spacing",
+      "label": {
+        "en": "Spacing between items"
+      },
+      "info": {
+        "en": "E.g: 10px"
+      },
+      "default": "10px"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": {
+        "en": "Loop"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "controls",
+      "label": {
+        "en": "Controls"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "dots",
+      "label": {
+        "en": "Dots"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": {
+        "en": "Autoplay"
+      },
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_timeout",
+      "label": {
+        "en": "Change slide every(s)"
+      },
+      "step": 0.5,
+      "min": 2,
+      "max": 10,
+      "unit": "s",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Section Heading"
+      }
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": {
+        "en": "Heading"
+      },
+      "default": "Customers albo bought"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": {
+        "en": "Subheading"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading_style",
+      "limit" : 1,
+      "name": {
+        "en": "Heading style"
+      },
+      "settings": [
+        {
+          "type": "header",
+          "content": {
+            "en": "Container settings"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_heading_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 20px 0px 20px 0px "
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          },
+          "default": "0 0 30px 0"
+        },
+        {
+          "type": "select",
+          "id": "section_heading_align",
+          "label": {
+            "en": "Alignment"
+          },
+          "options": [
+            {
+              "value": "auto",
+              "label": {
+                "en": "Auto"
+              }
+            },
+            {
+              "value": "left",
+              "label": {
+                "en": "Left"
+              }
+            },
+            {
+              "value": "center",
+              "label": {
+                "en": "Center"
+              }
+            },
+            {
+              "value": "right",
+              "label": {
+                "en": "Right"
+              }
+            }
+          ],
+          "default": "auto",
+          "info": {
+            "en": "With 'Auto' value. It will take from 'Section Heading' on 'Theme Settings'"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Heading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_heading_cl",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_heading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "40px",
+          "placeholder": {
+            "en": "E.g: 40px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_heading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 600
+        },
+        {
+          "type": "text",
+          "id": "section_heading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "60px",
+          "placeholder": {
+            "en": "E.g: 60px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Subheading settings"
+          }
+        },
+        {
+          "type": "color",
+          "id": "section_subheading_cl",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "default": "24px",
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "section_subheading_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "section_subheading_lh",
+          "label": {
+            "en": "Line height"
+          },
+          "default": "35px",
+          "placeholder": {
+            "en": "E.g: 35px"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

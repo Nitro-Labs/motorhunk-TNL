@@ -1,0 +1,1073 @@
+{%- liquid
+  assign default_color   = 'rgba(0,0,0,0)'
+  assign defautl_link    = '#" onclick="return false'
+  assign isBoxed         = section.settings.boxed_layout
+  assign items_resp      = section.settings.items_resp | default: '2,1'
+  assign hover_style     = section.settings.hover_style
+  assign section_padding = section.settings.section_padding
+  assign sectionID       = '#section-' | append: section.id
+  assign section_margin  = section.settings.section_margin
+
+  assign bg_image    = section.settings.bg_image
+  assign bg_color    = section.settings.bg_color | default: default_color
+  assign bg_repeat   = section.settings.bg_repeat
+  assign bg_size     = section.settings.bg_size
+  assign bg_position = section.settings.bg_position
+  assign content_blocks_size = section.blocks | where: 'type', 'content' | size
+-%}
+
+{%- if section.settings.bg_full -%}
+  {%- capture bg_full -%}{%- render 'bgset' image: bg_image -%}{%- endcapture-%}
+{%- else -%}
+  {%- capture bg_boxed -%}{%- render 'bgset' image: bg_image -%}{%- endcapture-%}
+  {%- assign bg_class = ' .section_content-wrapper' -%}
+{%- endif -%}
+
+{%- capture section_class -%}{{- -}}home-gallery hover_style-{{- hover_style }} {{bg_full-}}{%- endcapture -%}
+
+{%- if content_blocks_size != 0 -%}
+
+  <div class="{{section_class}}" id="section-{{section.id}}">
+    {%- if isBoxed -%}<div class="container">{%- endif -%}
+      <div class="section_content-wrapper {{bg_boxed}}">
+
+        <div class="section_content-body">
+          <div class="{%- render 'grid-class' value: items_resp -%}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'content' -%}
+                {%- liquid
+                  assign block_count  = block_count | plus: 1
+                  assign image        = block.settings.image
+                  assign content_1    = block.settings.content_1
+                  assign content_2    = block.settings.content_2
+                  assign content_3    = block.settings.content_3
+                  assign content_4    = block.settings.content_4
+                  assign button_label = block.settings.button_label
+                  assign button_url   = block.settings.button_url | default: '#' | replace: '#', defautl_link
+                  assign button_style = block.settings.btn_style
+                  assign block_style  = block.settings.block_style
+                  assign blockID      = '#block-' | append: block.id
+                -%}
+
+                {%- case block_style -%}
+                  {%- when '1' -%}
+                    <div class="card_section-item style-{{block_style}}" id="block-{{block.id}}" {{block.shopify_attributes}}>
+                      <div class="card_section-item-inner">
+                        <div class="card_section-figure">
+                          {%- comment -%}
+                            **
+                            * Image
+                            *
+                          {%- endcomment-%}
+                          {%- if image != blank -%}
+                              {%- render 'image-style', image: image, originQuality: true -%}
+                          {%- else -%}
+                            {%- include 'svgset', type: 'lifestyle' -%}
+                          {%- endif -%}
+                        </div>
+                        {%- capture checkContent -%}
+                          {{- content_1 -}}
+                          {{- content_2 -}}
+                          {{- content_3 -}}
+                          {{- content_4 -}}
+                          {{- button_label -}}
+                        {%- endcapture -%}
+                        {%- if checkContent != blank -%}
+                          <div class="card_section-content overlay-ui">
+                            <div class="card_section-content-inner">
+                              {%- comment -%}
+                                **
+                                * Text content
+                                *
+                              {%- endcomment-%}
+                              {%- if content_1 != blank -%}<div class="card_section-text card_section-text-1">{{ content_1 }}</div>{%- endif -%}
+
+                              {%- if content_2 != blank -%}<div class="card_section-text card_section-text-2">{{- content_2 -}}</div>{%- endif -%}
+
+                              {%- if content_3 != blank -%}<div class="card_section-text card_section-text-3">{{- content_3 -}}</div>{%- endif -%}
+
+                              {%- if content_4 != blank -%}<div class="card_section-text card_section-text-4">{{- content_4 -}}</div>{%- endif -%}
+
+                              {%- comment -%}
+                                **
+                                * Button
+                                *
+                              {%- endcomment-%}
+                              {%- if button_label != blank -%}
+                                <div class="card_section-button">
+                                  <a href="{{button_url}}" class="btn btn-{{button_style}}" style="z-index:1;">{{ button_label }}</a>
+                                </div>
+                              {%- endif -%}
+                            </div>
+                          </div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when '2' -%}
+                    <div class="card_section-item style-{{block_style}}" id="block-{{block.id}}" {{block.shopify_attributes}}>
+                      <div class="card_section-item-inner">
+                        <div class="card_section-figure">
+                          {%- comment -%}
+                            **
+                            * Image
+                            *
+                          {%- endcomment-%}
+                          {%- if image != blank -%}
+                              {%- render 'image-style', image: image, originQuality: true -%}
+                          {%- else -%}
+                            {%- include 'svgset', type: 'lifestyle' -%}
+                          {%- endif -%}
+                        </div>
+                        {%- capture checkContent -%}
+                          {{- content_1 -}}
+                          {{- content_2 -}}
+                          {{- content_3 -}}
+                          {{- content_4 -}}
+                          {{- button_label -}}
+                        {%- endcapture -%}
+
+                        {%- if checkContent != blank -%}
+                          <div class="card_section-content overlay-ui w-100 h-100">
+                            <div class="card_section-content-inner h-100 d-flex justify-content-between align-items-center">
+                              <div class="left-content">
+                                {%- if content_1 != blank -%}<div class="card_section-text card_section-text-1">{{ content_1 }}</div>{%- endif -%}
+
+                                {%- if content_2 != blank -%}<div class="card_section-text card_section-text-2">{{- content_2 -}}</div>{%- endif -%}
+
+                                {%- if content_3 != blank -%}<div class="card_section-text card_section-text-3">{{- content_3 -}}</div>{%- endif -%}
+                              </div>
+
+                              <div class="right-content">
+                                {%- if content_4 != blank -%}<div class="card_section-text card_section-text-4">{{- content_4 -}}</div>{%- endif -%}
+
+                                {%- if button_label != blank -%}
+                                  <div class="card_section-button">
+                                    <a href="{{button_url}}" class="btn btn-{{button_style}}">{{ button_label }}</a>
+                                  </div>
+                                {%- endif -%}
+                              </div>
+                            </div>
+                          </div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {% comment %} end {% endcomment %}
+
+                  {%- when '3' -%}
+                    <div class="card_section-item style-{{block_style}}" id="block-{{block.id}}" {{block.shopify_attributes}}>
+                      <div class="card_section-item-inner">
+                        <div class="card_section-figure">
+                          {%- comment -%}
+                            **
+                            * Image
+                            *
+                          {%- endcomment-%}
+                          {%- if image != blank -%}
+                              {%- render 'image-style', image: image, originQuality: true -%}
+                          {%- else -%}
+                            {%- include 'svgset', type: 'lifestyle' -%}
+                          {%- endif -%}
+                        </div>
+                        {%- capture checkContent -%}
+                          {{- content_1 -}}
+                          {{- content_2 -}}
+                          {{- content_3 -}}
+                          {{- content_4 -}}
+                          {{- button_label -}}
+                        {%- endcapture -%}
+
+                        {%- if checkContent != blank -%}
+                          <div class="card_section-content overlay-ui w-100 h-100">
+                            <div class="card_section-content-inner h-100 d-flex justify-content-between align-items-center">
+                              <div class="left-content">
+                                {%- if content_1 != blank -%}<div class="card_section-text card_section-text-1">{{ content_1 }}</div>{%- endif -%}
+
+                                {%- if content_2 != blank -%}<div class="card_section-text card_section-text-2">{{- content_2 -}}</div>{%- endif -%}
+
+                                {%- if content_3 != blank -%}<div class="card_section-text card_section-text-3">{{- content_3 -}}</div>{%- endif -%}
+                              </div>
+                              <div class="right-content">
+                                {%- if content_4 != blank -%}<div class="card_section-text card_section-text-4">{{- content_4 -}}</div>{%- endif -%}
+
+                                {%- if button_label != blank -%}
+                                  <div class="card_section-button">
+                                    <a href="{{button_url}}" class="btn btn-{{button_style}}">{{ button_label }}</a>
+                                  </div>
+                                {%- endif -%}
+                              </div>
+                            </div>
+                          </div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {% comment %} end {% endcomment %}
+                {%- endcase -%}
+
+                {%- for block in section.blocks offset: forloop.index -%}
+                  {%- if block.type == 'content' -%}{%- break -%}{%- endif -%}
+                  {%- capture block_css -%}
+                    {%- include 'snippet-gallery', type: block.type, blockID: blockID, block_style: block_style -%}
+                  {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+                {%- endfor -%}
+
+              {%- elsif block_count == blank -%}
+                  {%- capture block_css -%}
+                    {%- include 'snippet-gallery', type: block.type, blockID: '' -%}
+                  {%- endcapture -%}{%- assign section_css = section_css | append: block_css -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+      </div>
+    {%- if isBoxed -%}</div>{%- endif -%}
+  </div>
+
+  {%- style -%}
+    {{-section_css-}}
+    {%- capture bg_css -%}
+      {%- if bg_color != default_color -%}background-color:{{bg_color}};{%- endif -%}
+      {%- if bg_image != blank -%}background-repeat:{{bg_repeat}};background-size:{{bg_size}};background-position:{{bg_position}};{%- endif -%}
+    {%- endcapture -%}
+
+    {%- if bg_css != blank -%}{{sectionID}} {{bg_class}}{ {{-bg_css-}}}{%- endif -%}
+
+    {%- render 'grid-spacing' preClassID: sectionID, classID: ' .d-grid', value: section.settings.grid_spc -%}
+    {%- render 'css-responsive' preClassID: sectionID, classID: bg_class,
+      value_1: section_padding, property_1: 'padding'
+      value_2: section_margin,  property_2: 'margin'
+      -%}
+  {%- endstyle -%}
+  {% comment %} compress {% endcomment %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": {
+    "en": "Image Gallery"
+  },
+  "tag": "section",
+  "templates": ["index"],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Please see [instruction](https://support.arenacommerce.com/a/solutions/articles/6000248022) before use."
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "en": "Created by 'Image Gallery' section"
+      }
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": {
+        "en": "Section Label"
+      },
+      "default": "Image Gallery"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "LAYOUT"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed_layout",
+      "label": {
+        "en": "Boxed layout"
+      },
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_margin",
+      "label": {
+        "en": "Section Margin"
+      },
+      "info": {
+        "en": "E.g: 20px 0px 20px 0px. Order: Top Right Bottom Left"
+      },
+      "default" : "20px 0px 20px 0px"
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": {
+        "en": "Section Padding"
+      },
+      "placeholder": {
+        "en": "E.g: 20px 0px 20px 0px"
+      },
+      "info": {
+        "en": "E.g: 20px 0px 20px 0px. Order: Top Right Bottom Left"
+      },
+      "default" : "20px 0px 20px 0px"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Background"
+      }
+    },
+    {
+      "type" : "checkbox",
+      "id" : "bg_full",
+      "label" : {
+        "en": "Full section background"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": {
+        "en": "Background color"
+      }
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": {
+        "en": "Background image"
+      }
+    },
+    {
+      "type": "select",
+      "id": "bg_size",
+      "label": {
+        "en": "Background size"
+      },
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Auto"
+          }
+        },
+        {
+          "value": "cover",
+          "label": {
+            "en": "Cover"
+          }
+        },
+        {
+          "value": "contain",
+          "label": {
+            "en": "Contain"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": {
+        "en": "Background position"
+      },
+      "options": [
+        {
+          "value": "left top",
+          "label": {
+            "en": "Left Top"
+          }
+        },
+        {
+          "value": "left center",
+          "label": {
+            "en": "Left Center"
+          }
+        },
+        {
+          "value": "left bottom",
+          "label": {
+            "en": "Left Bottom"
+          }
+        },
+        {
+          "value": "right top",
+          "label": {
+            "en": "Right Top"
+          }
+        },
+        {
+          "value": "right center",
+          "label": {
+            "en": "Right Center"
+          }
+        },
+        {
+          "value": "right bottom",
+          "label": {
+            "en": "Right Bottom"
+          }
+        },
+        {
+          "value": "center top",
+          "label": {
+            "en": "Center Top"
+          }
+        },
+        {
+          "value": "center center",
+          "label": {
+            "en": "Center Center"
+          }
+        },
+        {
+          "value": "center bottom",
+          "label": {
+            "en": "Center Bottom"
+          }
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "bg_repeat",
+      "label": {
+        "en": "Background repeat"
+      },
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": {
+            "en": "No repeat"
+          }
+        },
+        {
+          "value": "repeat",
+          "label": {
+            "en": "Repeat"
+          }
+        },
+        {
+          "value": "repeat-x",
+          "label": {
+            "en": "Repeat X"
+          }
+        },
+        {
+          "value": "repeat-y",
+          "label": {
+            "en": "Repeat Y"
+          }
+        }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Layout content"
+      }
+    },
+    {
+      "type": "text",
+      "id": "items_resp",
+      "label": {
+        "en": "Max number of items per row"
+      },
+      "default": "2,1",
+      "placeholder": {
+        "en": "E.g: 2,1"
+      },
+      "info": {
+        "en": "E.g: 2,1"
+      }
+    },
+    {
+      "type": "text",
+      "id": "grid_spc",
+      "label": {
+        "en": "Spacing between items."
+      },
+      "default": "10px",
+      "placeholder": {
+        "en": "E.g: 10px"
+      },
+      "info": {
+        "en": "E.g: 10px"
+      }
+    },
+    {
+      "type": "select",
+      "id": "hover_style",
+      "label": {
+        "en": "Hover style"
+      },
+      "options": [
+        {
+          "value": "none",
+          "label": {
+            "en": "None"
+          }
+        },
+        {
+          "value": "1",
+          "label": {
+            "en": "Effect 1"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "Effect 2"
+          }
+        }
+      ],
+      "default": "none"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "content",
+      "name": {
+        "en": "Block item"
+      },
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Block label"
+          }
+        },
+        {
+          "type": "select",
+          "id": "block_style",
+          "label" : {
+            "en" : "Style"
+          },
+          "options": [
+           {
+              "value": "1",
+              "label": {
+                "en": "1"
+              }
+           },
+           {
+             "value": "2",
+             "label": {
+               "en": "2"
+             }
+           }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 1"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "content_1",
+          "label": {
+            "en": "Content"
+          },
+          "default" : "Lorem, ipsum dolor."
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 2"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "content_2",
+          "label": {
+            "en": "Content"
+          },
+          "default" : "Lorem ipsum dolor sit."
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 3"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "content_3",
+          "label": {
+            "en": "Content"
+          },
+          "default" : "Lorem ipsum dolor sit amet."
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 4"
+          }
+        },
+        {
+          "type": "textarea",
+          "id": "content_4",
+          "label": {
+            "en": "Content"
+          },
+          "default" : "Lorem, ipsum dolor."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": {
+            "en": "Button label"
+          },
+          "default" : "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": {
+            "en": "Button URL"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_style",
+          "label": {
+            "en": "Button style"
+          },
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "type": "style_wrapper",
+      "name": {
+        "en": "[+] Content wrapper"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "padding",
+          "label": {
+            "en": "Padding"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "E.g: 5px 8px 5px 8px. Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "position",
+          "label": {
+            "en": "Text block position"
+          },
+          "placeholder": {
+            "en": "E.g: 50%:50%"
+          },
+          "info": {
+            "en": "E.g: 50%:50%. Left(%):Top(%). Doesn't work on Banner Style 2."
+          }
+        },
+        {
+          "type": "text",
+          "id": "align",
+          "label": {
+            "en": "Text Alignment"
+          },
+          "placeholder": {
+            "en": "E.g: center or left"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_content",
+      "name": {
+        "en": "[+] Heading & Subheading"
+      },
+      "settings": [
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 1"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_1",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_1",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_1",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "content_margin_1",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_1",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 2"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_2",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_2",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_2",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "content_margin_2",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_2",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 3"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_3",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_3",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_3",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "content_margin_3",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_3",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text 4"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_fs_4",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 24px"
+          }
+        },
+        {
+          "type": "color",
+          "id": "content_cl_4",
+          "label": {
+            "en": "Color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "content_fw_4",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "content_margin_4",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 5px 8px 5px 8px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "content_lh_4",
+          "label": {
+            "en": "Line height"
+          },
+          "placeholder": {
+            "en": "E.g: 26px"
+          }
+        }
+      ]
+    },
+    {
+      "type": "style_button",
+      "name": {
+        "en": "[+] Button"
+      },
+      "settings": [
+        {
+          "type": "text",
+          "id": "btn_fs",
+          "label": {
+            "en": "Font size"
+          },
+          "placeholder": {
+            "en": "E.g: 18px"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_fw",
+          "label": {
+            "en": "Font weight"
+          },
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 400
+        },
+        {
+          "type": "text",
+          "id": "btn_padding",
+          "label": {
+            "en": "Padding"
+          },
+          "placeholder": {
+            "en": "E.g: 13px 50px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_margin",
+          "label": {
+            "en": "Margin"
+          },
+          "placeholder": {
+            "en": "E.g: 13px 50px"
+          },
+          "info": {
+            "en": "Order: Top Right Bottom Left"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_cl",
+          "label": {
+            "en": "Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_bg_cl",
+          "label": {
+            "en": "Background color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_cl",
+          "label": {
+            "en": "Hover: Text color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_bg_cl",
+          "label": {
+            "en": "Hover: Background color"
+          }
+        },
+        {
+          "type": "range",
+          "id": "btn_border_width",
+          "label": {
+            "en": "Border width"
+          },
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 1,
+          "unit": "px"
+        },
+        {
+          "type": "color",
+          "id": "btn_border_cl",
+          "label": {
+            "en": "Border color"
+          }
+        },
+        {
+          "type": "color",
+          "id": "btn_hover_border_cl",
+          "label": {
+            "en": "Hover: Border color"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btn_radius",
+          "label": {
+            "en": "Rounded corners"
+          },
+          "placeholder": {
+            "en": "E.g: 42px"
+          }
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Image Gallery"
+      },
+      "category": "Banner",
+      "blocks": [
+        {
+          "type": "content"
+        },
+        {
+          "type": "content"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

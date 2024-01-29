@@ -1,0 +1,39 @@
+<ul class="widget-social-icons list-inline">
+  {% for i in (1..6) %}
+    {%- assign social_type = 'social_icon_type_' | append: i -%}
+    {%- if settings[social_type] != 'none' -%}
+      {%- liquid
+        assign title        = 'social_icon_title_' | append: i
+        assign icon_default = 'social_icon_default_' | append: i
+        assign image        = 'social_image_' | append: i
+        assign icon_custom  = 'social_icon_custom_' | append: i
+        assign link         = 'social_icon_link_' | append: i
+        assign svg_type = settings[icon_default] | append: type
+      -%}
+
+      {%- capture icon_capture -%}
+        {%- if settings[social_type] == 'svg' -%}
+          {%- if settings[icon_custom] == blank -%}
+            {%- render 'svg', type: svg_type -%}
+          {%- elsif settings[icon_custom] contains '<svg' -%}
+            {{- settings[icon_custom] -}}
+          {%- endif -%}
+        {%- else -%}
+          <img src="{{ settings[image] | img_url: '20x' }}" class="lazyload" data-srcset="{{ settings[image] | img_url: '20x' }}" alt="{{ settings[title].alt | default: title}}"/>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      <li>
+        {%- if settings[link] != blank and settings[link] != '#' -%}
+          <a target="_blank" rel="noopener" href="{{ settings[link] }}" title="{{ settings[title] }}">
+            {{icon_capture}}
+          </a>
+        {%- else -%}
+          <button type="button" class="cursor-pointer">
+            {{icon_capture}}
+          </button>
+        {%- endif -%}
+      </li>
+    {%- endif -%}
+  {% endfor %}
+</ul>
